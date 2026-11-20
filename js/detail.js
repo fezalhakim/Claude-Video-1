@@ -11,7 +11,7 @@ let state = null;
 export function openDetail(run, el, { onChange, onDelete, runs = [], customDist = [], rollout, tempC = true }) {
   // ikut tetapan rollout semasa jika larian ada data mentah (boleh dikira semula); jika tidak, ikut cara ia direkod
   const canRecalc = !!run.raw?.d?.length;
-  state = { run, el, onChange, onDelete, runs, customDist, tempC, rollout: run.imported ? run.rollout !== false : canRecalc && rollout != null ? !!rollout : !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
+  state = { run, el, onChange, onDelete, runs, customDist, tempC, rollout: run.imported ? run.rollout !== false : canRecalc && rollout != null ? !!rollout : !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null, show: { v: true, g: true, alt: true } };
   el.hidden = false; document.body.style.overflow = 'hidden';
   render();
 }
@@ -72,7 +72,12 @@ function render() {
 
     <div class="dchart">
       <div class="axisSw"><button data-x="t" class="${state.xAxis === 't' ? 'on' : ''}">${t('axis.time')}</button><button data-x="d" class="${state.xAxis === 'd' ? 'on' : ''}">${t('axis.dist')}</button></div>
-      <div class="legend"><span style="--c:${COL.g}">${t('d.lgG')}</span><span style="--c:${COL.alt}">${t('d.lgAlt')}</span><span style="--c:${COL.v}">${t('d.lgV')}</span>${a.shifts.length ? `<span style="--c:${COL.shift}">${t('d.lgShift')}</span>` : ''}${b ? `<span class="dash" style="--c:${COL.other}">${t('d.lgOther', { no: oRun.no })}</span>` : ''}</div>
+      <div class="legend lgToggle">
+        ${[['v', COL.v, t('d.lgV')], ['g', COL.g, t('d.lgG')], ['alt', COL.alt, t('d.lgAlt')]].map(([k, c, l]) =>
+          `<button data-series="${k}" class="${state.show[k] ? '' : 'off'}" style="--c:${c}">${l}</button>`).join('')}
+        ${a.shifts.length ? `<span style="--c:${COL.shift}">${t('d.lgShift')}</span>` : ''}
+      </div>
+      ${b ? `<div class="legend lgRuns"><span class="solid" style="--c:#c3cad3">Run ${run.no}</span><span class="dash" style="--c:#c3cad3">Run ${oRun.no}</span></div>` : ''}
       <canvas id="dCanvas" width="700" height="440" aria-label="Graf larian"></canvas>
     </div>
 
@@ -109,10 +114,10 @@ function render() {
     <p class="note">${esc(t('d.note'))}</p>
   </div>`;
 
-  draw(el.querySelector('#dCanvas'), a, main?.time, state.xAxis, b);
+  draw(el.querySelector('#dCanvas'), a, main?.time, state.xAxis, b, state.show);
 
   el.onclick = e => {
-    const tg = e.target.closest('[data-act],[data-focus],[data-tab],[data-x]'); // (jangan guna nama 't' — itu fungsi terjemahan)
+    const tg = e.target.closest('[data-act],[data-focus],[data-tab],[data-x],[data-series]'); // (jangan guna nama 't' — itu fungsi terjemahan)
     if (!tg) return;
     const ds = tg.dataset;
     if (ds.act === 'close') return close();
@@ -120,13 +125,14 @@ function render() {
     if (ds.focus) { state.focus = ds.focus; return render(); }
     if (ds.tab) { state.tab = ds.tab; return render(); }
     if (ds.x) { state.xAxis = ds.x; return render(); }
+    if (ds.series) { state.show[ds.series] = !state.show[ds.series]; return render(); }
   };
   el.querySelector('#dCmp').onchange = e => { state.cmpNo = e.target.value ? +e.target.value : null; render(); };
   el.querySelector('#dRoll').onchange = e => { state.rollout = e.target.checked; render(); };
   el.querySelector('#dCar').onchange = e => { run.car = e.target.value.trim(); state.onChange(); };
 }
 
-function draw(c, a, tEnd, xk = 't', b = null) {
+function draw(c, a, tEnd, xk = 't', b = null, show = { v: true, g: true, alt: true }) {
   const x = c.getContext('2d'), W = c.width, H = c.height;
   const L = 78, R = 56, T = 14, B = 44, w = W - L - R, h = H - T - B;
   x.clearRect(0, 0, W, H);
@@ -144,9 +150,10 @@ function draw(c, a, tEnd, xk = 't', b = null) {
   }
 
   const vTop = niceMax(Math.max(...pts.map(p => p.v), ...bPts.map(p => p.v)));
-  const gv = pts.map(p => p.g).filter(v => v != null);
+  // skala G & ketinggian merangkumi kedua-dua larian supaya boleh dibanding pada paksi yang sama
+  const gv = [...pts, ...bPts].map(p => p.g).filter(v => v != null);
   const gTop = Math.max(0.5, Math.ceil(Math.max(...gv, 0.1) * 2) / 2), gBot = Math.min(0, Math.floor(Math.min(...gv, 0) * 2) / 2);
-  const av = pts.map(p => p.alt).filter(v => v != null);
+  const av = [...pts, ...bPts].map(p => p.alt).filter(v => v != null);
   const aMid = av.length ? (Math.max(...av) + Math.min(...av)) / 2 : 0;
   const aSpan = av.length ? Math.max(10, (Math.max(...av) - Math.min(...av)) * 1.6) : 10;
 
@@ -179,16 +186,23 @@ function draw(c, a, tEnd, xk = 't', b = null) {
     }
     x.strokeStyle = col; x.lineWidth = 3; x.stroke();
   };
-  if (gv.length) area('g', Yg, COL.g, Yg(Math.max(gBot, 0)));
-  area('v', Yv, COL.v, T + h);
-  if (av.length) area('alt', Ya, COL.alt, null);
+  const cmp = bPts.length > 1;
+  if (gv.length && show.g) area('g', Yg, COL.g, cmp ? null : Yg(Math.max(gBot, 0)));
+  if (show.v) area('v', Yv, COL.v, cmp ? null : T + h);
+  if (av.length && show.alt) area('alt', Ya, COL.alt, null);
 
-  // larian pembanding: garis kelajuan putus-putus + titik tukar gear berongga
-  if (bPts.length > 1) {
-    x.strokeStyle = COL.other; x.lineWidth = 2.5; x.setLineDash([8, 6]); x.beginPath();
-    bPts.forEach((p, i) => (i ? x.lineTo(X(p[xk]), Yv(p.v)) : x.moveTo(X(p[xk]), Yv(p.v))));
-    x.stroke(); x.setLineDash([]);
-    for (const g of b.shifts) {
+  // larian pembanding: SEMUA siri (kelajuan, G, ketinggian) sebagai garis putus-putus warna sama
+  if (cmp) {
+    const dashed = (key, Y, col) => {
+      const pp = bPts.filter(p => p[key] != null); if (pp.length < 2) return;
+      x.strokeStyle = col; x.globalAlpha = 0.95; x.lineWidth = 2.5; x.setLineDash([9, 6]); x.beginPath();
+      pp.forEach((p, i) => (i ? x.lineTo(X(p[xk]), Y(p[key])) : x.moveTo(X(p[xk]), Y(p[key]))));
+      x.stroke(); x.setLineDash([]); x.globalAlpha = 1;
+    };
+    if (show.g) dashed('g', Yg, COL.g);
+    if (show.v) dashed('v', Yv, COL.v);
+    if (show.alt && av.length) dashed('alt', Ya, COL.alt);
+    if (show.v) for (const g of b.shifts) {
       if (g[xk] > xMax) continue;
       x.strokeStyle = COL.other; x.lineWidth = 2; x.beginPath(); x.arc(X(g[xk]), Yv(g.v), 6, 0, Math.PI * 2); x.stroke();
     }
@@ -196,7 +210,7 @@ function draw(c, a, tEnd, xk = 't', b = null) {
 
   // penanda tukar gear
   a.shifts.forEach((g, i) => {
-    if (g.t > tMax) return;
+    if (g.t > tMax || !show.v) return;
     const gx = X(g[xk]);
     x.strokeStyle = COL.shift; x.lineWidth = 2; x.setLineDash([3, 4]);
     x.beginPath(); x.moveTo(gx, T + 24); x.lineTo(gx, T + h); x.stroke(); x.setLineDash([]);

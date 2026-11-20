@@ -36,7 +36,7 @@ setLang(settings.lang);
 if (!settings.rolloutUser) settings.rollout = true;
 // beri nombor run kepada rekod lama (yang belum bernombor)
 { let n = 0; for (let i = history.length - 1; i >= 0; i--) { if (history[i].no) n = Math.max(n, history[i].no); else history[i].no = ++n; } }
-let cmp = { a: null, b: null, x: 'd' };
+let cmp = { a: null, b: null, x: 'd', s: 'v' };
 let gpsOk = false, locked = false, holdT = null;
 let current = {}, lastSample = null, rateTimes = [], gTrail = [], chartPts = [];
 
@@ -408,16 +408,24 @@ function showDetail(no) {
   });
 }
 // siri kelajuan [t, km/j] untuk graf banding
-function curve(run, xk = 't') {
+// siri [x, nilai] untuk graf banding. key: 'v' kelajuan, 'g' pecutan, 'alt' ketinggian
+function curve(run, xk = 't', key = 'v') {
   if (run.raw) {
     const a = analyze(run, run.rollout, settings.customDist);
     // fasa pecutan sahaja (hingga kelajuan maksimum), tanpa brek
     const s = a.series.filter(p => p.t >= 0);
     let iMax = 0; s.forEach((p, i) => { if (p.v > s[iMax].v) iMax = i; });
-    return { pts: s.slice(0, iMax + 1).map(p => [p[xk], p.v]), shifts: a.shifts.map(g => [g[xk], g.v, g.d]) };
+    return { pts: s.slice(0, iMax + 1).filter(p => p[key] != null).map(p => [p[xk], p[key]]),
+      // [x, laju (untuk jadual), jarak, nilai siri dipilih (untuk penanda graf)]
+      shifts: a.shifts.map(g => [g[xk], g.v, g.d, key === 'v' ? g.v : key === 'g' ? g.g : null]) };
   }
-  return { pts: xk === 't' ? (run.pts || []) : [], shifts: [] }; // larian lama tiada data jarak
+  return { pts: xk === 't' && key === 'v' ? (run.pts || []) : [], shifts: [] }; // larian lama: hanya kelajuan ikut masa
 }
+document.querySelectorAll('[data-cs]').forEach(b => b.addEventListener('click', () => {
+  cmp.s = b.dataset.cs;
+  document.querySelectorAll('[data-cs]').forEach(o => o.classList.toggle('on', o === b));
+  renderCompare();
+}));
 document.querySelectorAll('[data-cx]').forEach(b => b.addEventListener('click', () => {
   cmp.x = b.dataset.cx;
   document.querySelectorAll('[data-cx]').forEach(o => o.classList.toggle('on', o === b));
@@ -527,8 +535,11 @@ for (const id of ['metricList', 'metricView']) $(id).addEventListener('click', e
 
 // ---------- Banding larian ----------
 function renderCompare() {
-  if (!byNo(cmp.a)) cmp.a = history[1]?.no ?? null;
-  if (!byNo(cmp.b)) cmp.b = history[0]?.no ?? null;
+  // pilihan lalai: B = larian terbaru, A = larian lain (jangan sama dengan B jika dipilih secara automatik)
+  const autoA = !byNo(cmp.a), autoB = !byNo(cmp.b);
+  if (autoB) cmp.b = history[0]?.no ?? null;
+  if (autoA) cmp.a = history.find(h => h.no !== cmp.b)?.no ?? null;
+  if ((autoA || autoB) && cmp.a === cmp.b && history.length > 1) cmp.a = history.find(h => h.no !== cmp.b).no;
   for (const k of ['a', 'b']) {
     $('cmp' + k.toUpperCase()).innerHTML = history.map(h =>
       `<option value="${h.no}" ${cmp[k] === h.no ? 'selected' : ''}>${esc(label(h))}</option>`).join('');
@@ -557,7 +568,7 @@ function renderCompare() {
   body.innerHTML = `<canvas id="cmpChart" width="600" height="300" ></canvas>
     <table class="cmp"><thead><tr><th>${t('cmp.metric')}</th><th><span class="tag a">A</span> Run ${A.no}</th><th><span class="tag b">B</span> Run ${B.no}</th><th>${t('cmp.delta')}</th></tr></thead>
     <tbody>${rows}${vmax}</tbody></table><p class="cmpSum">${sum} ${t('cmp.green')}</p>`;
-  const ca = curve(A, cmp.x), cb = curve(B, cmp.x);
+  const ca = curve(A, cmp.x, cmp.s), cb = curve(B, cmp.x, cmp.s);
   const n = Math.max(ca.shifts.length, cb.shifts.length);
   if (n) {
     const cell = (g, o) => g ? `${g[2].toFixed(0)} m · ${g[1].toFixed(0)}` + (o ? ` <span class="dm">(${g[2] < o[2] ? '−' : '+'}${Math.abs(g[2] - o[2]).toFixed(0)} m)</span>` : '') : '–';
@@ -576,22 +587,31 @@ function drawCompare(A, B, ca, cb) {
     x.fillStyle = '#8b95a3'; x.font = '18px system-ui';
     x.textAlign = 'center'; x.fillText(t('chart.nodata'), w / 2, h / 2); x.textAlign = 'left'; return;
   }
-  const tMax = Math.max(...all.map(q => q[0])), vMax = Math.max(100, ...all.map(q => q[1])) * 1.1;
+  const tMax = Math.max(...all.map(q => q[0]));
+  // skala paksi-Y ikut siri yang dipilih
+  const vals = all.map(q => q[1]);
+  let yMin, yMax, step;
+  if (cmp.s === 'v') { yMin = 0; yMax = Math.max(100, ...vals) * 1.1; step = 50; }
+  else if (cmp.s === 'g') { yMin = Math.min(0, Math.floor(Math.min(...vals) * 2) / 2); yMax = Math.max(0.5, Math.ceil(Math.max(...vals) * 2) / 2); step = 0.5; }
+  else { const lo = Math.min(...vals), hi = Math.max(...vals), pad = Math.max(1, (hi - lo) * 0.3); yMin = Math.floor(lo - pad); yMax = Math.ceil(hi + pad); step = Math.max(1, Math.round((yMax - yMin) / 4)); }
+  const Y = v => h - p - ((v - yMin) / (yMax - yMin)) * (h - 2 * p);
   x.strokeStyle = '#242a32'; x.fillStyle = '#8b95a3'; x.font = '16px system-ui'; x.lineWidth = 1;
-  for (let v = 0; v <= vMax; v += 50) { const y = h - p - (v / vMax) * (h - 2 * p);
-    x.beginPath(); x.moveTo(p, y); x.lineTo(w - 8, y); x.stroke(); x.fillText(v, 2, y + 5); }
+  for (let v = yMin; v <= yMax + 1e-9; v += step) { const y = Y(v);
+    x.beginPath(); x.moveTo(p, y); x.lineTo(w - 8, y); x.stroke(); x.fillText(cmp.s === 'g' ? v.toFixed(1) : Math.round(v), 2, y + 5); }
+  x.fillText(cmp.s === 'v' ? t('kmh') : cmp.s === 'g' ? 'g' : 'm', p + 230, 22);
   x.textAlign = 'right'; x.fillText(tMax.toFixed(0) + (cmp.x === 't' ? ' s' : ' m'), w - 8, h - 8); x.textAlign = 'left';
   for (const [pts, col] of [[pa, '#ff3b30'], [pb, '#4aa3ff']]) {
     if (!pts.length) continue;
     x.strokeStyle = col; x.lineWidth = 3; x.beginPath();
-    pts.forEach(([t, v], i) => { const px = p + (t / tMax) * (w - p - 8), py = h - p - (v / vMax) * (h - 2 * p);
+    pts.forEach(([tt, v], i) => { const px = p + (tt / tMax) * (w - p - 8), py = Y(v);
       i ? x.lineTo(px, py) : x.moveTo(px, py); });
     x.stroke();
   }
   // penanda tukar gear (A di atas paksi, B di bawah)
   for (const [sh, col, top] of [[ca.shifts, '#ff3b30', true], [cb.shifts, '#4aa3ff', false]]) {
-    for (const [t, v] of sh) {
-      const px = p + (t / tMax) * (w - p - 8), py = h - p - (v / vMax) * (h - 2 * p);
+    for (const [tt, , , v] of sh) {
+      if (v == null) continue;
+      const px = p + (tt / tMax) * (w - p - 8), py = Y(v);
       x.strokeStyle = col; x.lineWidth = 1.5; x.setLineDash([3, 4]);
       x.beginPath(); x.moveTo(px, top ? 30 : py); x.lineTo(px, top ? py : h - p); x.stroke(); x.setLineDash([]);
       x.fillStyle = col; x.beginPath(); x.arc(px, py, 4.5, 0, Math.PI * 2); x.fill();
@@ -745,7 +765,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 document.addEventListener('pgear:lang', updateAwake);
 
 // ---------- Kemas kini app ----------
-const APP_VERSION = '33';
+const APP_VERSION = '34';
 $('appVer').textContent = 'v' + APP_VERSION;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis
