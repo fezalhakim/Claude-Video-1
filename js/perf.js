@@ -102,13 +102,15 @@ export class PerfTimer {
     const base = r.rolloutDone ? r.startT : null;
     const distOff = this.rollout ? FT : 0;
 
-    if (base !== null) {
-      for (const g of SPEED_TARGETS) {
-        if (!r.results[g.key] && pk < g.to && kmh >= g.to) {
-          const tt = lerp(p.t, s.t, frac(pk, kmh, g.to));
-          r.results[g.key] = { time: (tt - base) / 1000, dist: lerp(d0, d1, frac(pk, kmh, g.to)) - distOff };
-        }
+    // Kelajuan (0-60, 0-100…): sentiasa dari pegun, TANPA rollout (r.t0 = saat mula bergerak).
+    for (const g of SPEED_TARGETS) {
+      if (!r.results[g.key] && pk < g.to && kmh >= g.to) {
+        const tt = lerp(p.t, s.t, frac(pk, kmh, g.to));
+        r.results[g.key] = { time: (tt - r.t0) / 1000, dist: lerp(d0, d1, frac(pk, kmh, g.to)) };
       }
+    }
+    // Jarak (60ft, 1/8, 1/4…): guna 1ft rollout jika diaktifkan (gaya dragstrip / NHRA).
+    if (base !== null) {
       for (const g of this.distTargets) {
         const m = g.m + distOff;
         if (!r.results[g.key] && d0 < m && d1 >= m) {

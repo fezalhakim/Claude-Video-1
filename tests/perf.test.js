@@ -36,10 +36,12 @@ test('larian simulator lengkap menghasilkan keputusan final', () => {
   assert.ok(Math.abs(res['0-200'].time - res['0-100'].time - res['100-200'].time) < 0.05);
 });
 
-test('rollout 1 kaki memendekkan masa', () => {
-  const get = rollout => { let f; const pt = new PerfTimer({ rollout, onResult: r => { if (r.kind === 'live') f = r.run; } });
-    for (const s of constAccel(5)) pt.push(s); return f.results['0-100'].time; };
-  assert.ok(get(true) < get(false));
+test('rollout 1 kaki: jarak lebih pantas, 0-100 sentiasa dari pegun', () => {
+  const get = (rollout, k) => { let f; const pt = new PerfTimer({ rollout, onResult: r => { if (r.kind === 'live') f = r.run; } });
+    for (const s of constAccel(5)) pt.push(s); return f.results[k].time; };
+  assert.ok(get(true, '60ft') < get(false, '60ft'));
+  assert.ok(get(true, '1/4 batu') < get(false, '1/4 batu'));
+  assert.equal(get(true, '0-100'), get(false, '0-100'));
 });
 
 import { makeDistTargets, customKey } from '../js/perf.js';

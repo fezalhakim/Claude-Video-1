@@ -26,7 +26,8 @@ test('analisis: keputusan dari data mentah sama dengan semasa larian', () => {
 
 test('analisis: rollout memendekkan masa', () => {
   const run = makeRun();
-  assert.ok(analyze(run, true).results['0-100'].time < analyze(run, false).results['0-100'].time);
+  assert.ok(analyze(run, true).results['1/4 batu'].time < analyze(run, false).results['1/4 batu'].time);
+  assert.equal(analyze(run, true).results['0-100'].time, analyze(run, false).results['0-100'].time);
 });
 
 test('DA: panas & tekanan rendah -> DA tinggi', () => {
