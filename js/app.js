@@ -6,6 +6,7 @@ import { connectSimulator } from './devices/simulator.js';
 import { openDetail } from './detail.js';
 import { importRuns, templateCSV, runFingerprint } from './importer.js';
 import { ocrImage, parseReportText } from './ocrimport.js';
+import { digitizeChart } from './chartdigitize.js';
 import { t, metric, setLang, getLang, locale, applyStatic, detectLang, LANGS } from './i18n.js';
 import { packSamples, analyze } from './analysis.js';
 import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets, customKey, isDistKey, UNIT_M } from './perf.js';
@@ -830,7 +831,18 @@ $('impFile').addEventListener('change', async e => {
 });
 
 // ---------- Import dari screenshot (OCR) ----------
-let shotQueue = [], shotIdx = 0, shotCond = {}, shotUrl = null;
+let shotQueue = [], shotIdx = 0, shotCond = {}, shotUrl = null, shotGraph = null;
+// jarak metrik (m) untuk menala paksi graf dari nilai jadual
+const KNOWN_M = { '60ft': 18.288, '100ft': 30.48, '330ft': 100.584, '1/8 batu': 201.168, '1000ft': 304.8, '1/4 batu': 402.336, '1/2 batu': 804.672 };
+async function readGraph(file, parsed) {
+  const dist = Object.entries(parsed.results).filter(([k]) => KNOWN_M[k]).map(([k, r]) => ({ m: KNOWN_M[k], time: r.time, trap: r.trap }));
+  if (!dist.length) return null;
+  const speed = Object.entries(parsed.results).filter(([k]) => /^0-\d+$/.test(k)).map(([k, r]) => ({ kmh: +k.slice(2), time: r.time }));
+  const bmp = await createImageBitmap(file);
+  const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
+  const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(bmp, 0, 0);
+  return digitizeChart(x.getImageData(0, 0, c.width, c.height), { T: Math.max(...dist.map(d => d.time)), known: { dist, speed } });
+}
 $('impShot').addEventListener('click', () => $('shotFile').click());
 $('shotFile').addEventListener('change', e => {
   shotQueue = [...e.target.files]; e.target.value = ''; shotIdx = 0;
@@ -855,6 +867,8 @@ async function nextShot() {
     const txt = await ocrImage(file, p => { const b = document.getElementById('ocrBar'); if (b) b.style.width = Math.round(p * 100) + '%'; });
     parsed = parseReportText(txt);
   } catch { $('ocrStatus').textContent = t('ocr.fail'); }
+  shotGraph = null;
+  try { shotGraph = await readGraph(file, parsed); } catch { /* tiada graf */ }
   const keys = ALL.filter(k => parsed.results[k]);
   if ($('ocrStatus').textContent !== t('ocr.fail'))
     $('ocrStatus').innerHTML = keys.length ? t('ocr.found', { n: keys.length }) : t('ocr.nothing');
@@ -864,7 +878,7 @@ async function nextShot() {
   $('ocrCar').value = settings.car || ''; $('ocrDev').value = parsed.device || 'Dragy'; $('ocrMax').value = '';
   shotCond = { temp: parsed.temp, da: parsed.da, alt: parsed.alt, slope: parsed.slope };
   const c = [shotCond.temp != null && `${shotCond.temp}°C`, shotCond.alt != null && `${shotCond.alt} m`, shotCond.da != null && `DA ${shotCond.da} m`, shotCond.slope != null && `${t('d.slope')} ${shotCond.slope}%`].filter(Boolean);
-  $('ocrCond').textContent = c.length ? t('ocr.cond', { c: c.join(' · ') }) : '';
+  $('ocrCond').innerHTML = esc(c.length ? t('ocr.cond', { c: c.join(' · ') }) : '') + '<br>' + (shotGraph ? t('ocr.graph') : t('ocr.noGraph'));
   $('ocrForm').hidden = false; $('ocrSave').disabled = false;
 }
 $('ocrAdd').addEventListener('click', () => $('ocrRows').insertAdjacentHTML('beforeend', ocrRow()));
@@ -883,6 +897,7 @@ $('ocrSave').addEventListener('click', () => {
   const run = { at, imported: true, device: $('ocrDev').value.trim() || 'Dragy', car: $('ocrCar').value.trim(), driver: settings.driver || '',
     rollout: true, maxKmh: max > 0 ? max : undefined, results, slope: shotCond.slope,
     weather: (shotCond.temp != null || shotCond.da != null) ? { temp: shotCond.temp, da: shotCond.da } : undefined, note: 'screenshot' };
+  if (shotGraph) { run.raw = packSamples(shotGraph.samples); run.graphFromShot = true; } // graf dibina semula dari screenshot
   if (history.some(h => runFingerprint(h) === runFingerprint(run))) { toast(t('imp.dup', { n: 1 })); shotIdx++; return nextShot(); }
   run.no = history.reduce((m, h) => Math.max(m, h.no || 0), 0) + 1;
   history = [...history, run].sort((a, b) => b.at - a.at);

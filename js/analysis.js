@@ -118,8 +118,10 @@ export function analyze(run, rollout, customDist = []) {
   const samples = unpackSamples(run.raw);
   let results = run.results, startT = null, maxKmh = run.maxKmh;
   if (samples.length > 2) {
-    const f = recompute(samples, rollout, allCustom);
-    if (f) { results = f.results; startT = f.startT; maxKmh = f.maxKmh; }
+    // larian import (Dragy): metrik kelajuan diukur dari pegun, jadi graf dikira tanpa rollout
+    const f = recompute(samples, run.imported ? false : rollout, allCustom);
+    // larian import dengan graf dari screenshot: nilai tepat dari jadual diutamakan, graf mengisi metrik lain
+    if (f) { results = run.imported ? { ...f.results, ...run.results } : f.results; startT = f.startT; maxKmh = run.imported ? (run.maxKmh ?? f.maxKmh) : f.maxKmh; }
   }
   let series = [];
   if (startT != null) series = buildSeries(samples, startT);
@@ -154,7 +156,7 @@ export function analyze(run, rollout, customDist = []) {
   };
 
   return {
-    results, series, shifts, maxG, maxKmh, slope: slope ?? run.slope ?? null, elev, sats,
+    results, series, shifts, maxG, maxKmh, slope: run.imported && run.slope != null ? run.slope : (slope ?? run.slope ?? null), elev, sats,
     da: run.weather?.da ?? densityAltitude(run.weather?.temp, run.weather?.pressure),
     temp: run.weather?.temp ?? null,
     hasRaw: samples.length > 2,

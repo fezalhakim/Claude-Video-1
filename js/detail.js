@@ -101,11 +101,11 @@ function render() {
       : `<p class="empty">${t('d.empty')}</p>`}
 
     <div class="dfoot">
-      <label class="toggle"><input type="checkbox" id="dRoll" ${state.rollout ? 'checked' : ''} ${a.hasRaw ? '' : 'disabled'}>
+      <label class="toggle"><input type="checkbox" id="dRoll" ${state.rollout && !run.imported ? 'checked' : ''} ${a.hasRaw && !run.imported ? '' : 'disabled'}>
         <span>${t('d.rollout')}</span></label>
       <span class="note">${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale())} · ${esc(run.device)}</span>
     </div>
-    ${a.hasRaw ? '' : `<p class="note">${run.imported ? t('imp.noGraph') : t('d.old')}</p>`}
+    ${a.hasRaw ? (run.graphFromShot ? `<p class="note">${t('d.fromShot')}</p>` : '') : `<p class="note">${run.imported ? t('imp.noGraph') : t('d.old')}</p>`}
     <p class="note">${esc(t('d.note'))}</p>
   </div>`;
 

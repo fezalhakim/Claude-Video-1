@@ -89,13 +89,17 @@ export function parseReportText(raw) {
     if (!results[key]) put(key, m[1]);
   }
 
+  // label penanda pada graf: "3.71s 100" = masa mencapai 100 km/j dari pegun
+  for (const m of text.matchAll(/(\d{1,2}\.\d{2})s[ \t]*\(?(60|100|150|200)\b(?![.\d%])(?!\s*(?:km|m\b|ft))/g)) if (!results['0-' + m[2]]) put('0-' + m[2], m[1]);
   const out = { results };
   let m;
   // suhu / ketinggian / DA: OCR sering hilangkan "°" dan salah baca ikon & "DA" (cth. "&26C A72m BI571m")
   for (const line of text.split('\n')) {
-    const tm = line.match(/(?:^|[^\d.])(-?\d{1,2}(?:\.\d)?)\s*°?\s*[cC](?![a-z])/);
+    const tm = line.match(/(?:^|[^\d.])(-?\d{1,3}(?:\.\d)?)\s*°?\s*([cCfF])(?![a-z])/);
     if (!tm || out.temp != null) continue;
-    const tv = num(tm[1]); if (tv < -30 || tv > 60) continue;
+    let tv = num(tm[1]);
+    if (/f/i.test(tm[2])) tv = Math.round((tv - 32) * 5 / 9 * 10) / 10;   // Fahrenheit -> Celsius
+    if (tv < -30 || tv > 60) continue;
     out.temp = tv;
     const rest = line.slice(tm.index + tm[0].length);
     const ms = [...rest.matchAll(/(-?\d{1,4})\s*m\b/g)].map(x => num(x[1]));
