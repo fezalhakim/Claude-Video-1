@@ -118,8 +118,8 @@ export function analyze(run, rollout, customDist = []) {
   const samples = unpackSamples(run.raw);
   let results = run.results, startT = null, maxKmh = run.maxKmh;
   if (samples.length > 2) {
-    // larian import (Dragy): metrik kelajuan diukur dari pegun, jadi graf dikira tanpa rollout
-    const f = recompute(samples, run.imported ? false : rollout, allCustom);
+    // larian import (Dragy): diukur dengan 1ft rollout (NHRA) — kira graf dengan rollout yang sama seperti larian asal
+    const f = recompute(samples, run.imported ? run.rollout !== false : rollout, allCustom);
     // larian import dengan graf dari screenshot: nilai tepat dari jadual diutamakan, graf mengisi metrik lain
     if (f) { results = run.imported ? { ...f.results, ...run.results } : f.results; startT = f.startT; maxKmh = run.imported ? (run.maxKmh ?? f.maxKmh) : f.maxKmh; }
   }

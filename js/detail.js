@@ -11,7 +11,7 @@ let state = null;
 export function openDetail(run, el, { onChange, onDelete, runs = [], customDist = [], rollout, tempC = true }) {
   // ikut tetapan rollout semasa jika larian ada data mentah (boleh dikira semula); jika tidak, ikut cara ia direkod
   const canRecalc = !!run.raw?.d?.length;
-  state = { run, el, onChange, onDelete, runs, customDist, tempC, rollout: canRecalc && rollout != null ? !!rollout : !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
+  state = { run, el, onChange, onDelete, runs, customDist, tempC, rollout: run.imported ? run.rollout !== false : canRecalc && rollout != null ? !!rollout : !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
   el.hidden = false; document.body.style.overflow = 'hidden';
   render();
 }
@@ -101,7 +101,7 @@ function render() {
       : `<p class="empty">${t('d.empty')}</p>`}
 
     <div class="dfoot">
-      <label class="toggle"><input type="checkbox" id="dRoll" ${state.rollout && !run.imported ? 'checked' : ''} ${a.hasRaw && !run.imported ? '' : 'disabled'}>
+      <label class="toggle"><input type="checkbox" id="dRoll" ${state.rollout ? 'checked' : ''} ${a.hasRaw && !run.imported ? '' : 'disabled'}>
         <span>${t('d.rollout')}</span></label>
       <span class="note">${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale())} · ${esc(run.device)}</span>
     </div>

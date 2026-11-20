@@ -89,9 +89,12 @@ export function parseReportText(raw) {
     if (!results[key]) put(key, m[1]);
   }
 
-  // label penanda pada graf: "3.71s 100" = masa mencapai 100 km/j dari pegun
-  for (const m of text.matchAll(/(\d{1,2}\.\d{2})s[ \t]*\(?(60|100|150|200)\b(?![.\d%])(?!\s*(?:km|m\b|ft))/g)) if (!results['0-' + m[2]]) put('0-' + m[2], m[1]);
-  const out = { results };
+  // label penanda pada graf: "3.71s 100" = masa graf (dari pegun, tanpa rollout) mencapai 100 km/j.
+  // Disimpan berasingan: digunakan untuk menala graf, bukan sebagai keputusan rasmi (keputusan dikira dengan 1ft rollout).
+  const labels = {};
+  for (const m of text.matchAll(/(\d{1,2}\.\d{2})s[ \t]*\(?(60|100|150|200)\b(?![.\d%])(?!\s*(?:km|m\b|ft))/g))
+    if (!labels['0-' + m[2]] && num(m[1]) > 0.3 && num(m[1]) < 60) labels['0-' + m[2]] = { time: num(m[1]) };
+  const out = { results, labels };
   let m;
   // suhu / ketinggian / DA: OCR sering hilangkan "°" dan salah baca ikon & "DA" (cth. "&26C A72m BI571m")
   for (const line of text.split('\n')) {

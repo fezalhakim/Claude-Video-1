@@ -837,7 +837,8 @@ const KNOWN_M = { '60ft': 18.288, '100ft': 30.48, '330ft': 100.584, '1/8 batu': 
 async function readGraph(file, parsed) {
   const dist = Object.entries(parsed.results).filter(([k]) => KNOWN_M[k]).map(([k, r]) => ({ m: KNOWN_M[k], time: r.time, trap: r.trap }));
   if (!dist.length) return null;
-  const speed = Object.entries(parsed.results).filter(([k]) => /^0-\d+$/.test(k)).map(([k, r]) => ({ kmh: +k.slice(2), time: r.time }));
+  // label graf (cth. "2.70s 100") ialah masa dari pegun pada paksi graf — sesuai untuk menala graf
+  const speed = Object.entries(parsed.labels || {}).map(([k, r]) => ({ kmh: +k.slice(2), time: r.time }));
   const bmp = await createImageBitmap(file);
   const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
   const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(bmp, 0, 0);
@@ -869,6 +870,8 @@ async function nextShot() {
   } catch { $('ocrStatus').textContent = t('ocr.fail'); }
   shotGraph = null;
   try { shotGraph = await readGraph(file, parsed); } catch { /* tiada graf */ }
+  // tanpa graf, label graf (0-100 dari pegun) masih berguna sebagai keputusan; dengan graf, ia dikira semula dengan 1ft rollout
+  if (!shotGraph) for (const [k, r] of Object.entries(parsed.labels || {})) if (!parsed.results[k]) parsed.results[k] = r;
   const keys = ALL.filter(k => parsed.results[k]);
   if ($('ocrStatus').textContent !== t('ocr.fail'))
     $('ocrStatus').innerHTML = keys.length ? t('ocr.found', { n: keys.length }) : t('ocr.nothing');

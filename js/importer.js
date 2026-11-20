@@ -119,7 +119,8 @@ export function importRuns(text) {
     const max = parseNum(f.max, delim);
     runs.push({
       at, imported: true, device: f.device || 'Dragy', car: f.car || '', driver: f.driver || '',
-      rollout: /^(1|y|yes|ya|true|on)$/i.test(f.rollout || ''), maxKmh: max > 0 ? max : undefined,
+      // data Dragy diukur dengan 1ft rollout (NHRA): anggap ON kecuali lajur rollout jelas menyatakan tidak
+      rollout: !/^(0|n|no|tidak|false|off)$/i.test((f.rollout || '').trim()), maxKmh: max > 0 ? max : undefined,
       results, note: f.notes || ''
     });
   });

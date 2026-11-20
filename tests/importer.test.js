@@ -56,3 +56,9 @@ test('cap jari sama untuk larian sama', () => {
   const { runs } = importRuns('date,time,0-100\n2026-11-20,10:00,5.10\n2026-11-20,10:00,5.10\n');
   assert.equal(runFingerprint(runs[0]), runFingerprint(runs[1]));
 });
+
+test('data Dragy: rollout ON jika lajur kosong / tiada, OFF hanya jika dinyatakan', () => {
+  const { runs } = importRuns('date,rollout,0-100\n2026-11-20,,5.1\n2026-11-21,0,5.2\n2026-11-22,1,5.0\n');
+  assert.deepEqual(runs.map(r => r.rollout), [true, false, true]);
+  assert.equal(importRuns('date,0-100\n2026-11-20,5.1\n').runs[0].rollout, true);
+});
