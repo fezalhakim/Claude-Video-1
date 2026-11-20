@@ -3,6 +3,7 @@
 Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS **RaceBox** atau **Dragy** melalui Bluetooth (Web Bluetooth). Boleh dipasang ke skrin utama telefon dan berfungsi luar talian.
 
 ## Ciri-ciri
+- **Kongsi gambar laju maks:** butang Kongsi menjana kad gambar MGear (1080×1350) dengan laju maks, keputusan utama, pemandu, kereta & tarikh — terus kongsi ke WhatsApp/Instagram atau simpan ke galeri.
 - **Mesra pengguna:** navigasi tab (Ukur / Sejarah / Tetapan), panduan 3 langkah kali pertama, senarai semak "Sedia" (Bersambung · GPS kuat · Berhenti), ringkasan automatik selepas larian dengan getaran, padam boleh dibatalkan ("Buat asal").
 - **Pelbagai bahasa:** Bahasa Melayu, English, Bahasa Indonesia, 中文 (pilih di bahagian atas atau di Tetapan; bahasa telefon dikesan automatik kali pertama).
 - **Sambung terus** ke RaceBox Mini / Mini S / Micro, Dragy, GPS telefon, atau mod Demo (simulator).

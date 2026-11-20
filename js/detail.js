@@ -8,8 +8,8 @@ const COL = { other: '#e8ecf1', shift: '#c58bff', g: '#ffb340', alt: '#30d158', 
 
 let state = null;
 
-export function openDetail(run, el, { onChange, onDelete, runs = [], customDist = [] }) {
-  state = { run, el, onChange, onDelete, runs, customDist, rollout: !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
+export function openDetail(run, el, { onChange, onDelete, onShare, runs = [], customDist = [] }) {
+  state = { run, el, onChange, onDelete, onShare, runs, customDist, rollout: !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
   el.hidden = false; document.body.style.overflow = 'hidden';
   render();
 }
@@ -46,6 +46,8 @@ function render() {
       <div><small>${t('d.maxG')}</small><b>${a.maxG == null ? '–' : a.maxG.toFixed(2)}</b><i>g</i></div>
       <div><small>${t('d.maxV')}</small><b>${a.maxKmh == null ? '–' : a.maxKmh.toFixed(1)}</b><i>${t('kmh')}</i></div>
     </div>
+
+    <button class="ghost wide dshare" data-act="share"><span aria-hidden="true">📷</span> ${t('share.card')}</button>
 
     <div class="dcar"><span class="who">${esc(run.driver || t('d.driver'))}</span>
       <input id="dCar" maxlength="40" placeholder="${t('d.carPh')}" value="${esc(run.car)}" aria-label="${t('d.carPh')}"></div>
@@ -111,6 +113,7 @@ function render() {
 
   el.onclick = e => {
     const t = e.target;
+    if (t.closest('[data-act=share]')) return state.onShare && state.onShare(run);
     if (t.dataset.act === 'close') return close();
     if (t.dataset.act === 'del') { if (confirm(t('d.confirmDel', { no: run.no }))) { state.onDelete(); close(); } return; }
     if (t.dataset.focus) { state.focus = t.dataset.focus; return render(); }
