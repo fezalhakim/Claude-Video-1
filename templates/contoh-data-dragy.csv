@@ -1,0 +1,4 @@
+date,time,car,driver,device,rollout,max_kmh,0-60,0-100,100-200,0-200,60ft,330ft,1/8 mile,1/8 mile trap kmh,1/4 mile,1/4 mile trap kmh,notes
+2026-11-15,21:10,Honda Civic FK8,Faizal,Dragy Pro,1,198.4,2.20,5.05,10.10,15.15,2.02,5.55,8.45,146.2,13.02,178.5,
+2026-11-16,21:40,Honda Civic FK8,Faizal,Dragy Pro,1,201.0,2.12,4.92,9.95,14.87,1.97,5.44,8.31,148.0,12.85,180.9,tayar baru
+17/11/2026,9:05 PM,Honda Civic FK8,Faizal,Dragy Pro,yes,203.7,2.08,4.85,,,1.94,5.38,8.24,149.1,12.74,182.3,

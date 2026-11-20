@@ -287,6 +287,13 @@ main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 .mRow .acts button { font-size: 12px; font-weight: 800; width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--line); padding: 0; background: none; color: var(--text); }
 .mRow .acts button.on.a { background: var(--red); border-color: var(--red); color: #fff; }
 .mRow .acts button.on.b { background: var(--blue); border-color: var(--blue); color: #08111c; }
+.histBtns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.impTitle { margin: 0 0 8px; font-size: 19px; }
+.impSteps { margin: 0 0 12px; padding-left: 20px; color: var(--text); font-size: 14px; line-height: 1.5; }
+.impSteps li { margin-bottom: 6px; }
+.impSteps li b { color: var(--amber); }
+#importBox .ghost.wide { margin-bottom: 10px; }
+.impTag { display: inline-block; font-size: 11px; font-weight: 800; color: #08111c; background: var(--amber); border-radius: 5px; padding: 1px 6px; margin-left: 6px; vertical-align: 1px; }
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 4px; }
 .steps span { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: var(--mute);
   background: #1b2027; border-radius: 99px; padding: 6px 4px; border: 1px solid var(--line); }

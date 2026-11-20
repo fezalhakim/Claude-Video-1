@@ -68,6 +68,10 @@ const D = {
     'set.shown': 'Keputusan dipaparkan', 'set.shownHint': 'Pilih keputusan yang ditunjuk di skrin Ukur, ringkasan, rekod terbaik & pengumuman suara. Semua tetap direkod — lihat dalam Butiran larian.', 'set.grpSpeed': 'Kelajuan', 'set.grpDist': 'Jarak', 'set.tempC': 'Suhu dalam Celsius (matikan untuk Fahrenheit)',
     'hist.byMetric': 'Ikut metrik', 'hist.all': 'Semua larian', 'hist.runs': '{n} Run', 'hist.bestIs': 'Terbaik {v} s', 'hist.sortBest': 'Terpantas', 'hist.sortNew': 'Terbaru', 'hist.back': '‹ Metrik', 'hist.trend': 'Masa setiap run (lama → baru) — titik hijau = terbaik',
     'hist.top': 'Terbaik',
+    'imp.btn': 'Import', 'imp.title': 'Import data (Dragy / CSV)',
+    'imp.s1': 'Muat turun <b>templat</b> dan buka dalam Excel atau Google Sheets.', 'imp.s2': 'Salin keputusan dari app Dragy (tarikh, kereta, 0-100, 60ft, 1/8 mile, 1/4 mile, trap…) — satu baris setiap larian. Padam baris CONTOH.',
+    'imp.s3': 'Simpan sebagai <b>CSV</b>, kemudian tekan "Pilih fail CSV". Fail eksport MGear juga boleh diimport.',
+    'imp.tpl': '⬇ Muat turun templat', 'imp.pick': 'Pilih fail CSV', 'imp.done': '{n} larian diimport', 'imp.dup': '{n} sudah ada (dilangkau)', 'imp.none': 'Tiada larian sah dalam fail ini. Pastikan tajuk lajur seperti dalam templat (cth. 0-100, 60ft, 1/4 mile).', 'imp.tag': 'Import', 'imp.noGraph': 'Larian import tiada data GPS penuh — hanya keputusan masa dipaparkan.',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -134,6 +138,10 @@ const D = {
     'set.shown': 'Results shown', 'set.shownHint': 'Choose which results appear on the Measure screen, summary, best records & voice. Everything is still recorded — see Run details.', 'set.grpSpeed': 'Speed', 'set.grpDist': 'Distance', 'set.tempC': 'Temperature in Celsius (turn off for Fahrenheit)',
     'hist.byMetric': 'By metric', 'hist.all': 'All runs', 'hist.runs': '{n} Runs', 'hist.bestIs': 'Best {v} s', 'hist.sortBest': 'Fastest', 'hist.sortNew': 'Newest', 'hist.back': '‹ Metrics', 'hist.trend': 'Time per run (old → new) — green dot = best',
     'hist.top': 'Best',
+    'imp.btn': 'Import', 'imp.title': 'Import data (Dragy / CSV)',
+    'imp.s1': 'Download the <b>template</b> and open it in Excel or Google Sheets.', 'imp.s2': 'Copy results from the Dragy app (date, car, 0-100, 60ft, 1/8 mile, 1/4 mile, trap…) — one row per run. Delete the EXAMPLE row.',
+    'imp.s3': 'Save as <b>CSV</b>, then tap "Choose CSV file". MGear export files can be imported too.',
+    'imp.tpl': '⬇ Download template', 'imp.pick': 'Choose CSV file', 'imp.done': '{n} runs imported', 'imp.dup': '{n} already exist (skipped)', 'imp.none': 'No valid runs in this file. Make sure the column headers match the template (e.g. 0-100, 60ft, 1/4 mile).', 'imp.tag': 'Import', 'imp.noGraph': 'Imported runs have no full GPS data — only times are shown.',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -200,6 +208,10 @@ const D = {
     'set.shown': 'Hasil yang ditampilkan', 'set.shownHint': 'Pilih hasil yang muncul di layar Ukur, ringkasan, rekor terbaik & suara. Semua tetap direkam — lihat di Detail run.', 'set.grpSpeed': 'Kecepatan', 'set.grpDist': 'Jarak', 'set.tempC': 'Suhu dalam Celsius (matikan untuk Fahrenheit)',
     'hist.byMetric': 'Per metrik', 'hist.all': 'Semua run', 'hist.runs': '{n} Run', 'hist.bestIs': 'Terbaik {v} s', 'hist.sortBest': 'Tercepat', 'hist.sortNew': 'Terbaru', 'hist.back': '‹ Metrik', 'hist.trend': 'Waktu tiap run (lama → baru) — titik hijau = terbaik',
     'hist.top': 'Terbaik',
+    'imp.btn': 'Impor', 'imp.title': 'Impor data (Dragy / CSV)',
+    'imp.s1': 'Unduh <b>template</b> lalu buka di Excel atau Google Sheets.', 'imp.s2': 'Salin hasil dari aplikasi Dragy (tanggal, mobil, 0-100, 60ft, 1/8 mile, 1/4 mile, trap…) — satu baris per run. Hapus baris CONTOH.',
+    'imp.s3': 'Simpan sebagai <b>CSV</b>, lalu ketuk "Pilih file CSV". File ekspor MGear juga bisa diimpor.',
+    'imp.tpl': '⬇ Unduh template', 'imp.pick': 'Pilih file CSV', 'imp.done': '{n} run diimpor', 'imp.dup': '{n} sudah ada (dilewati)', 'imp.none': 'Tidak ada run valid di file ini. Pastikan judul kolom sesuai template (mis. 0-100, 60ft, 1/4 mile).', 'imp.tag': 'Impor', 'imp.noGraph': 'Run impor tidak punya data GPS lengkap — hanya waktu yang ditampilkan.',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -266,6 +278,10 @@ const D = {
     'set.shown': '显示的成绩', 'set.shownHint': '选择在测试页面、总结、最佳记录和语音播报中显示的成绩。所有成绩仍会记录 — 可在详情中查看。', 'set.grpSpeed': '速度', 'set.grpDist': '距离', 'set.tempC': '温度使用摄氏度（关闭则为华氏度）',
     'hist.byMetric': '按项目', 'hist.all': '全部记录', 'hist.runs': '{n} 次', 'hist.bestIs': '最佳 {v} 秒', 'hist.sortBest': '最快', 'hist.sortNew': '最新', 'hist.back': '‹ 项目', 'hist.trend': '每次成绩（旧 → 新）— 绿点 = 最佳',
     'hist.top': '最佳',
+    'imp.btn': '导入', 'imp.title': '导入数据（Dragy / CSV）',
+    'imp.s1': '下载<b>模板</b>，用 Excel 或 Google 表格打开。', 'imp.s2': '从 Dragy 应用复制成绩（日期、车辆、0-100、60ft、1/8 英里、1/4 英里、尾速…）— 每次测试一行。删除示例行。',
+    'imp.s3': '保存为 <b>CSV</b>，然后点击"选择 CSV 文件"。也可导入 MGear 导出的文件。',
+    'imp.tpl': '⬇ 下载模板', 'imp.pick': '选择 CSV 文件', 'imp.done': '已导入 {n} 次测试', 'imp.dup': '{n} 次已存在（已跳过）', 'imp.none': '文件中没有有效记录。请确认列标题与模板一致（如 0-100、60ft、1/4 mile）。', 'imp.tag': '导入', 'imp.noGraph': '导入的记录没有完整 GPS 数据 — 仅显示时间。',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };

@@ -97,7 +97,7 @@
 
     <section class="card">
       <div class="rowhead"><h2 data-i18n="h.history">Sejarah</h2>
-        <div><button id="exportCsv" class="ghost" data-i18n="btn.csv">Eksport CSV</button> <button id="clearHist" class="ghost danger" data-i18n="btn.clear">Padam semua</button></div>
+        <div class="histBtns"><button id="importBtn" class="ghost" data-i18n="imp.btn">Import</button> <button id="exportCsv" class="ghost" data-i18n="btn.csv">Eksport CSV</button> <button id="clearHist" class="ghost danger" data-i18n="btn.clear">Padam semua</button></div>
       </div>
       <div class="seg" id="histSeg">
         <button data-hv="metric" class="on" data-i18n="hist.byMetric">Ikut metrik</button>
@@ -181,6 +181,20 @@
       <p id="onbBody"></p>
       <div class="dots" id="onbDots"><i></i><i></i><i></i></div>
       <div class="sheetBtns"><button id="onbSkip" class="ghost" data-i18n="onb.skip">Langkau</button><button id="onbNext" class="primary" data-i18n="onb.next">Seterusnya</button></div>
+    </div>
+  </div>
+
+  <div id="importBox" class="sheet" hidden role="dialog" aria-modal="true">
+    <div class="sheetBox">
+      <h3 class="impTitle" data-i18n="imp.title">Import data (Dragy / CSV)</h3>
+      <ol class="impSteps">
+        <li data-i18n-html="imp.s1"></li>
+        <li data-i18n-html="imp.s2"></li>
+        <li data-i18n-html="imp.s3"></li>
+      </ol>
+      <button id="impTpl" class="ghost wide" data-i18n="imp.tpl">Muat turun templat</button>
+      <div class="sheetBtns"><button id="impClose" class="ghost" data-i18n="done.close">Tutup</button><button id="impPick" class="primary" data-i18n="imp.pick">Pilih fail CSV</button></div>
+      <input id="impFile" type="file" accept=".csv,text/csv,text/plain" hidden>
     </div>
   </div>
 

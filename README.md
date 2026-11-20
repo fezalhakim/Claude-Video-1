@@ -3,6 +3,7 @@
 Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS **RaceBox** atau **Dragy** melalui Bluetooth (Web Bluetooth). Boleh dipasang ke skrin utama telefon dan berfungsi luar talian.
 
 ## Ciri-ciri
+- **Import data Dragy / CSV** (Sejarah → Import): isi `templates/mgear-import-template.csv` (atau muat turun dari app) dengan keputusan Dragy, kemudian import. Larian ditanda "Import" dan muncul dalam Sejarah, Ikut metrik, Banding & Butiran. Fail eksport MGear juga boleh diimport; larian berganda dilangkau.
 - **Sejarah ikut metrik:** pilih 0-60, 0-100, 60ft, 1/8 batu, 1/4 batu dsb. untuk lihat semua run bagi metrik itu — disusun terpantas (🏆), beza dengan yang terbaik, graf prestasi, dan butang A/B untuk banding.
 - **Pilih keputusan dipaparkan** (Tetapan): tandakan metrik yang mahu dilihat di skrin Ukur, ringkasan, rekod terbaik & suara. Semua metrik tetap direkod. Suhu dalam °C atau °F.
 - **Mesra pengguna:** navigasi tab (Ukur / Sejarah / Tetapan), panduan 3 langkah kali pertama, senarai semak "Sedia" (Bersambung · GPS kuat · Berhenti), ringkasan automatik selepas larian dengan getaran, padam boleh dibatalkan ("Buat asal").

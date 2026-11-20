@@ -105,7 +105,7 @@ function render() {
         <span>${t('d.rollout')}</span></label>
       <span class="note">${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale())} · ${esc(run.device)}</span>
     </div>
-    ${a.hasRaw ? '' : `<p class="note">${t('d.old')}</p>`}
+    ${a.hasRaw ? '' : `<p class="note">${run.imported ? t('imp.noGraph') : t('d.old')}</p>`}
     <p class="note">${esc(t('d.note'))}</p>
   </div>`;
 

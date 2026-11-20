@@ -4,6 +4,7 @@ import { connectDragy } from './devices/dragy.js';
 import { connectPhoneGps } from './devices/phonegps.js';
 import { connectSimulator } from './devices/simulator.js';
 import { openDetail } from './detail.js';
+import { importRuns, templateCSV, runFingerprint } from './importer.js';
 import { t, metric, setLang, getLang, locale, applyStatic, detectLang, LANGS } from './i18n.js';
 import { packSamples, analyze } from './analysis.js';
 import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets, customKey, isDistKey, UNIT_M } from './perf.js';
@@ -434,7 +435,7 @@ function renderHistory() {
     const hk = ALL.filter(k => h.results[k]), hs = hk.filter(k => sh.includes(k));
     const vals = (hs.length ? hs : hk).map(k => `${metric(k)} <b>${h.results[k].time.toFixed(2)}</b>`).join(' · ');
     const d = new Date(h.at);
-    return `<li><div class="hinfo" data-open="${h.no}"><div class="meta"><span class="runno">Run ${h.no}</span>${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale())} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ` · ${t('hist.max')} ${h.maxKmh.toFixed(0)} ${t('kmh')}` : ''}</div>
+    return `<li><div class="hinfo" data-open="${h.no}"><div class="meta"><span class="runno">Run ${h.no}</span>${h.imported ? `<span class="impTag">${t('imp.tag')}</span> ` : ''}${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale())} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ` · ${t('hist.max')} ${h.maxKmh.toFixed(0)} ${t('kmh')}` : ''}</div>
       <div class="vals">${vals}</div><div class="open">${h.car ? esc(h.car) + ' · ' : ''}${t('hist.open')}</div></div><div class="acts">
       <button class="pick a ${cmp.a === h.no ? 'on' : ''}" data-pick="a" data-no="${h.no}" aria-label="${t('aria.pickA')}">A</button>
       <button class="pick b ${cmp.b === h.no ? 'on' : ''}" data-pick="b" data-no="${h.no}" aria-label="${t('aria.pickB')}">B</button>
@@ -485,7 +486,7 @@ function renderMetricHist() {
       const r = h.results[k], rank = rankOf.get(h.no), d = new Date(h.at), dd = r.time - best;
       const extra = r.trap != null ? ` · @ ${r.trap.toFixed(1)} ${t('kmh')}` : r.dist != null ? ` · ${r.dist.toFixed(1)} m` : '';
       return `<li class="mRow ${rank === 1 ? 'top' : ''}"><span class="rank">${rank === 1 ? '🏆' : '#' + rank}</span>
-        <div class="mi" data-open="${h.no}"><b>${r.time.toFixed(2)}<i>s</i></b><small>Run ${h.no} · ${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })}${extra}${h.car ? ' · ' + esc(h.car) : ''}</small></div>
+        <div class="mi" data-open="${h.no}"><b>${r.time.toFixed(2)}<i>s</i></b><small>Run ${h.no}${h.imported ? ' · ' + t('imp.tag') + ' ' + esc(h.device) : ''} · ${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })}${extra}${h.car ? ' · ' + esc(h.car) : ''}</small></div>
         <span class="dlt">${rank === 1 ? t('hist.top') : '+' + dd.toFixed(2)}</span>
         <span class="acts"><button class="a ${cmp.a === h.no ? 'on' : ''}" data-pick="a" data-no="${h.no}" aria-label="${t('aria.pickA')}">A</button><button class="b ${cmp.b === h.no ? 'on' : ''}" data-pick="b" data-no="${h.no}" aria-label="${t('aria.pickB')}">B</button></span></li>`;
     }).join('')}</ol>`;
@@ -796,4 +797,34 @@ $('unlockBtn').addEventListener('pointerdown', e => {
 for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) $('unlockBtn').addEventListener(ev, cancelHold);
 // telan semua sentuhan lain pada lapisan kunci
 for (const ev of ['click', 'contextmenu', 'touchmove', 'wheel']) $('lockScr').addEventListener(ev, e => { if (!e.target.closest('#unlockBtn')) e.preventDefault(); e.stopPropagation(); }, { passive: false });
+
+// ---------- Import data (Dragy / CSV) ----------
+$('importBtn').addEventListener('click', () => { $('importBox').hidden = false; });
+$('impClose').addEventListener('click', () => { $('importBox').hidden = true; });
+$('importBox').addEventListener('click', e => { if (e.target.id === 'importBox') $('importBox').hidden = true; });
+$('impTpl').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([templateCSV()], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'mgear-import-template.csv'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+$('impPick').addEventListener('click', () => $('impFile').click());
+$('impFile').addEventListener('change', async e => {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  let text = '';
+  try { text = await file.text(); } catch (err) { return toast(err.message); }
+  const { runs } = importRuns(text);
+  if (!runs.length) return toast(t('imp.none'));
+  const seen = new Set(history.map(runFingerprint));
+  const fresh = runs.filter(r => { const fp = runFingerprint(r); if (seen.has(fp)) return false; seen.add(fp); return true; });
+  // nombor run diberi ikut tarikh (lama -> baru), sejarah disusun terbaru dahulu
+  let n = history.reduce((m, h) => Math.max(m, h.no || 0), 0);
+  fresh.sort((a, b) => a.at - b.at).forEach(r => { r.no = ++n; });
+  history = [...history, ...fresh].sort((a, b) => b.at - a.at);
+  persist(); renderHistory();
+  $('importBox').hidden = true;
+  const dup = runs.length - fresh.length;
+  toast(t('imp.done', { n: fresh.length }) + (dup ? ' · ' + t('imp.dup', { n: dup }) : ''));
+});
 
