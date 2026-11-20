@@ -26,7 +26,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
 };
 
-let conn = null, history = store.get(HKEY, []), settings = { rollout: true, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
+let conn = null, history = store.get(HKEY, []), settings = { rollout: true, keepAwake: true, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
 setLang(settings.lang);
 // Rollout 1 kaki ON secara lalai. Hanya ikut nilai tersimpan jika pengguna sendiri pernah menukarnya
 // (tetapan lama mungkin menyimpan rollout:false secara automatik walaupun tidak pernah disentuh).
@@ -86,11 +86,12 @@ for (const k of ['driver', 'car']) {
   $(k).value = settings[k] || '';
   $(k).addEventListener('change', () => { settings[k] = $(k).value.trim(); store.set(SKEY, settings); });
 }
-for (const k of ['rollout', 'anyBle', 'speak', 'weather']) {
+for (const k of ['rollout', 'keepAwake', 'anyBle', 'speak', 'weather']) {
   $(k).checked = !!settings[k];
   $(k).addEventListener('change', () => {
     settings[k] = $(k).checked;
     if (k === 'rollout') { settings.rolloutUser = true; timer.rollout = settings.rollout; }
+    if (k === 'keepAwake') keepAwake(!!conn);
     store.set(SKEY, settings);
   });
 }
@@ -159,13 +160,17 @@ async function connectDev(dev, btn, extra = {}) {
     setPill('on');
     $('livePanel').hidden = false; $('connectPanel').hidden = true; $('resumeBtn').hidden = true;
     sess.set({ dev: dev === 'sim' ? null : dev, bleId: conn.id || null, name: conn.name });
+    keepAwake(true);
     return true;
   } catch (e) {
     if (e.name !== 'NotFoundError') toast(e.message || String(e)); // NotFoundError = pengguna batal
     conn = null; return false;
   } finally { setButtons(false); if (btn) { btn.classList.remove('busy'); sub.textContent = orig; } }
 }
-document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', () => connectDev(btn.dataset.dev, btn)));
+document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', () => {
+  if (settings.keepAwake && !('wakeLock' in navigator)) startVideoFallback(); // mesti dalam sentuhan pengguna (iPhone)
+  connectDev(btn.dataset.dev, btn);
+}));
 
 function setPill(st) {
   const el = $('conn');
@@ -209,7 +214,7 @@ $('resetRun').addEventListener('click', () => { timer.reset(); current = {}; cha
 function setButtons(dis) { document.querySelectorAll('.dev').forEach(b => b.disabled = dis); }
 
 function onDisconnect() {
-  conn = null;
+  conn = null; keepAwake(false);
   setPill('off');
   $('livePanel').hidden = true; $('connectPanel').hidden = false;
 }
@@ -573,9 +578,50 @@ $('showGuide').addEventListener('click', openOnb);
 document.addEventListener('pgear:lang', () => { if (!$('onb').hidden) renderOnb(); });
 
 // Elak skrin tidur semasa larian
-async function wakeLock() { try { await navigator.wakeLock?.request('screen'); } catch { /* abaikan */ } }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && conn) wakeLock(); });
-document.addEventListener('click', wakeLock, { once: true });
+// ---------- Kekalkan skrin hidup semasa bersambung ----------
+// Web app dibekukan bila skrin dikunci (GPS & Bluetooth berhenti), jadi skrin dihalang daripada tidur.
+// Utama: Screen Wake Lock API. Sandaran (iPhone lama / pelayar tanpa API): video senyap berulang.
+let wakeSentinel = null, awakeVid = null, awakeMode = 'off';
+function startVideoFallback() {
+  if (!awakeVid) {
+    awakeVid = document.createElement('video');
+    Object.assign(awakeVid, { muted: true, loop: true, playsInline: true, src: 'media/awake.mp4' });
+    awakeVid.setAttribute('playsinline', ''); awakeVid.setAttribute('muted', '');
+    awakeVid.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0.01;pointer-events:none;bottom:0;left:0';
+    document.body.appendChild(awakeVid);
+  }
+  return awakeVid.play().then(() => true).catch(() => false);
+}
+async function keepAwake(on) {
+  if (!on || !settings.keepAwake) {
+    try { await wakeSentinel?.release(); } catch { /* abaikan */ }
+    wakeSentinel = null; awakeVid?.pause(); awakeMode = 'off'; updateAwake(); return;
+  }
+  if (document.visibilityState !== 'visible') return;
+  let ok = false;
+  if ('wakeLock' in navigator) {
+    try {
+      if (!wakeSentinel) {
+        wakeSentinel = await navigator.wakeLock.request('screen');
+        wakeSentinel.addEventListener('release', () => { wakeSentinel = null; if (awakeMode === 'lock') { awakeMode = 'fail'; updateAwake(); } });
+      }
+      ok = true; awakeMode = 'lock';
+    } catch { /* cuba sandaran */ }
+  }
+  if (!ok) { ok = await startVideoFallback(); awakeMode = ok ? 'video' : 'fail'; }
+  updateAwake();
+}
+function updateAwake() {
+  const el = $('awake'); if (!el) return;
+  el.hidden = !conn || !settings.keepAwake;
+  const on = awakeMode === 'lock' || awakeMode === 'video';
+  el.className = 'awake ' + (on ? 'on' : 'warn');
+  el.textContent = t(on ? 'awake.on' : 'awake.off');
+}
+// sentuhan pengguna diperlukan oleh sesetengah pelayar (terutama iPhone) — cuba semula pada sentuhan
+document.addEventListener('pointerdown', () => { if (conn && awakeMode !== 'lock' && awakeMode !== 'video') keepAwake(true); }, { passive: true });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && conn) keepAwake(true); });
+document.addEventListener('pgear:lang', updateAwake);
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 

@@ -63,6 +63,7 @@ const D = {
     'conn.reconnecting': 'Menyambung semula…', 'conn.lost': 'Sambungan terputus — menyambung semula…', 'conn.resume': '↻ Sambung semula: {name}',
     'ios.bleTitle': 'iPhone: RaceBox / Dragy perlukan Bluefy', 'ios.bleBody': 'Safari di iPhone tidak boleh sambung ke peranti Bluetooth. Muat turun app percuma Bluefy, kemudian buka link MGear di dalam Bluefy. GPS Telefon dan Demo berfungsi di Safari.', 'ios.getBluefy': 'Dapatkan Bluefy di App Store',
     'inst.title': 'Pasang MGear', 'inst.btn': 'Pasang', 'inst.ios': 'Tekan Kongsi ⬆︎ kemudian "Add to Home Screen".', 'inst.android': 'Guna skrin penuh & elak refresh tak sengaja.',
+    'set.keepAwake': 'Kekalkan skrin hidup semasa bersambung (app berhenti jika skrin dikunci)', 'awake.on': '🔆 Skrin kekal hidup — jangan kunci skrin semasa merekod', 'awake.off': '⚠ Skrin mungkin terkunci sendiri — sentuh skrin sekali, dan jangan kunci skrin semasa merekod',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -124,6 +125,7 @@ const D = {
     'conn.reconnecting': 'Reconnecting…', 'conn.lost': 'Connection lost — reconnecting…', 'conn.resume': '↻ Reconnect: {name}',
     'ios.bleTitle': 'iPhone: RaceBox / Dragy need Bluefy', 'ios.bleBody': 'Safari on iPhone cannot connect to Bluetooth devices. Download the free Bluefy app, then open the MGear link inside Bluefy. Phone GPS and Demo work in Safari.', 'ios.getBluefy': 'Get Bluefy on the App Store',
     'inst.title': 'Install MGear', 'inst.btn': 'Install', 'inst.ios': 'Tap Share ⬆︎ then "Add to Home Screen".', 'inst.android': 'Full screen & no accidental refresh.',
+    'set.keepAwake': 'Keep screen on while connected (the app stops if the screen locks)', 'awake.on': '🔆 Screen stays on — do not lock the screen while recording', 'awake.off': '⚠ Screen may lock by itself — tap the screen once, and do not lock it while recording',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -185,6 +187,7 @@ const D = {
     'conn.reconnecting': 'Menghubungkan ulang…', 'conn.lost': 'Koneksi terputus — menghubungkan ulang…', 'conn.resume': '↻ Hubungkan ulang: {name}',
     'ios.bleTitle': 'iPhone: RaceBox / Dragy butuh Bluefy', 'ios.bleBody': 'Safari di iPhone tidak bisa terhubung ke perangkat Bluetooth. Unduh aplikasi gratis Bluefy, lalu buka link MGear di dalam Bluefy. GPS Ponsel dan Demo berfungsi di Safari.', 'ios.getBluefy': 'Dapatkan Bluefy di App Store',
     'inst.title': 'Pasang MGear', 'inst.btn': 'Pasang', 'inst.ios': 'Ketuk Bagikan ⬆︎ lalu "Add to Home Screen".', 'inst.android': 'Layar penuh & tanpa refresh tak sengaja.',
+    'set.keepAwake': 'Biarkan layar tetap menyala saat terhubung (aplikasi berhenti jika layar terkunci)', 'awake.on': '🔆 Layar tetap menyala — jangan kunci layar saat merekam', 'awake.off': '⚠ Layar mungkin terkunci sendiri — ketuk layar sekali, dan jangan kunci layar saat merekam',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -246,6 +249,7 @@ const D = {
     'conn.reconnecting': '正在重新连接…', 'conn.lost': '连接中断 — 正在重新连接…', 'conn.resume': '↻ 重新连接：{name}',
     'ios.bleTitle': 'iPhone：RaceBox / Dragy 需要 Bluefy', 'ios.bleBody': 'iPhone 上的 Safari 无法连接蓝牙设备。请下载免费应用 Bluefy，然后在 Bluefy 中打开 MGear 链接。手机 GPS 和演示可在 Safari 中使用。', 'ios.getBluefy': '在 App Store 获取 Bluefy',
     'inst.title': '安装 MGear', 'inst.btn': '安装', 'inst.ios': '点击分享 ⬆︎，然后选择"添加到主屏幕"。', 'inst.android': '全屏使用，避免误刷新。',
+    'set.keepAwake': '连接时保持屏幕常亮（锁屏后应用会停止）', 'awake.on': '🔆 屏幕保持常亮 — 记录时请勿锁屏', 'awake.off': '⚠ 屏幕可能自动锁定 — 请轻触屏幕一次，记录时请勿锁屏',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
