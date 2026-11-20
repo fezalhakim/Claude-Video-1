@@ -26,7 +26,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
 };
 
-let conn = null, history = store.get(HKEY, []), settings = { rollout: true, keepAwake: true, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
+let conn = null, history = store.get(HKEY, []), settings = { rollout: true, keepAwake: true, tempC: true, shown: null, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
 setLang(settings.lang);
 // Rollout 1 kaki ON secara lalai. Hanya ikut nilai tersimpan jika pengguna sendiri pernah menukarnya
 // (tetapan lama mungkin menyimpan rollout:false secara automatik walaupun tidak pernah disentuh).
@@ -54,6 +54,26 @@ for (const id of ['lang', 'langTop']) $(id).addEventListener('change', e => chan
 $('lang').value = getLang(); $('langTop').value = getLang();
 applyStatic();
 
+// ---------- Pilih keputusan yang dipaparkan ----------
+const DEFAULT_SHOWN = ['0-60', '0-100', '100-200', '60ft', '1/8 batu', '1/4 batu'];
+const shownKeys = () => settings.shown || [...DEFAULT_SHOWN, ...customKeys()];
+const ICON_SPEED = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17a8 8 0 1 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 17l4-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></svg>';
+const ICON_DIST = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15h18M4 15v-4M8 15v-2.5M12 15v-4M16 15v-2.5M20 15v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function renderShown() {
+  const sh = shownKeys(), ck = customKeys();
+  const row = k => `<label class="shownRow">${isDistKey(k) ? ICON_DIST : ICON_SPEED}<span>${esc(metric(k))}${isDistKey(k) ? '' : ' ' + t('kmh')}${ck.includes(k) ? ` <em>★</em>` : ''}</span><input type="checkbox" data-shown="${esc(k)}" ${sh.includes(k) ? 'checked' : ''}></label>`;
+  const speed = ALL.filter(k => !isDistKey(k)), dist = ALL.filter(k => isDistKey(k));
+  $('shownList').innerHTML = `<h4>${t('set.grpSpeed')}</h4>${speed.map(row).join('')}<h4>${t('set.grpDist')}</h4>${dist.map(row).join('')}`;
+}
+$('shownList').addEventListener('change', e => {
+  const k = e.target.dataset.shown; if (k == null) return;
+  const sh = new Set(shownKeys());
+  e.target.checked ? sh.add(k) : sh.delete(k);
+  settings.shown = ALL.filter(x => sh.has(x)); store.set(SKEY, settings);
+  renderResults(); renderHistory();
+});
+document.addEventListener('pgear:lang', () => renderShown());
+
 // ---------- Jarak tersuai ----------
 function renderCustom() {
   $('cdList').innerHTML = settings.customDist.map((c, i) =>
@@ -68,6 +88,7 @@ $('cdAdd').addEventListener('click', () => {
   if (makeDistTargets().some(g => Math.abs(g.m - m) < 0.01) || settings.customDist.some(o => Math.abs(o.v * UNIT_M[o.u] - m) < 0.01))
     return toast(t('cd.exists'));
   settings.customDist.push(c); $('cdVal').value = '';
+  if (settings.shown && !settings.shown.includes(customKey(c))) settings.shown.push(customKey(c));
   customChanged();
 });
 $('cdVal').addEventListener('keydown', e => { if (e.key === 'Enter') $('cdAdd').click(); });
@@ -77,7 +98,7 @@ $('cdList').addEventListener('click', e => {
 });
 function customChanged() {
   store.set(SKEY, settings); timer.setCustomDist(settings.customDist);
-  rebuildKeys(); renderCustom(); renderResults(); renderHistory();
+  rebuildKeys(); renderCustom(); renderShown(); renderResults(); renderHistory();
 }
 document.addEventListener('pgear:lang', renderCustom);
 
@@ -86,7 +107,7 @@ for (const k of ['driver', 'car']) {
   $(k).value = settings[k] || '';
   $(k).addEventListener('change', () => { settings[k] = $(k).value.trim(); store.set(SKEY, settings); });
 }
-for (const k of ['rollout', 'keepAwake', 'anyBle', 'speak', 'weather']) {
+for (const k of ['rollout', 'keepAwake', 'tempC', 'anyBle', 'speak', 'weather']) {
   $(k).checked = !!settings[k];
   $(k).addEventListener('change', () => {
     settings[k] = $(k).checked;
@@ -326,8 +347,8 @@ function fmt(key, r) {
 function renderResults() {
   const ck = customKeys();
   // tunjuk metrik utama + jarak tersuai; yang lain hanya bila dicapai
-  const CORE = ['0-60', '0-100', '100-200', '60ft', '1/8 batu', '1/4 batu'];
-  $('results').innerHTML = ALL.filter(k => CORE.includes(k) || ck.includes(k) || current[k]).map(k =>
+  const sh = shownKeys();
+  $('results').innerHTML = ALL.filter(k => sh.includes(k)).map(k =>
     `<div class="res ${current[k] ? 'hit' : ''} ${ck.includes(k) ? 'custom' : ''}"><small>${metric(k)}${isDistKey(k) ? '' : ' ' + t('kmh')}</small>${fmt(k, current[k])}</div>`).join('');
 }
 
@@ -368,7 +389,7 @@ async function fetchWeather(run) {
 function showDetail(no) {
   const run = byNo(no); if (!run) return;
   openDetail(run, $('detail'), {
-    runs: history, customDist: settings.customDist, rollout: settings.rollout,
+    runs: history, customDist: settings.customDist, rollout: settings.rollout, tempC: settings.tempC,
     onChange: () => { persist(); renderHistory(); },
     onDelete: () => removeRun(run.no)
   });
@@ -397,9 +418,11 @@ function renderHistory() {
   const best = {};
   for (const h of history) for (const [k, r] of Object.entries(h.results))
     if (!best[k] || r.time < best[k].time) best[k] = r;
-  $('best').innerHTML = ALL.filter(k => best[k]).map(k => `<span>${t('best', { k: metric(k) })}: <b>${best[k].time.toFixed(2)} s</b></span>`).join('');
+  const sh = shownKeys();
+  $('best').innerHTML = ALL.filter(k => best[k] && sh.includes(k)).map(k => `<span>${t('best', { k: metric(k) })}: <b>${best[k].time.toFixed(2)} s</b></span>`).join('');
   $('history').innerHTML = history.length ? history.map((h, i) => {
-    const vals = ALL.filter(k => h.results[k]).map(k => `${metric(k)} <b>${h.results[k].time.toFixed(2)}</b>`).join(' · ');
+    const hk = ALL.filter(k => h.results[k]), hs = hk.filter(k => sh.includes(k));
+    const vals = (hs.length ? hs : hk).map(k => `${metric(k)} <b>${h.results[k].time.toFixed(2)}</b>`).join(' · ');
     const d = new Date(h.at);
     return `<li><div class="hinfo" data-open="${h.no}"><div class="meta"><span class="runno">Run ${h.no}</span>${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale())} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ` · ${t('hist.max')} ${h.maxKmh.toFixed(0)} ${t('kmh')}` : ''}</div>
       <div class="vals">${vals}</div><div class="open">${h.car ? esc(h.car) + ' · ' : ''}${t('hist.open')}</div></div><div class="acts">
@@ -518,7 +541,7 @@ $('exportCsv').addEventListener('click', () => {
 // ---------- Lain-lain ----------
 function announce(results) {
   if (!settings.speak || !('speechSynthesis' in window)) return;
-  const keys = ['0-100', '100-200', '1/4 batu', '100-0'].filter(k => results[k]);
+  const keys = shownKeys().filter(k => results[k]).slice(0, 4);
   if (!keys.length) return;
   const u = new SpeechSynthesisUtterance(keys.map(k => `${metric(k).replace('-', t('speak.to'))}, ${results[k].time.toFixed(2)} ${t('speak.sec')}`).join('. '));
   u.lang = locale(); speechSynthesis.speak(u);
@@ -554,7 +577,8 @@ document.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click',
 
 // ---------- Ringkasan selepas larian ----------
 function showSummary(run) {
-  const pick = ['0-100', '100-200', '60ft', '1/8 batu', '1/4 batu', ...customKeys(), '0-200', '0-60'].filter((k, i, a) => run.results[k] && a.indexOf(k) === i).slice(0, 5);
+  const sh = shownKeys();
+  const pick = ALL.filter(k => sh.includes(k) && run.results[k]).slice(0, 5);
   const tiles = pick.map(k => `<div><small>${esc(metric(k))}</small><b>${run.results[k].time.toFixed(2)}</b><i>s</i></div>`);
   if (run.maxKmh) tiles.push(`<div><small>${t('d.maxV')}</small><b>${run.maxKmh.toFixed(0)}</b><i>${t('kmh')}</i></div>`);
   $('sheetBody').innerHTML = tiles.join('');
@@ -630,7 +654,7 @@ document.addEventListener('pgear:lang', updateAwake);
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 
-rebuildKeys(); renderCustom(); renderResults(); renderHistory();
+rebuildKeys(); renderCustom(); renderShown(); renderResults(); renderHistory();
 if (!settings.onboarded) openOnb();
 
 // pulihkan laju maks & sambungan selepas refresh

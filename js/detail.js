@@ -8,10 +8,10 @@ const COL = { other: '#e8ecf1', shift: '#c58bff', g: '#ffb340', alt: '#30d158', 
 
 let state = null;
 
-export function openDetail(run, el, { onChange, onDelete, runs = [], customDist = [], rollout }) {
+export function openDetail(run, el, { onChange, onDelete, runs = [], customDist = [], rollout, tempC = true }) {
   // ikut tetapan rollout semasa jika larian ada data mentah (boleh dikira semula); jika tidak, ikut cara ia direkod
   const canRecalc = !!run.raw?.d?.length;
-  state = { run, el, onChange, onDelete, runs, customDist, rollout: canRecalc && rollout != null ? !!rollout : !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
+  state = { run, el, onChange, onDelete, runs, customDist, tempC, rollout: canRecalc && rollout != null ? !!rollout : !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
   el.hidden = false; document.body.style.overflow = 'hidden';
   render();
 }
@@ -57,7 +57,7 @@ function render() {
       <div><small>${t('d.slope')}</small><b>${a.slope == null ? '–' : (a.slope > 0 ? '+' : '') + a.slope.toFixed(2) + '%'}</b></div>
       <div><small>${t('d.da')}</small><b>${a.da == null ? '–' : a.da.toFixed(0) + ' m'}</b></div>
       <div><small>${t('d.elev')}</small><b>${a.elev == null ? '–' : (a.elev > 0 ? '+' : '') + a.elev.toFixed(1) + ' m'}</b></div>
-      <div><small>${t('d.temp')}</small><b>${a.temp == null ? '–' : a.temp.toFixed(1) + '°C'}</b></div>
+      <div><small>${t('d.temp')}</small><b>${a.temp == null ? '–' : state.tempC ? a.temp.toFixed(1) + '°C' : (a.temp * 9 / 5 + 32).toFixed(1) + '°F'}</b></div>
     </div>
 
     <div class="chips">${keys.map(k => `<button data-focus="${esc(k)}" class="${k === state.focus ? 'on' : ''}">${esc(metric(k))}</button>`).join('')}</div>

@@ -3,10 +3,11 @@
 Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS **RaceBox** atau **Dragy** melalui Bluetooth (Web Bluetooth). Boleh dipasang ke skrin utama telefon dan berfungsi luar talian.
 
 ## Ciri-ciri
+- **Pilih keputusan dipaparkan** (Tetapan): tandakan metrik yang mahu dilihat di skrin Ukur, ringkasan, rekod terbaik & suara. Semua metrik tetap direkod. Suhu dalam °C atau °F.
 - **Mesra pengguna:** navigasi tab (Ukur / Sejarah / Tetapan), panduan 3 langkah kali pertama, senarai semak "Sedia" (Bersambung · GPS kuat · Berhenti), ringkasan automatik selepas larian dengan getaran, padam boleh dibatalkan ("Buat asal").
 - **Pelbagai bahasa:** Bahasa Melayu, English, Bahasa Indonesia, 中文 (pilih di bahagian atas atau di Tetapan; bahasa telefon dikesan automatik kali pertama).
 - **Sambung terus** ke RaceBox Mini / Mini S / Micro (25 Hz), Dragy (10 Hz), GPS telefon (~1 Hz), atau mod Demo (simulator).
-- **Pengukuran:** 0-60, 0-100, 0-150, 0-200, 60-100, 80-120, 100-200 km/j, 60ft, 100ft, 330ft, 1/8 batu, 1000ft, 1/4 batu (dengan trap speed), dan brek 100-0.
+- **Pengukuran:** 0-60, 0-100, 0-150, 0-200, 60-100, 80-120, 100-200, 200-250, 200-300 km/j, 60ft, 100ft, 330ft, 1/8 batu, 1000ft, 1/4 batu, 1/2 batu, 1 batu (dengan trap speed), dan brek 100-0.
 - **Jarak tersuai** (Tetapan): tambah sehingga 10 jarak sendiri dalam m, ft atau batu (cth. 500 m, 1 km, 800 ft). Setiap ujian jarak tunjuk masa, laju di garisan dan **laju maksimum** dalam jarak itu. Larian lama yang ada data penuh dikira semula secara automatik.
 - Mula automatik bila kenderaan bergerak dari pegun; **rollout 1 kaki ON secara lalai** (boleh dimatikan di Tetapan).
 - Masa dikira dari **cap masa GNSS peranti** dan diinterpolasi antara sampel (bukan masa ketibaan Bluetooth).

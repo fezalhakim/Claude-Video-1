@@ -8,12 +8,14 @@ export const SPEED_TARGETS = [            // dari pegun (km/j)
 ];
 export const ROLLING_TARGETS = [          // bergolek (km/j)
   { key: '60-100', from: 60, to: 100 }, { key: '80-120', from: 80, to: 120 },
-  { key: '100-200', from: 100, to: 200 }
+  { key: '100-200', from: 100, to: 200 }, { key: '200-250', from: 200, to: 250 },
+  { key: '200-300', from: 200, to: 300 }
 ];
 export const DIST_TARGETS = [             // jarak (m)
   { key: '60ft', m: 60 * FT }, { key: '100ft', m: 100 * FT }, { key: '330ft', m: 330 * FT },
   { key: '1/8 batu', m: MILE / 8 },
-  { key: '1000ft', m: 1000 * FT }, { key: '1/4 batu', m: MILE / 4 }
+  { key: '1000ft', m: 1000 * FT }, { key: '1/4 batu', m: MILE / 4 },
+  { key: '1/2 batu', m: MILE / 2 }, { key: '1 batu', m: MILE }
 ];
 
 /** Jarak tersuai: { v: nilai, u: 'm' | 'ft' | 'mi' } -> sasaran { key, m, custom: true } */
