@@ -14,7 +14,7 @@ export const DRAGY_CANDIDATES = [
     notify: '49535343-1e4d-4bd9-ba61-23c647249616' }
 ];
 
-export async function connectDragy({ onSample, onDisconnect, anyDevice = false }) {
+export async function connectDragy({ onSample, onDisconnect, onStatus, device, anyDevice = false }) {
   const stream = new NmeaStream(onSample, 'Dragy');
   const decoder = new TextDecoder();
   return connectBle({
@@ -23,6 +23,6 @@ export async function connectDragy({ onSample, onDisconnect, anyDevice = false }
     optionalServices: DRAGY_CANDIDATES.map(c => c.service),
     candidates: DRAGY_CANDIDATES,
     onData: dv => stream.push(decoder.decode(dv, { stream: true })),
-    onDisconnect
+    onDisconnect, onStatus, device
   });
 }

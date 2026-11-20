@@ -1,4 +1,4 @@
-import { bleSupported } from './ble.js';
+import { bleSupported, findKnownDevice } from './ble.js';
 import { connectRaceBox } from './devices/racebox.js';
 import { connectDragy } from './devices/dragy.js';
 import { connectPhoneGps } from './devices/phonegps.js';
@@ -43,7 +43,7 @@ function changeLang(l) {
   $('lang').value = l; $('langTop').value = l;
   applyStatic();
   $('runState').dataset.st = ''; refreshState();
-  $('conn').textContent = conn ? t('conn.on', { name: conn.name }) : t('conn.off');
+  setPill(conn ? 'on' : 'off');
   renderResults(); renderHistory(); scheduleDraw();
   document.dispatchEvent(new Event('pgear:lang'));
 }
@@ -130,31 +130,80 @@ const CONNECTORS = {
   sim: connectSimulator
 };
 
-document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', async () => {
+// ---------- Sambungan (dengan sambung semula selepas refresh) ----------
+// sessionStorage kekal selepas refresh dalam tab yang sama, tetapi hilang bila app ditutup.
+const SESS = 'mgear.session';
+const sess = {
+  get() { try { return JSON.parse(sessionStorage.getItem(SESS)) || {}; } catch { return {}; } },
+  set(v) { try { sessionStorage.setItem(SESS, JSON.stringify({ ...sess.get(), ...v })); } catch { /* abaikan */ } }
+};
+
+async function connectDev(dev, btn, extra = {}) {
   if (conn) conn.disconnect();
   setButtons(true);
-  const sub = btn.querySelector('small'), orig = sub.textContent;
-  btn.classList.add('busy'); sub.textContent = t('conn.searching');
+  const sub = btn?.querySelector('small'), orig = sub?.textContent;
+  if (btn) { btn.classList.add('busy'); sub.textContent = t('conn.searching'); }
   try {
-    conn = await CONNECTORS[btn.dataset.dev]({ onSample, onDisconnect, onError: e => toast(e.message) });
-    timer.reset(); lastSample = null; rateTimes = []; resetTop();
+    conn = await CONNECTORS[dev]({ onSample, onDisconnect, onStatus, onError: e => toast(e.message), ...extra });
+    const keepTop = extra.resume;
+    timer.reset(); lastSample = null; rateTimes = [];
+    if (!keepTop) resetTop();
     $('devName').textContent = conn.name;
-    $('conn').textContent = t('conn.on', { name: conn.name }); $('conn').className = 'pill on';
-    $('livePanel').hidden = false; $('connectPanel').hidden = true;
+    setPill('on');
+    $('livePanel').hidden = false; $('connectPanel').hidden = true; $('resumeBtn').hidden = true;
+    sess.set({ dev: dev === 'sim' ? null : dev, bleId: conn.id || null, name: conn.name });
+    return true;
   } catch (e) {
     if (e.name !== 'NotFoundError') toast(e.message || String(e)); // NotFoundError = pengguna batal
-    conn = null;
-  } finally { setButtons(false); btn.classList.remove('busy'); sub.textContent = orig; }
-}));
+    conn = null; return false;
+  } finally { setButtons(false); if (btn) { btn.classList.remove('busy'); sub.textContent = orig; } }
+}
+document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', () => connectDev(btn.dataset.dev, btn)));
 
-$('disconnect').addEventListener('click', () => { if (conn) conn.disconnect(); onDisconnect(); });
+function setPill(st) {
+  const el = $('conn');
+  if (st === 'on') { el.textContent = t('conn.on', { name: conn.name }); el.className = 'pill on'; }
+  else if (st === 'reconnecting') { el.textContent = t('conn.reconnecting'); el.className = 'pill warn'; }
+  else { el.textContent = t('conn.off'); el.className = 'pill off'; }
+}
+function onStatus(st) {
+  if (st === 'reconnecting') { setPill('reconnecting'); toast(t('conn.lost')); }
+  else if (st === 'connected' && conn) setPill('on');
+}
+
+// Selepas refresh: sambung semula peranti terakhir
+async function resumeSession() {
+  const s = sess.get();
+  if (!s.dev) return;
+  if (s.dev === 'phone') return connectDev('phone', null, { resume: true });
+  // RaceBox / Dragy: cuba tanpa dialog (Chrome yang menyokong getDevices), jika tidak tunjuk butang sekali tekan
+  const device = await findKnownDevice(s.bleId);
+  if (device) {
+    setPill('reconnecting');
+    if (await connectDev(s.dev, null, { device, resume: true })) return;
+  }
+  setPill('off');
+  const b = $('resumeBtn');
+  b.textContent = t('conn.resume', { name: s.name || s.dev });
+  b.hidden = false;
+  b.onclick = async () => {
+    const d = await findKnownDevice(s.bleId);
+    connectDev(s.dev, null, d ? { device: d, resume: true } : { resume: true });
+  };
+}
+
+$('disconnect').addEventListener('click', () => {
+  if (conn) conn.disconnect();
+  sess.set({ dev: null }); // putus sengaja: jangan sambung semula selepas refresh
+  onDisconnect();
+});
 $('resetRun').addEventListener('click', () => { timer.reset(); current = {}; chartPts = []; renderResults(); });
 
 function setButtons(dis) { document.querySelectorAll('.dev').forEach(b => b.disabled = dis); }
 
 function onDisconnect() {
   conn = null;
-  $('conn').textContent = t('conn.off'); $('conn').className = 'pill off';
+  setPill('off');
   $('livePanel').hidden = true; $('connectPanel').hidden = false;
 }
 
@@ -162,13 +211,13 @@ function onDisconnect() {
 // Laju maks sesi: laju tertinggi sejak sambung / set semula. Bacaan tanpa fix GPS
 // atau dengan ketepatan teruk (GPS telefon > 25 m) diabaikan supaya gangguan tidak dikira.
 let topKmh = 0, topFlash = 0;
-function resetTop() { topKmh = 0; $('topSpeed').textContent = '0.0'; }
+function resetTop() { topKmh = 0; $('topSpeed').textContent = '0.0'; sess.set({ top: 0 }); }
 $('resetMax').addEventListener('click', resetTop);
 function trackTop(s) {
   if (!(s.fix >= 2) || (s.hAcc != null && s.hAcc > 25) || (s.sAcc != null && s.sAcc > 2)) return;
   const k = s.speed * 3.6;
   if (k < 2 || k <= topKmh) return; // < 2 km/j = gangguan semasa pegun
-  topKmh = k;
+  topKmh = k; sess.set({ top: k });
   const now = performance.now();
   if (now - topFlash > 800) { // kesan "rekod baru" (dihadkan supaya tidak berkelip berterusan)
     topFlash = now; const el = $('maxBox'); el.classList.remove('new'); void el.offsetWidth; el.classList.add('new');
@@ -525,3 +574,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.ser
 
 rebuildKeys(); renderCustom(); renderResults(); renderHistory();
 if (!settings.onboarded) openOnb();
+
+// pulihkan laju maks & sambungan selepas refresh
+{ const s0 = sess.get(); if (s0.top > 0) { topKmh = s0.top; $('topSpeed').textContent = topKmh.toFixed(1); } }
+resumeSession();

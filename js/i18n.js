@@ -60,6 +60,7 @@ const D = {
     'onb.t2': 'Tunggu tanda hijau', 'onb.b2': 'Pastikan ketiga-tiga tanda hijau: Bersambung, GPS kuat dan Berhenti. Status akan bertukar kepada SEDIA.',
     'onb.t3': 'Pecut!', 'onb.b3': 'Masa bermula sendiri bila kenderaan bergerak, dan disimpan bila anda berhenti. Lihat semua larian dalam tab Sejarah.',
     'live.top': 'Laju maks',
+    'conn.reconnecting': 'Menyambung semula…', 'conn.lost': 'Sambungan terputus — menyambung semula…', 'conn.resume': '↻ Sambung semula: {name}',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -118,6 +119,7 @@ const D = {
     'onb.t2': 'Wait for green ticks', 'onb.b2': 'Make sure all three ticks are green: Connected, Good GPS and Stopped. The status changes to READY.',
     'onb.t3': 'Launch!', 'onb.b3': 'Timing starts by itself when the vehicle moves and is saved when you stop. See every run in the History tab.',
     'live.top': 'Top speed',
+    'conn.reconnecting': 'Reconnecting…', 'conn.lost': 'Connection lost — reconnecting…', 'conn.resume': '↻ Reconnect: {name}',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -176,6 +178,7 @@ const D = {
     'onb.t2': 'Tunggu tanda hijau', 'onb.b2': 'Pastikan ketiga tanda hijau: Terhubung, GPS kuat dan Berhenti. Status akan berubah menjadi SIAP.',
     'onb.t3': 'Gas!', 'onb.b3': 'Waktu mulai otomatis saat kendaraan bergerak dan disimpan saat Anda berhenti. Lihat semua run di tab Riwayat.',
     'live.top': 'Kecepatan maks',
+    'conn.reconnecting': 'Menghubungkan ulang…', 'conn.lost': 'Koneksi terputus — menghubungkan ulang…', 'conn.resume': '↻ Hubungkan ulang: {name}',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -234,6 +237,7 @@ const D = {
     'onb.t2': '等待绿色勾', 'onb.b2': '确保三个勾都变绿：已连接、GPS 良好、已停车。状态会变为"就绪"。',
     'onb.t3': '起步！', 'onb.b3': '车辆一动自动开始计时，停车后自动保存。在"历史记录"中查看所有成绩。',
     'live.top': '最高速度',
+    'conn.reconnecting': '正在重新连接…', 'conn.lost': '连接中断 — 正在重新连接…', 'conn.resume': '↻ 重新连接：{name}',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };

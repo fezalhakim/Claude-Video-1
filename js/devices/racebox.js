@@ -71,7 +71,7 @@ export class RaceBoxStream {
   }
 }
 
-export async function connectRaceBox({ onSample, onDisconnect }) {
+export async function connectRaceBox({ onSample, onDisconnect, onStatus, device }) {
   const stream = new RaceBoxStream(m => onSample({
     t: m.iTOW, speed: m.fixOk ? m.speed : 0, lat: m.lat, lon: m.lon, alt: m.alt,
     heading: m.heading, sats: m.sats, fix: m.fixOk ? m.fix : 0, hAcc: m.hAcc, sAcc: m.sAcc,
@@ -82,6 +82,6 @@ export async function connectRaceBox({ onSample, onDisconnect }) {
     optionalServices: [NUS_SERVICE],
     candidates: [{ service: NUS_SERVICE, notify: NUS_TX, write: NUS_RX }],
     onData: dv => stream.push(new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength)),
-    onDisconnect
+    onDisconnect, onStatus, device
   });
 }
