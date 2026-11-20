@@ -26,7 +26,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
 };
 
-let conn = null, history = store.get(HKEY, []), settings = { rollout: false, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], demo: { v: 230, u: 'kmh' }, ...store.get(SKEY, {}) };
+let conn = null, history = store.get(HKEY, []), settings = { rollout: false, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
 setLang(settings.lang);
 // beri nombor run kepada rekod lama (yang belum bernombor)
 { let n = 0; for (let i = history.length - 1; i >= 0; i--) { if (history[i].no) n = Math.max(n, history[i].no); else history[i].no = ++n; } }
@@ -73,34 +73,9 @@ $('cdList').addEventListener('click', e => {
 });
 function customChanged() {
   store.set(SKEY, settings); timer.setCustomDist(settings.customDist);
-  rebuildKeys(); renderCustom(); renderDemo(); renderResults(); renderHistory();
+  rebuildKeys(); renderCustom(); renderResults(); renderHistory();
 }
 document.addEventListener('pgear:lang', renderCustom);
-
-// ---------- Sasaran demo ----------
-function demoTarget() {
-  const { v, u } = settings.demo;
-  return u === 'kmh' ? { targetKmh: v } : { targetM: v * UNIT_M[u] };
-}
-function demoValid(v, u) {
-  if (!(v > 0)) return false;
-  return u === 'kmh' ? v >= 20 && v <= 450 : v * UNIT_M[u] >= 20 && v * UNIT_M[u] <= 10000;
-}
-function renderDemo() {
-  const { v, u } = settings.demo;
-  $('demoVal').value = v; $('demoUnit').value = u;
-  const sub = u === 'kmh' ? t('demo.subSpeed', { v }) : t('demo.subDist', { v: u === 'ft' ? `${v}ft` : u === 'mi' ? `${v} ${t('unit.mi')}` : `${v} m` });
-  document.querySelector('[data-dev=sim] small').textContent = sub;
-}
-for (const id of ['demoVal', 'demoUnit']) $(id).addEventListener('change', () => {
-  const v = parseFloat(String($('demoVal').value).replace(',', '.')), u = $('demoUnit').value;
-  if (id === 'demoUnit') { // tukar unit: nilai lalai yang sesuai
-    settings.demo = { v: u === 'kmh' ? 230 : u === 'm' ? 1000 : u === 'ft' ? 1000 : 1, u };
-  } else if (demoValid(v, u)) settings.demo = { v: +v.toFixed(3), u };
-  else toast(t(u === 'kmh' ? 'demo.badSpeed' : 'demo.badDist'));
-  store.set(SKEY, settings); renderDemo();
-});
-document.addEventListener('pgear:lang', renderDemo);
 
 // ---------- Tetapan ----------
 for (const k of ['driver', 'car']) {
@@ -149,7 +124,7 @@ const CONNECTORS = {
   racebox: connectRaceBox,
   dragy: o => connectDragy({ ...o, anyDevice: settings.anyBle }),
   phone: connectPhoneGps,
-  sim: o => connectSimulator({ ...o, target: demoTarget() })
+  sim: connectSimulator
 };
 
 document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', async () => {
@@ -455,4 +430,4 @@ document.addEventListener('click', wakeLock, { once: true });
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 
-rebuildKeys(); renderCustom(); renderDemo(); renderResults(); renderHistory();
+rebuildKeys(); renderCustom(); renderResults(); renderHistory();
