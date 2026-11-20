@@ -440,8 +440,87 @@ function renderHistory() {
       <button class="pick b ${cmp.b === h.no ? 'on' : ''}" data-pick="b" data-no="${h.no}" aria-label="${t('aria.pickB')}">B</button>
       <button data-del="${h.no}" aria-label="${t('aria.del')}">×</button></div></li>`;
   }).join('') : `<li class="empty">${t('hist.empty')} <button class="ghost" data-demo>${t('hist.tryDemo')}</button></li>`;
+  renderMetricHist();
   renderCompare();
 }
+
+// ---------- Sejarah ikut metrik (senarai metrik -> kedudukan run) ----------
+let hv = 'metric', mSel = null, mSort = 'best';
+const icon = k => isDistKey(k) ? ICON_DIST : ICON_SPEED;
+const unitLbl = k => isDistKey(k) ? '' : ' ' + t('kmh');
+function renderMetricHist() {
+  document.querySelectorAll('[data-hv]').forEach(b => b.classList.toggle('on', b.dataset.hv === hv));
+  $('allRuns').hidden = hv !== 'all';
+  const showMetric = hv === 'metric';
+  if (showMetric && !history.length) { // tiada larian: guna paparan kosong yang sama
+    $('metricList').innerHTML = `<p class="empty">${t('hist.empty')} <button class="ghost" data-demo>${t('hist.tryDemo')}</button></p>`;
+    $('metricList').hidden = false; $('metricView').hidden = true; return;
+  }
+  if (mSel && !history.some(h => h.results[mSel])) mSel = null;
+  $('metricList').hidden = !showMetric || !!mSel;
+  $('metricView').hidden = !showMetric || !mSel;
+  if (!showMetric) return;
+  if (!mSel) {
+    const sh = shownKeys();
+    const keys = ALL.filter(k => history.some(h => h.results[k]))
+      .sort((a, b) => (sh.includes(b) ? 1 : 0) - (sh.includes(a) ? 1 : 0)); // pilihan pengguna di atas
+    $('metricList').innerHTML = keys.map(k => {
+      const runs = history.filter(h => h.results[k]);
+      const best = Math.min(...runs.map(h => h.results[k].time));
+      return `<button class="mItem" data-metric="${esc(k)}">${icon(k)}<span class="ml"><b>${esc(metric(k))}${unitLbl(k)}</b><small>${t('hist.bestIs', { v: best.toFixed(2) })}</small></span>
+        <span class="mc">${t('hist.runs', { n: runs.length })}</span><span class="chev">›</span></button>`;
+    }).join('');
+    return;
+  }
+  const k = mSel;
+  const runs = history.filter(h => h.results[k]);
+  const best = Math.min(...runs.map(h => h.results[k].time));
+  const byBest = [...runs].sort((a, b) => a.results[k].time - b.results[k].time);
+  const rankOf = new Map(byBest.map((h, i) => [h.no, i + 1]));
+  const list = mSort === 'best' ? byBest : [...runs].sort((a, b) => b.at - a.at);
+  $('metricView').innerHTML = `<div class="mvHead"><button class="ghost" data-mback>${t('hist.back')}</button><h3>${esc(metric(k))}${unitLbl(k)}</h3></div>
+    <div class="seg"><button data-msort="best" class="${mSort === 'best' ? 'on' : ''}">${t('hist.sortBest')}</button><button data-msort="new" class="${mSort === 'new' ? 'on' : ''}">${t('hist.sortNew')}</button></div>
+    ${runs.length > 1 ? `<canvas id="mvChart" class="mvChart" width="600" height="200"></canvas><p class="note">${t('hist.trend')}</p>` : ''}
+    <ol class="mvList">${list.map(h => {
+      const r = h.results[k], rank = rankOf.get(h.no), d = new Date(h.at), dd = r.time - best;
+      const extra = r.trap != null ? ` · @ ${r.trap.toFixed(1)} ${t('kmh')}` : r.dist != null ? ` · ${r.dist.toFixed(1)} m` : '';
+      return `<li class="mRow ${rank === 1 ? 'top' : ''}"><span class="rank">${rank === 1 ? '🏆' : '#' + rank}</span>
+        <div class="mi" data-open="${h.no}"><b>${r.time.toFixed(2)}<i>s</i></b><small>Run ${h.no} · ${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })}${extra}${h.car ? ' · ' + esc(h.car) : ''}</small></div>
+        <span class="dlt">${rank === 1 ? t('hist.top') : '+' + dd.toFixed(2)}</span>
+        <span class="acts"><button class="a ${cmp.a === h.no ? 'on' : ''}" data-pick="a" data-no="${h.no}" aria-label="${t('aria.pickA')}">A</button><button class="b ${cmp.b === h.no ? 'on' : ''}" data-pick="b" data-no="${h.no}" aria-label="${t('aria.pickB')}">B</button></span></li>`;
+    }).join('')}</ol>`;
+  if (runs.length > 1) drawTrend(runs, k, best);
+}
+function drawTrend(runs, k, best) {
+  const c = $('mvChart'), x = c.getContext('2d'), w = c.width, h = c.height, L = 46, R = 14, T = 16, B = 26;
+  const pts = [...runs].sort((a, b) => a.at - b.at).map(h => [h.no, h.results[k].time]);
+  const ts = pts.map(p => p[1]), lo = Math.min(...ts), hi = Math.max(...ts), pad = Math.max(0.05, (hi - lo) * 0.2);
+  const y0 = lo - pad, y1 = hi + pad;
+  const X = i => L + (pts.length === 1 ? (w - L - R) / 2 : (i / (pts.length - 1)) * (w - L - R));
+  const Y = v => T + ((v - y0) / (y1 - y0)) * (h - T - B); // lebih pantas = lebih tinggi
+  x.clearRect(0, 0, w, h); x.font = '15px system-ui'; x.fillStyle = '#8b95a3'; x.strokeStyle = '#242a32'; x.lineWidth = 1;
+  for (const v of [lo, (lo + hi) / 2, hi]) { const yy = Y(v); x.beginPath(); x.moveTo(L, yy); x.lineTo(w - R, yy); x.stroke(); x.fillText(v.toFixed(2), 2, yy + 5); }
+  x.strokeStyle = '#4aa3ff'; x.lineWidth = 3; x.beginPath();
+  pts.forEach(([, v], i) => (i ? x.lineTo(X(i), Y(v)) : x.moveTo(X(i), Y(v)))); x.stroke();
+  x.textAlign = 'center';
+  pts.forEach(([no, v], i) => {
+    const isBest = v === best;
+    x.fillStyle = isBest ? '#30d158' : '#4aa3ff'; x.beginPath(); x.arc(X(i), Y(v), isBest ? 8 : 5, 0, Math.PI * 2); x.fill();
+    if (pts.length <= 12) { x.fillStyle = '#8b95a3'; x.fillText('R' + no, X(i), h - 6); }
+  });
+  x.textAlign = 'left';
+}
+document.querySelectorAll('[data-hv]').forEach(b => b.addEventListener('click', () => { hv = b.dataset.hv; renderMetricHist(); }));
+for (const id of ['metricList', 'metricView']) $(id).addEventListener('click', e => {
+  const m = e.target.closest('[data-metric]');
+  if (m) { mSel = m.dataset.metric; mSort = 'best'; renderMetricHist(); $('metricView').scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
+  if (e.target.closest('[data-mback]')) { mSel = null; renderMetricHist(); return; }
+  const so = e.target.closest('[data-msort]'); if (so) { mSort = so.dataset.msort; renderMetricHist(); return; }
+  if (e.target.dataset.demo !== undefined) { go('measure'); document.querySelector('[data-dev=sim]').click(); return; }
+  const pk = e.target.closest('[data-pick]');
+  if (pk) { cmp[pk.dataset.pick] = +pk.dataset.no; renderHistory(); $('compareCard').scrollIntoView({ behavior: 'smooth' }); return; }
+  const op = e.target.closest('[data-open]'); if (op) showDetail(+op.dataset.open);
+});
 
 // ---------- Banding larian ----------
 function renderCompare() {

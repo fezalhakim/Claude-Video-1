@@ -66,6 +66,8 @@ const D = {
     'set.keepAwake': 'Kekalkan skrin hidup semasa bersambung (app berhenti jika skrin dikunci)', 'awake.on': '🔆 Skrin kekal hidup — jangan kunci skrin semasa merekod', 'awake.off': '⚠ Skrin mungkin terkunci sendiri — sentuh skrin sekali, dan jangan kunci skrin semasa merekod',
     'lock.btn': 'Kunci', 'lock.locked': 'Skrin dikunci', 'lock.hold': 'Tekan & tahan 🔓 untuk buka kunci',
     'set.shown': 'Keputusan dipaparkan', 'set.shownHint': 'Pilih keputusan yang ditunjuk di skrin Ukur, ringkasan, rekod terbaik & pengumuman suara. Semua tetap direkod — lihat dalam Butiran larian.', 'set.grpSpeed': 'Kelajuan', 'set.grpDist': 'Jarak', 'set.tempC': 'Suhu dalam Celsius (matikan untuk Fahrenheit)',
+    'hist.byMetric': 'Ikut metrik', 'hist.all': 'Semua larian', 'hist.runs': '{n} Run', 'hist.bestIs': 'Terbaik {v} s', 'hist.sortBest': 'Terpantas', 'hist.sortNew': 'Terbaru', 'hist.back': '‹ Metrik', 'hist.trend': 'Masa setiap run (lama → baru) — titik hijau = terbaik',
+    'hist.top': 'Terbaik',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -130,6 +132,8 @@ const D = {
     'set.keepAwake': 'Keep screen on while connected (the app stops if the screen locks)', 'awake.on': '🔆 Screen stays on — do not lock the screen while recording', 'awake.off': '⚠ Screen may lock by itself — tap the screen once, and do not lock it while recording',
     'lock.btn': 'Lock', 'lock.locked': 'Screen locked', 'lock.hold': 'Press & hold 🔓 to unlock',
     'set.shown': 'Results shown', 'set.shownHint': 'Choose which results appear on the Measure screen, summary, best records & voice. Everything is still recorded — see Run details.', 'set.grpSpeed': 'Speed', 'set.grpDist': 'Distance', 'set.tempC': 'Temperature in Celsius (turn off for Fahrenheit)',
+    'hist.byMetric': 'By metric', 'hist.all': 'All runs', 'hist.runs': '{n} Runs', 'hist.bestIs': 'Best {v} s', 'hist.sortBest': 'Fastest', 'hist.sortNew': 'Newest', 'hist.back': '‹ Metrics', 'hist.trend': 'Time per run (old → new) — green dot = best',
+    'hist.top': 'Best',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -194,6 +198,8 @@ const D = {
     'set.keepAwake': 'Biarkan layar tetap menyala saat terhubung (aplikasi berhenti jika layar terkunci)', 'awake.on': '🔆 Layar tetap menyala — jangan kunci layar saat merekam', 'awake.off': '⚠ Layar mungkin terkunci sendiri — ketuk layar sekali, dan jangan kunci layar saat merekam',
     'lock.btn': 'Kunci', 'lock.locked': 'Layar dikunci', 'lock.hold': 'Tekan & tahan 🔓 untuk membuka',
     'set.shown': 'Hasil yang ditampilkan', 'set.shownHint': 'Pilih hasil yang muncul di layar Ukur, ringkasan, rekor terbaik & suara. Semua tetap direkam — lihat di Detail run.', 'set.grpSpeed': 'Kecepatan', 'set.grpDist': 'Jarak', 'set.tempC': 'Suhu dalam Celsius (matikan untuk Fahrenheit)',
+    'hist.byMetric': 'Per metrik', 'hist.all': 'Semua run', 'hist.runs': '{n} Run', 'hist.bestIs': 'Terbaik {v} s', 'hist.sortBest': 'Tercepat', 'hist.sortNew': 'Terbaru', 'hist.back': '‹ Metrik', 'hist.trend': 'Waktu tiap run (lama → baru) — titik hijau = terbaik',
+    'hist.top': 'Terbaik',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -258,6 +264,8 @@ const D = {
     'set.keepAwake': '连接时保持屏幕常亮（锁屏后应用会停止）', 'awake.on': '🔆 屏幕保持常亮 — 记录时请勿锁屏', 'awake.off': '⚠ 屏幕可能自动锁定 — 请轻触屏幕一次，记录时请勿锁屏',
     'lock.btn': '锁定', 'lock.locked': '屏幕已锁定', 'lock.hold': '长按 🔓 解锁',
     'set.shown': '显示的成绩', 'set.shownHint': '选择在测试页面、总结、最佳记录和语音播报中显示的成绩。所有成绩仍会记录 — 可在详情中查看。', 'set.grpSpeed': '速度', 'set.grpDist': '距离', 'set.tempC': '温度使用摄氏度（关闭则为华氏度）',
+    'hist.byMetric': '按项目', 'hist.all': '全部记录', 'hist.runs': '{n} 次', 'hist.bestIs': '最佳 {v} 秒', 'hist.sortBest': '最快', 'hist.sortNew': '最新', 'hist.back': '‹ 项目', 'hist.trend': '每次成绩（旧 → 新）— 绿点 = 最佳',
+    'hist.top': '最佳',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };

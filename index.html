@@ -99,8 +99,16 @@
       <div class="rowhead"><h2 data-i18n="h.history">Sejarah</h2>
         <div><button id="exportCsv" class="ghost" data-i18n="btn.csv">Eksport CSV</button> <button id="clearHist" class="ghost danger" data-i18n="btn.clear">Padam semua</button></div>
       </div>
-      <div id="best" class="best"></div>
-      <ol id="history" class="history"></ol>
+      <div class="seg" id="histSeg">
+        <button data-hv="metric" class="on" data-i18n="hist.byMetric">Ikut metrik</button>
+        <button data-hv="all" data-i18n="hist.all">Semua larian</button>
+      </div>
+      <div id="metricList" class="metricList"></div>
+      <div id="metricView" class="metricView" hidden></div>
+      <div id="allRuns" hidden>
+        <div id="best" class="best"></div>
+        <ol id="history" class="history"></ol>
+      </div>
     </section>
 
     <section class="card" id="compareCard">
