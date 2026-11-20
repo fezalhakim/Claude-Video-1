@@ -1,4 +1,4 @@
-const CACHE = 'mgear-v12';
+const CACHE = 'mgear-v13';
 const ASSETS = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg',
   './js/app.js', './js/analysis.js', './js/i18n.js', './js/share.js', './js/detail.js', './js/perf.js', './js/nmea.js', './js/ble.js',
@@ -16,7 +16,9 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).then(res => {
+    // 'no-cache': sentiasa semak versi terkini dengan pelayan (elak campuran fail lama & baru
+    // akibat cache HTTP 10 minit GitHub Pages); cache hanya digunakan bila luar talian.
+    fetch(e.request, { cache: 'no-cache' }).then(res => {
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy));
       return res;
