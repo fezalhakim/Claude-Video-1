@@ -1,0 +1,217 @@
+import { bleSupported } from './ble.js';
+import { connectRaceBox } from './devices/racebox.js';
+import { connectDragy } from './devices/dragy.js';
+import { connectPhoneGps } from './devices/phonegps.js';
+import { connectSimulator } from './devices/simulator.js';
+import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, DIST_TARGETS, BRAKE_TARGETS } from './perf.js';
+
+const $ = id => document.getElementById(id);
+const ALL = [...SPEED_TARGETS, ...ROLLING_TARGETS, ...DIST_TARGETS, ...BRAKE_TARGETS].map(g => g.key);
+const STATE_TXT = { wait: 'Tunggu kenderaan berhenti', armed: 'Sedia — pecut bila-bila', run: 'Merekod…' };
+const HKEY = 'pgear.history.v1', SKEY = 'pgear.settings.v1';
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
+};
+
+let conn = null, history = store.get(HKEY, []), settings = store.get(SKEY, { rollout: false, anyBle: false, speak: true });
+let current = {}, lastSample = null, rateTimes = [], gTrail = [], chartPts = [];
+
+// ---------- Tetapan ----------
+for (const k of ['rollout', 'anyBle', 'speak']) {
+  $(k).checked = !!settings[k];
+  $(k).addEventListener('change', () => {
+    settings[k] = $(k).checked; store.set(SKEY, settings);
+    if (k === 'rollout') timer.rollout = settings.rollout;
+  });
+}
+if (!bleSupported()) $('bleWarn').hidden = false;
+
+// ---------- Enjin masa ----------
+const timer = new PerfTimer({
+  rollout: settings.rollout,
+  onState: s => { const el = $('runState'); el.className = 'state ' + s; el.textContent = STATE_TXT[s] || s;
+    if (s === 'run') { current = {}; chartPts = []; renderResults(); } },
+  onResult: r => {
+    if (r.kind === 'live') {
+      Object.assign(current, r.run.results);
+      $('elapsed').textContent = (r.run.elapsed || 0).toFixed(2);
+      $('dist').textContent = r.run.dist.toFixed(0);
+      $('vmax').textContent = r.run.maxKmh.toFixed(0);
+      chartPts = r.run.pts;
+      renderResults();
+    } else if (r.kind === 'final') {
+      Object.assign(current, r.results); renderResults();
+      saveRun({ at: r.at, device: conn?.name || '-', rollout: r.rollout, maxKmh: r.maxKmh, results: r.results });
+      announce(r.results);
+    } else { // rolling / brake di luar larian
+      Object.assign(current, r.results); renderResults();
+      saveRun({ at: r.at, device: conn?.name || '-', rollout: false, results: r.results });
+      announce(r.results);
+    }
+  }
+});
+
+// ---------- Sambungan ----------
+const CONNECTORS = {
+  racebox: connectRaceBox,
+  dragy: o => connectDragy({ ...o, anyDevice: settings.anyBle }),
+  phone: connectPhoneGps,
+  sim: connectSimulator
+};
+
+document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', async () => {
+  if (conn) conn.disconnect();
+  setButtons(true);
+  try {
+    conn = await CONNECTORS[btn.dataset.dev]({ onSample, onDisconnect, onError: e => toast(e.message) });
+    timer.reset(); lastSample = null; rateTimes = [];
+    $('devName').textContent = conn.name;
+    $('conn').textContent = 'Bersambung: ' + conn.name; $('conn').className = 'pill on';
+    $('livePanel').hidden = false; $('connectPanel').hidden = true;
+  } catch (e) {
+    if (e.name !== 'NotFoundError') toast(e.message || String(e)); // NotFoundError = pengguna batal
+    conn = null;
+  } finally { setButtons(false); }
+}));
+
+$('disconnect').addEventListener('click', () => { if (conn) conn.disconnect(); onDisconnect(); });
+$('resetRun').addEventListener('click', () => { timer.reset(); current = {}; chartPts = []; renderResults(); });
+
+function setButtons(dis) { document.querySelectorAll('.dev').forEach(b => b.disabled = dis); }
+
+function onDisconnect() {
+  conn = null;
+  $('conn').textContent = 'Tidak bersambung'; $('conn').className = 'pill off';
+  $('livePanel').hidden = true; $('connectPanel').hidden = false;
+}
+
+// ---------- Sampel masuk ----------
+function onSample(s) {
+  lastSample = s;
+  timer.push(s);
+  const now = performance.now();
+  rateTimes.push(now); while (rateTimes.length && now - rateTimes[0] > 1000) rateTimes.shift();
+  if (s.gx !== undefined) { gTrail.push([s.gx, s.gy]); if (gTrail.length > 60) gTrail.shift(); }
+  scheduleDraw();
+}
+
+let drawPending = false;
+function scheduleDraw() { if (!drawPending) { drawPending = true; requestAnimationFrame(draw); } }
+
+function draw() {
+  drawPending = false;
+  const s = lastSample; if (!s) return;
+  $('speed').textContent = Math.round(s.speed * 3.6);
+  $('sats').textContent = s.sats ?? '-';
+  $('fix').textContent = s.fix >= 3 ? '3D' : s.fix === 2 ? '2D' : 'Tiada';
+  $('fix').style.color = s.fix >= 2 ? 'var(--green)' : 'var(--red)';
+  $('hz').textContent = rateTimes.length + ' Hz';
+  $('bat').textContent = s.battery != null ? s.battery + '%' + (s.charging ? '⚡' : '') : '-';
+  drawG(s); drawChart();
+}
+
+function drawG(s) {
+  const c = $('gmeter'), x = c.getContext('2d'), w = c.width, h = c.height, cx = w / 2, cy = h / 2, R = w / 2 - 14;
+  x.clearRect(0, 0, w, h);
+  x.strokeStyle = '#2a313a'; x.lineWidth = 2;
+  for (const f of [1 / 3, 2 / 3, 1]) { x.beginPath(); x.arc(cx, cy, R * f, 0, Math.PI * 2); x.stroke(); }
+  x.beginPath(); x.moveTo(cx - R, cy); x.lineTo(cx + R, cy); x.moveTo(cx, cy - R); x.lineTo(cx, cy + R); x.stroke();
+  x.fillStyle = '#8b95a3'; x.font = '18px system-ui'; x.fillText('1.5g', cx + 4, cy - R + 18);
+  if (s.gx === undefined) { x.fillText('Tiada data G', cx - 55, cy + 40); return; }
+  const k = R / 1.5;
+  x.strokeStyle = 'rgba(255,59,48,.35)'; x.beginPath();
+  gTrail.forEach(([gx, gy], i) => { const px = cx + gy * k, py = cy - gx * k; i ? x.lineTo(px, py) : x.moveTo(px, py); });
+  x.stroke();
+  x.fillStyle = '#ff3b30'; x.beginPath(); x.arc(cx + s.gy * k, cy - s.gx * k, 10, 0, Math.PI * 2); x.fill();
+  x.fillStyle = '#f2f4f7'; x.font = 'bold 22px system-ui';
+  x.fillText(Math.hypot(s.gx, s.gy).toFixed(2) + 'g', 10, h - 12);
+}
+
+function drawChart() {
+  const c = $('chart'), x = c.getContext('2d'), w = c.width, h = c.height, p = 30;
+  x.clearRect(0, 0, w, h);
+  const tMax = Math.max(10, ...chartPts.map(q => q[0])), vMax = Math.max(100, ...chartPts.map(q => q[1])) * 1.1;
+  x.strokeStyle = '#242a32'; x.fillStyle = '#8b95a3'; x.font = '16px system-ui'; x.lineWidth = 1;
+  for (let v = 0; v <= vMax; v += 50) { const y = h - p - (v / vMax) * (h - 2 * p);
+    x.beginPath(); x.moveTo(p, y); x.lineTo(w - 8, y); x.stroke(); x.fillText(v, 2, y + 5); }
+  x.fillText(tMax.toFixed(0) + ' s', w - 50, h - 8);
+  if (chartPts.length < 2) { x.fillText('Graf kelajuan larian', w / 2 - 80, h / 2); return; }
+  x.strokeStyle = '#ff3b30'; x.lineWidth = 3; x.beginPath();
+  chartPts.forEach(([t, v], i) => { const px = p + (t / tMax) * (w - p - 8), py = h - p - (v / vMax) * (h - 2 * p);
+    i ? x.lineTo(px, py) : x.moveTo(px, py); });
+  x.stroke();
+}
+
+// ---------- Keputusan ----------
+function fmt(key, r) {
+  if (!r) return '<b>--.--</b>';
+  let extra = '';
+  if (r.trap !== undefined) extra = `@ ${r.trap.toFixed(1)} km/j`;
+  else if (r.dist !== undefined) extra = `${r.dist.toFixed(1)} m`;
+  return `<b>${r.time.toFixed(2)}</b> s<em>${extra}</em>`;
+}
+function renderResults() {
+  $('results').innerHTML = ALL.map(k =>
+    `<div class="res ${current[k] ? 'hit' : ''}"><small>${k}${/batu|ft/.test(k) ? '' : ' km/j'}</small>${fmt(k, current[k])}</div>`).join('');
+}
+
+// ---------- Sejarah ----------
+function saveRun(run) { history.unshift(run); history = history.slice(0, 200); store.set(HKEY, history); renderHistory(); }
+
+function renderHistory() {
+  const best = {};
+  for (const h of history) for (const [k, r] of Object.entries(h.results))
+    if (!best[k] || r.time < best[k].time) best[k] = r;
+  $('best').innerHTML = ALL.filter(k => best[k]).map(k => `<span>Terbaik ${k}: <b>${best[k].time.toFixed(2)} s</b></span>`).join('');
+  $('history').innerHTML = history.length ? history.map((h, i) => {
+    const vals = ALL.filter(k => h.results[k]).map(k => `${k} <b>${h.results[k].time.toFixed(2)}</b>`).join(' · ');
+    const d = new Date(h.at);
+    return `<li><div><div class="meta">${d.toLocaleDateString('ms-MY')} ${d.toLocaleTimeString('ms-MY')} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ' · maks ' + h.maxKmh.toFixed(0) + ' km/j' : ''}</div>
+      <div class="vals">${vals}</div></div><button data-del="${i}" aria-label="Padam">×</button></li>`;
+  }).join('') : '<li class="empty">Belum ada larian. Sambung peranti dan mula memecut.</li>';
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+$('history').addEventListener('click', e => {
+  const i = e.target.dataset.del; if (i === undefined) return;
+  history.splice(+i, 1); store.set(HKEY, history); renderHistory();
+});
+$('clearHist').addEventListener('click', () => {
+  if (history.length && confirm('Padam semua sejarah larian?')) { history = []; store.set(HKEY, history); renderHistory(); }
+});
+$('exportCsv').addEventListener('click', () => {
+  const rows = [['tarikh', 'peranti', 'rollout', 'maks_kmj', ...ALL.map(k => k + '_s')]];
+  for (const h of history) rows.push([new Date(h.at).toISOString(), h.device, h.rollout ? 1 : 0, h.maxKmh?.toFixed(1) ?? '',
+    ...ALL.map(k => h.results[k]?.time.toFixed(3) ?? '')]);
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `pgear-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+// ---------- Lain-lain ----------
+function announce(results) {
+  if (!settings.speak || !('speechSynthesis' in window)) return;
+  const keys = ['0-100', '100-200', '1/4 batu', '100-0'].filter(k => results[k]);
+  if (!keys.length) return;
+  const u = new SpeechSynthesisUtterance(keys.map(k => `${k.replace('-', ' ke ')}, ${results[k].time.toFixed(2)} saat`).join('. '));
+  u.lang = 'ms-MY'; speechSynthesis.speak(u);
+}
+let toastT;
+function toast(msg) {
+  let el = document.querySelector('.toast');
+  if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg; clearTimeout(toastT); toastT = setTimeout(() => el.remove(), 4500);
+}
+
+// Elak skrin tidur semasa larian
+async function wakeLock() { try { await navigator.wakeLock?.request('screen'); } catch { /* abaikan */ } }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && conn) wakeLock(); });
+document.addEventListener('click', wakeLock, { once: true });
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+
+renderResults(); renderHistory();

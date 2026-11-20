@@ -1,0 +1,153 @@
+// Enjin pengiraan masa prestasi. Masa dikira dari cap masa GNSS peranti (bukan masa
+// ketibaan BLE) dan setiap lintasan ambang diinterpolasi secara linear antara sampel.
+export const FT = 0.3048, MILE = 1609.344;
+const KMH = 3.6;
+
+export const SPEED_TARGETS = [            // dari pegun (km/j)
+  { key: '0-60', to: 60 }, { key: '0-100', to: 100 }, { key: '0-150', to: 150 }, { key: '0-200', to: 200 }
+];
+export const ROLLING_TARGETS = [          // bergolek (km/j)
+  { key: '60-100', from: 60, to: 100 }, { key: '80-120', from: 80, to: 120 },
+  { key: '100-200', from: 100, to: 200 }
+];
+export const DIST_TARGETS = [             // jarak (m)
+  { key: '60ft', m: 60 * FT }, { key: '1/8 batu', m: MILE / 8 },
+  { key: '1000ft', m: 1000 * FT }, { key: '1/4 batu', m: MILE / 4 }
+];
+export const BRAKE_TARGETS = [{ key: '100-0', from: 100 }];
+
+const lerp = (a, b, f) => a + (b - a) * f;
+const frac = (x0, x1, x) => (x1 === x0 ? 1 : (x - x0) / (x1 - x0));
+
+export class PerfTimer {
+  constructor({ rollout = false, startKmh = 0.8, stopKmh = 0.8, onResult, onState } = {}) {
+    this.rollout = rollout; this.startKmh = startKmh; this.stopKmh = stopKmh;
+    this.onResult = onResult; this.onState = onState;
+    this.reset();
+  }
+
+  reset() {
+    this.state = 'wait';         // wait (belum pegun) | armed (pegun, sedia) | run
+    this.prev = null; this.run = null; this.rolling = {}; this.brake = {};
+    this.stillSince = null;
+    this.onState && this.onState(this.state);
+  }
+
+  setState(s) { if (s !== this.state) { this.state = s; this.onState && this.onState(s); } }
+
+  /** sample: { t(ms), speed(m/s), ... } */
+  push(s) {
+    const p = this.prev; this.prev = s;
+    const kmh = s.speed * KMH;
+    if (!p) { if (kmh < this.startKmh) this.setState('armed'); return; }
+    const pk = p.speed * KMH, dt = (s.t - p.t) / 1000;
+    if (dt <= 0 || dt > 2) { // jurang data -> batalkan larian
+      if (this.run) { this.run = null; }
+      this.setState(kmh < this.startKmh ? 'armed' : 'wait'); return;
+    }
+    const dd = (p.speed + s.speed) / 2 * dt; // trapezoid
+
+    this.trackRolling(p, s, pk, kmh, dd);
+    this.trackBrake(p, s, pk, kmh, dd);
+
+    if (this.state === 'armed') {
+      if (kmh < this.startKmh) return;
+      if (pk < this.startKmh) {
+        // mula: interpolasi titik kelajuan melepasi ambang
+        const f = frac(pk, kmh, this.startKmh);
+        const t0 = lerp(p.t, s.t, f);
+        const dPart = dd * (1 - f);
+        this.run = { t0, dist: dPart, startT: t0, results: {}, maxKmh: kmh, rolloutDone: !this.rollout, pts: [] };
+        if (this.rollout && dPart >= FT) { this.run.rolloutDone = true; }
+        this.setState('run');
+        this.emit();
+        return;
+      }
+    }
+
+    if (this.state === 'wait') { if (kmh < this.startKmh) this.setState('armed'); return; }
+    if (this.state !== 'run' || !this.run) return;
+
+    const r = this.run;
+    const d0 = r.dist, d1 = r.dist + dd;
+    // rollout 1 kaki: jam bermula selepas kenderaan bergerak 0.3048 m
+    if (!r.rolloutDone && d1 >= FT) {
+      r.startT = lerp(p.t, s.t, frac(d0, d1, FT)); r.rolloutDone = true;
+    }
+    const base = r.rolloutDone ? r.startT : null;
+    const distOff = this.rollout ? FT : 0;
+
+    if (base !== null) {
+      for (const g of SPEED_TARGETS) {
+        if (!r.results[g.key] && pk < g.to && kmh >= g.to) {
+          const tt = lerp(p.t, s.t, frac(pk, kmh, g.to));
+          r.results[g.key] = { time: (tt - base) / 1000, dist: lerp(d0, d1, frac(pk, kmh, g.to)) - distOff };
+        }
+      }
+      for (const g of DIST_TARGETS) {
+        const m = g.m + distOff;
+        if (!r.results[g.key] && d0 < m && d1 >= m) {
+          const f = frac(d0, d1, m);
+          r.results[g.key] = { time: (lerp(p.t, s.t, f) - base) / 1000, trap: lerp(pk, kmh, f) };
+        }
+      }
+    }
+    r.dist = d1; r.maxKmh = Math.max(r.maxKmh, kmh);
+    r.elapsed = base !== null ? (s.t - base) / 1000 : 0;
+    r.pts.push([r.elapsed, kmh]);
+
+    if (kmh < this.stopKmh) this.finish();
+    else this.emit();
+  }
+
+  trackRolling(p, s, pk, kmh, dd) {
+    for (const g of ROLLING_TARGETS) {
+      const st = this.rolling[g.key];
+      if (pk < g.from && kmh >= g.from) {
+        const f = frac(pk, kmh, g.from);
+        this.rolling[g.key] = { t0: lerp(p.t, s.t, f), dist: dd * (1 - f) };
+        continue;
+      }
+      if (!st) continue;
+      if (kmh < g.from) { delete this.rolling[g.key]; continue; }
+      if (pk < g.to && kmh >= g.to) {
+        const f = frac(pk, kmh, g.to);
+        const res = { time: (lerp(p.t, s.t, f) - st.t0) / 1000, dist: st.dist + dd * f };
+        delete this.rolling[g.key];
+        if (this.run) this.run.results[g.key] = res;
+        else this.onResult && this.onResult({ kind: 'rolling', at: Date.now(), results: { [g.key]: res } });
+      } else st.dist += dd;
+    }
+  }
+
+  trackBrake(p, s, pk, kmh, dd) {
+    for (const g of BRAKE_TARGETS) {
+      const st = this.brake[g.key];
+      if (pk >= g.from && kmh < g.from) {
+        const f = frac(pk, kmh, g.from);
+        this.brake[g.key] = { t0: lerp(p.t, s.t, f), dist: dd * (1 - f) };
+        continue;
+      }
+      if (!st) continue;
+      if (kmh > g.from + 2) { delete this.brake[g.key]; continue; }
+      if (kmh < this.stopKmh) {
+        const f = frac(pk, kmh, this.stopKmh);
+        const res = { time: (lerp(p.t, s.t, f) - st.t0) / 1000, dist: st.dist + dd * f };
+        delete this.brake[g.key];
+        if (this.run) this.run.results[g.key] = res;
+        else this.onResult && this.onResult({ kind: 'brake', at: Date.now(), results: { [g.key]: res } });
+      } else st.dist += dd;
+    }
+  }
+
+  emit() { this.onResult && this.run && this.onResult({ kind: 'live', run: this.run }); }
+
+  finish() {
+    const r = this.run; this.run = null;
+    this.setState('armed');
+    if (r && Object.keys(r.results).length) {
+      this.onResult && this.onResult({ kind: 'final', at: Date.now(), results: r.results,
+        maxKmh: r.maxKmh, dist: r.dist, rollout: this.rollout, pts: r.pts });
+    }
+  }
+}
