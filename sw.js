@@ -1,4 +1,4 @@
-const CACHE = 'mgear-v10';
+const CACHE = 'mgear-v11';
 const ASSETS = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg',
   './js/app.js', './js/analysis.js', './js/i18n.js', './js/detail.js', './js/perf.js', './js/nmea.js', './js/ble.js',

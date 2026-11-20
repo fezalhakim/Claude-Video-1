@@ -104,7 +104,6 @@ const timer = new PerfTimer({
       Object.assign(current, r.run.results);
       $('elapsed').textContent = (r.run.elapsed || 0).toFixed(2);
       $('dist').textContent = r.run.dist.toFixed(0);
-      $('vmax').textContent = r.run.maxKmh.toFixed(0);
       chartPts = r.run.pts;
       renderResults();
     } else if (r.kind === 'final') {
@@ -138,7 +137,7 @@ document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', a
   btn.classList.add('busy'); sub.textContent = t('conn.searching');
   try {
     conn = await CONNECTORS[btn.dataset.dev]({ onSample, onDisconnect, onError: e => toast(e.message) });
-    timer.reset(); lastSample = null; rateTimes = [];
+    timer.reset(); lastSample = null; rateTimes = []; resetTop();
     $('devName').textContent = conn.name;
     $('conn').textContent = t('conn.on', { name: conn.name }); $('conn').className = 'pill on';
     $('livePanel').hidden = false; $('connectPanel').hidden = true;
@@ -160,8 +159,25 @@ function onDisconnect() {
 }
 
 // ---------- Sampel masuk ----------
+// Laju maks sesi: laju tertinggi sejak sambung / set semula. Bacaan tanpa fix GPS
+// atau dengan ketepatan teruk (GPS telefon > 25 m) diabaikan supaya gangguan tidak dikira.
+let topKmh = 0, topFlash = 0;
+function resetTop() { topKmh = 0; $('topSpeed').textContent = '0.0'; }
+$('resetMax').addEventListener('click', resetTop);
+function trackTop(s) {
+  if (!(s.fix >= 2) || (s.hAcc != null && s.hAcc > 25) || (s.sAcc != null && s.sAcc > 2)) return;
+  const k = s.speed * 3.6;
+  if (k < 2 || k <= topKmh) return; // < 2 km/j = gangguan semasa pegun
+  topKmh = k;
+  const now = performance.now();
+  if (now - topFlash > 800) { // kesan "rekod baru" (dihadkan supaya tidak berkelip berterusan)
+    topFlash = now; const el = $('maxBox'); el.classList.remove('new'); void el.offsetWidth; el.classList.add('new');
+  }
+}
+
 function onSample(s) {
   lastSample = s;
+  trackTop(s);
   timer.push(s);
   const now = performance.now();
   rateTimes.push(now); while (rateTimes.length && now - rateTimes[0] > 1000) rateTimes.shift();
@@ -184,6 +200,7 @@ function draw() {
   drawPending = false;
   const s = lastSample; if (!s) return;
   $('speed').textContent = Math.round(s.speed * 3.6);
+  $('topSpeed').textContent = topKmh.toFixed(1);
   $('sats').textContent = s.sats ?? '-';
   $('fix').textContent = s.fix >= 3 ? '3D' : s.fix === 2 ? '2D' : t('fix.none');
   $('fix').style.color = s.fix >= 2 ? 'var(--green)' : 'var(--red)';

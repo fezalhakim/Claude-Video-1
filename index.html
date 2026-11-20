@@ -39,13 +39,20 @@
         <div id="speed" class="speed">0</div>
         <div class="unit" data-i18n="kmh">km/j</div>
       </div>
+      <div class="maxBox" id="maxBox">
+        <div>
+          <small data-i18n="live.top">Laju maks</small>
+          <div class="maxVal"><b id="topSpeed">0.0</b><span data-i18n="kmh">km/j</span></div>
+        </div>
+        <button id="resetMax" class="ghost" data-i18n="btn.reset">Set semula</button>
+      </div>
       <div class="steps" id="steps">
         <span id="stepConn" class="ok"><i></i><em data-i18n="step.conn">Bersambung</em></span>
         <span id="stepGps"><i></i><em data-i18n="step.gps">GPS kuat</em></span>
         <span id="stepStop"><i></i><em data-i18n="step.stop">Berhenti</em></span>
       </div>
       <div id="runState" class="state wait" data-i18n="state.wait">Tunggu kenderaan berhenti</div>
-      <div class="runline"><span><span data-i18n="live.time">Masa</span> <b id="elapsed">0.00</b> s</span><span><span data-i18n="live.dist">Jarak</span> <b id="dist">0</b> m</span><span><span data-i18n="live.max">Maks</span> <b id="vmax">0</b> <span data-i18n="kmh">km/j</span></span></div>
+      <div class="runline"><span><span data-i18n="live.time">Masa</span> <b id="elapsed">0.00</b> s</span><span><span data-i18n="live.dist">Jarak</span> <b id="dist">0</b> m</span></div>
       <div class="stats">
         <div><small data-i18n="st.sats">Satelit</small><b id="sats">-</b></div>
         <div><small data-i18n="st.fix">Fix</small><b id="fix">-</b></div>

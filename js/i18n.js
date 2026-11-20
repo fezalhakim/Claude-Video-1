@@ -59,6 +59,7 @@ const D = {
     'onb.t1': 'Sambung peranti', 'onb.b1': 'Tekan RaceBox atau Dragy dan pilih peranti anda. Tiada peranti? Tekan Demo untuk mencuba dahulu.',
     'onb.t2': 'Tunggu tanda hijau', 'onb.b2': 'Pastikan ketiga-tiga tanda hijau: Bersambung, GPS kuat dan Berhenti. Status akan bertukar kepada SEDIA.',
     'onb.t3': 'Pecut!', 'onb.b3': 'Masa bermula sendiri bila kenderaan bergerak, dan disimpan bila anda berhenti. Lihat semua larian dalam tab Sejarah.',
+    'live.top': 'Laju maks',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -116,6 +117,7 @@ const D = {
     'onb.t1': 'Connect a device', 'onb.b1': 'Tap RaceBox or Dragy and pick your device. No device? Tap Demo to try it first.',
     'onb.t2': 'Wait for green ticks', 'onb.b2': 'Make sure all three ticks are green: Connected, Good GPS and Stopped. The status changes to READY.',
     'onb.t3': 'Launch!', 'onb.b3': 'Timing starts by itself when the vehicle moves and is saved when you stop. See every run in the History tab.',
+    'live.top': 'Top speed',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -173,6 +175,7 @@ const D = {
     'onb.t1': 'Hubungkan perangkat', 'onb.b1': 'Ketuk RaceBox atau Dragy lalu pilih perangkat Anda. Tidak punya perangkat? Ketuk Demo untuk mencoba dulu.',
     'onb.t2': 'Tunggu tanda hijau', 'onb.b2': 'Pastikan ketiga tanda hijau: Terhubung, GPS kuat dan Berhenti. Status akan berubah menjadi SIAP.',
     'onb.t3': 'Gas!', 'onb.b3': 'Waktu mulai otomatis saat kendaraan bergerak dan disimpan saat Anda berhenti. Lihat semua run di tab Riwayat.',
+    'live.top': 'Kecepatan maks',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -230,6 +233,7 @@ const D = {
     'onb.t1': '连接设备', 'onb.b1': '点击 RaceBox 或 Dragy 并选择你的设备。没有设备？点击"演示"先试一试。',
     'onb.t2': '等待绿色勾', 'onb.b2': '确保三个勾都变绿：已连接、GPS 良好、已停车。状态会变为"就绪"。',
     'onb.t3': '起步！', 'onb.b3': '车辆一动自动开始计时，停车后自动保存。在"历史记录"中查看所有成绩。',
+    'live.top': '最高速度',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
