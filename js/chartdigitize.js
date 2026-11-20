@@ -137,7 +137,10 @@ export function digitizeChart(img, opts) {
     if (best) { S = best.S; o = best.o; vTop = best.v; calibrated = true; }
   }
   const dtCol = S / (n - 1);
-  const [g0, g1] = opts.gRange || [-0.5, 1.5], [h0, h1] = opts.hRange || [-16, 16];
+  // Skala paksi G berbeza-beza dalam laporan Dragy (cth. -0.5…1.5 atau -1…3). Jika tidak diberi, kira dari fizik:
+  // pecutan sebenar = Δkelajuan/Δmasa (graf kelajuan sudah ditala), padankan dengan garisan oren.
+  const gRange = opts.gRange || (g && fitGRange(sm, g, S, vTop)) || [-0.5, 1.5];
+  const [g0, g1] = gRange, [h0, h1] = opts.hRange || [-16, 16];
   const hz = opts.hz || 25, samples = [];
   const at = (arr, f) => { const i = Math.min(n - 1, Math.max(0, f)), a = Math.floor(i), b = Math.min(n - 1, a + 1); const va = arr[a], vb = arr[b]; return va == null ? vb : vb == null ? va : va + (vb - va) * (i - a); };
   // 1 s pegun sebelum mula supaya pengira masa MGear mengesan permulaan
@@ -152,5 +155,30 @@ export function digitizeChart(img, opts) {
   // sambung 0.5 s selepas hujung graf pada laju terakhir, supaya garisan yang tamat tepat di tepi graf masih dilepasi
   const last = samples[samples.length - 1];
   for (let k = 1; k <= hz / 2; k++) samples.push({ ...last, t: last.t + k * 1000 / hz, gx: 0 });
-  return { samples, box, vTop, calibrated, span: S, rollout: o };
+  return { samples, box, vTop, calibrated, span: S, rollout: o, gRange };
+}
+
+/**
+ * Cari skala paksi G [bawah, atas] yang paling sepadan dengan pecutan yang dikira dari graf kelajuan.
+ * Calon ialah julat "bulat" 4 selang grid (cth. -0.5…1.5, -1…3, -0.25…0.75). Pulangkan null jika data tidak cukup.
+ */
+export function fitGRange(sm, g, S, vTop) {
+  const n = sm.length, dt = S / (n - 1), k = Math.max(2, Math.round(0.25 / dt));
+  const box = arr => arr.map((_, i) => { let s = 0, c = 0; for (let j = i - k; j <= i + k; j++) if (arr[j] != null) { s += arr[j]; c++; } return c ? s / c : null; });
+  const v = sm.map(x => x * vTop / 3.6), og = box(g);
+  const pairs = [];
+  for (let i = k; i < n - k; i++) {
+    if (og[i] == null) continue;
+    const a = (v[i + k] - v[i - k]) / (2 * k * dt) / 9.80665;
+    pairs.push([og[i], a]);
+  }
+  if (pairs.length < 20) return null;
+  let best = null;
+  for (const step of [0.25, 0.5, 1, 2]) for (let j = -4; j <= 0; j++) {
+    const lo = j * step, hi = lo + 4 * step;
+    let err = 0; for (const [o, a] of pairs) err += (a - (lo + o * (hi - lo))) ** 2;
+    err /= pairs.length;
+    if (!best || err < best.err) best = { err, r: [lo, hi] };
+  }
+  return best.r;
 }

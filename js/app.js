@@ -765,7 +765,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 document.addEventListener('pgear:lang', updateAwake);
 
 // ---------- Kemas kini app ----------
-const APP_VERSION = '34';
+const APP_VERSION = '35';
 $('appVer').textContent = 'v' + APP_VERSION;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis
