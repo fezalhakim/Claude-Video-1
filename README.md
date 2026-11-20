@@ -4,12 +4,14 @@ Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS *
 
 ## Ciri-ciri
 - **Sambung terus** ke RaceBox Mini / Mini S / Micro, Dragy, GPS telefon, atau mod Demo (simulator).
-- **Pengukuran:** 0-60, 0-100, 0-150, 0-200, 60-100, 80-120, 100-200 km/j, 60ft, 1/8 batu, 1000ft, 1/4 batu (dengan trap speed), dan brek 100-0.
+- **Pengukuran:** 0-60, 0-100, 0-150, 0-200, 60-100, 80-120, 100-200 km/j, 60ft, 100ft, 330ft, 1/8 batu, 1000ft, 1/4 batu (dengan trap speed), dan brek 100-0.
 - Mula automatik bila kenderaan bergerak dari pegun; pilihan **rollout 1 kaki**.
 - Masa dikira dari **cap masa GNSS peranti** dan diinterpolasi antara sampel (bukan masa ketibaan Bluetooth).
 - Paparan langsung: kelajuan, satelit, fix, kadar Hz, bateri, G-meter, graf kelajuan.
 - Sejarah larian bernombor (Run 1, Run 2, ...), rekod terbaik, eksport CSV, pengumuman suara.
-- **Banding larian:** pilih Run A vs Run B — jadual beza masa setiap metrik + graf kelajuan bertindih.
+- **Butiran larian** (tekan mana-mana run dalam Sejarah): keputusan, G maks, laju maks, pemandu & kereta, satelit, cerun, DA (ketinggian ketumpatan), beza tinggi, suhu; graf pecutan (g) + ketinggian + kelajuan dengan paksi **Masa atau Jarak**; jadual split (Jarak / Kelajuan / Bergolek & Brek) dengan G, laju dan split; togol rollout yang mengira semula keputusan.
+- **Pengesanan tukar gear automatik:** titik tukar gear ditanda pada graf, dengan jarak, kelajuan, masa dan G yang hilang setiap kali tukar gear.
+- **Banding larian:** pilih Run A vs Run B — jadual beza masa setiap metrik + graf kelajuan bertindih (paksi masa atau jarak) + perbandingan titik tukar gear.
 
 ## Cara guna
 1. Hos fail ini di HTTPS (cth. GitHub Pages) atau jalankan secara lokal: `npm start` → buka `http://localhost:8080`.

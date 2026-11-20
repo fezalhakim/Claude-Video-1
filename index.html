@@ -52,7 +52,7 @@
     </section>
 
     <section class="card">
-      <div class="rowhead"><h2>Keputusan larian</h2><button id="resetRun" class="ghost">Set semula</button></div>
+      <div class="rowhead"><h2>Keputusan larian</h2><div><button id="lastDetail" class="ghost" hidden>Lihat butiran</button> <button id="resetRun" class="ghost">Set semula</button></div></div>
       <div id="results" class="results"></div>
     </section>
 
@@ -71,18 +71,26 @@
         <span class="vs">vs</span>
         <label><span class="tag b">B</span><select id="cmpB" aria-label="Larian B"></select></label>
       </div>
+      <div class="axisSw"><button data-cx="t">Masa (s)</button><button data-cx="d" class="on">Jarak (m)</button></div>
       <div id="cmpBody"></div>
     </section>
 
     <section class="card">
       <h2>Tetapan</h2>
+      <div class="fields">
+        <label>Nama pemandu<input id="driver" maxlength="30" placeholder="cth. Faizal"></label>
+        <label>Kereta<input id="car" maxlength="40" placeholder="cth. Proton Satria Neo"></label>
+      </div>
       <label class="toggle"><input type="checkbox" id="rollout"><span>Rollout 1 kaki (gaya dragstrip, masa lebih pantas ~0.2 s)</span></label>
       <label class="toggle"><input type="checkbox" id="anyBle"><span>Dragy: tunjuk semua peranti BLE (jika nama peranti lain)</span></label>
       <label class="toggle"><input type="checkbox" id="speak" checked><span>Umum keputusan dengan suara</span></label>
+      <label class="toggle"><input type="checkbox" id="weather" checked><span>Ambil suhu &amp; tekanan udara dari internet untuk kira DA (lokasi larian dihantar ke open-meteo.com)</span></label>
     </section>
 
     <p class="foot">PGear · Masa dikira dari cap masa GNSS peranti &amp; diinterpolasi antara sampel. Gunakan hanya di litar / kawasan tertutup.</p>
   </main>
+
+  <div id="detail" class="detail" hidden role="dialog" aria-modal="true" aria-label="Butiran larian"></div>
 
   <script type="module" src="js/app.js"></script>
 </body>

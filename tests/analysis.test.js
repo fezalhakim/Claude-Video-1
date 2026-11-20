@@ -1,0 +1,44 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { PerfTimer } from '../js/perf.js';
+import { simulateRun } from '../js/devices/simulator.js';
+import { packSamples, analyze, densityAltitude } from '../js/analysis.js';
+
+function makeRun() {
+  let f; const pt = new PerfTimer({ onResult: r => { if (r.kind === 'final') f = r; } });
+  for (const s of simulateRun()) pt.push(s);
+  return { no: 1, at: 0, rollout: false, results: f.results, maxKmh: f.maxKmh, raw: packSamples(f.samples),
+    weather: { temp: 30, pressure: 1008 } };
+}
+
+test('analisis: keputusan dari data mentah sama dengan semasa larian', () => {
+  const run = makeRun(); const a = analyze(run, false);
+  for (const k of ['0-100', '1/4 batu', '60ft', '330ft'])
+    assert.ok(Math.abs(a.results[k].time - run.results[k].time) < 0.02, k);
+  assert.ok(a.maxG > 0.3 && a.maxG < 1.5, `maxG ${a.maxG}`);
+  assert.ok(a.slope < 0 && a.slope > -1, `cerun ${a.slope}`); // simulator menurun 0.5%
+  assert.equal(a.sats, 21);
+  const d = a.rows.dist;
+  assert.deepEqual(d.map(r => r.key).slice(0, 3), ['60ft', '100ft', '330ft']);
+  assert.ok(Math.abs(d[1].split - (d[1].time - d[0].time)) < 1e-9);
+  assert.ok(d[0].speed > 0 && d[0].g > 0);
+});
+
+test('analisis: rollout memendekkan masa', () => {
+  const run = makeRun();
+  assert.ok(analyze(run, true).results['0-100'].time < analyze(run, false).results['0-100'].time);
+});
+
+test('DA: panas & tekanan rendah -> DA tinggi', () => {
+  assert.ok(Math.abs(densityAltitude(15, 1013.25)) < 1);
+  const da = densityAltitude(32, 1005);
+  assert.ok(da > 600 && da < 800, `DA ${da}`); // ~PA 69 m + 36.6 m/°C x 17.5°C
+});
+
+test('kesan tukar gear dari simulator (4 tukar gear)', () => {
+  const a = analyze(makeRun(), false);
+  assert.equal(a.shifts.length, 4, JSON.stringify(a.shifts.map(s => s.v.toFixed(0))));
+  const exp = [60, 105, 150, 195];
+  a.shifts.forEach((s, i) => assert.ok(Math.abs(s.v - exp[i]) < 6, `gear ${i} @ ${s.v}`));
+  assert.ok(a.shifts[1].d > a.shifts[0].d);
+});

@@ -82,6 +82,7 @@ h2 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacin
 .cmp td:first-child, .cmp th:first-child { text-align: left; color: var(--mute); }
 .cmp .win { color: var(--green); font-weight: 700; }
 .cmp .faster { color: var(--green); } .cmp .slower { color: var(--red); }
+.cmp .dm { color: var(--mute); font-size: 12px; }
 .cmpSum { font-size: 13px; color: var(--mute); margin: 8px 0 0; }
 .cmpSum b { color: var(--text); }
 .runno { font-weight: 800; color: var(--text); margin-right: 4px; }
@@ -89,7 +90,59 @@ h2 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacin
 .history .acts button.pick { font-size: 12px; font-weight: 800; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line); padding: 0; }
 .history .acts button.pick.on.a { background: var(--red); border-color: var(--red); color: #fff; }
 .history .acts button.pick.on.b { background: var(--blue); border-color: var(--blue); color: #08111c; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+.fields label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--mute); }
+.fields input, .dcar input { background: #1b2027; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 9px; font: inherit; font-size: 14px; min-width: 0; }
+.history li .info { cursor: pointer; flex: 1; min-width: 0; }
+.history .open { color: var(--blue); font-size: 12px; }
+
+/* ---- Butiran larian ---- */
+.detail { position: fixed; inset: 0; z-index: 20; background: var(--bg); overflow-y: auto; }
+.dwrap { max-width: 720px; margin: 0 auto; padding: 0 16px 40px; }
+.dtop { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 10px 0; padding-top: max(10px, env(safe-area-inset-top)); background: rgba(11,13,16,.94); backdrop-filter: blur(8px); }
+.dtop h3 { margin: 0; font-size: 16px; }
+.hero { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; gap: 8px; margin: 6px 0 12px; }
+.hero div { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.hero small { display: block; color: var(--mute); font-size: 12px; }
+.hero b { font-size: clamp(22px, 7vw, 32px); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.hero i { font-style: normal; color: var(--mute); font-size: 13px; margin-left: 2px; }
+.hero .main b { color: var(--red); }
+.dcar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.dcar .who { background: var(--red); color: #fff; font-weight: 800; border-radius: 99px; padding: 6px 12px; font-size: 13px; }
+.dcar input { flex: 1; border-radius: 99px; padding: 6px 12px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; scrollbar-width: none; }
+.chips button { flex: none; background: #1b2027; border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; font-size: 13px; }
+.chips button.on { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 700; }
+.info { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+.info div { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; text-align: center; }
+.info small { display: block; color: var(--mute); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+.info b { font-size: 14px; font-variant-numeric: tabular-nums; }
+.dchart { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 6px 6px; margin-bottom: 12px; }
+.dchart canvas { width: 100%; height: auto; display: block; }
+.legend { display: flex; justify-content: center; gap: 14px; font-size: 12px; color: var(--mute); margin-bottom: 4px; }
+.legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.axisSw { display: flex; justify-content: center; gap: 4px; margin-bottom: 6px; }
+.axisSw button { background: #1b2027; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; font-size: 12px; color: var(--mute); }
+.axisSw button.on { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 700; }
+.sub { margin: 4px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--mute); }
+.splits.gears { margin-bottom: 14px; }
+.gearTag { background: #c58bff; color: #0b0d10; border-radius: 6px; padding: 2px 7px; font-size: 13px; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 3px; margin-bottom: 8px; }
+.tabs button { background: none; border: 0; border-radius: 8px; padding: 8px; font-size: 13px; color: var(--mute); }
+.tabs button.on { background: #262d36; color: var(--text); font-weight: 700; }
+.splits { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.splits th { font-size: 11px; color: var(--mute); font-weight: 600; text-align: right; padding: 10px 10px 6px; text-transform: uppercase; letter-spacing: .04em; }
+.splits td { padding: 11px 10px; border-top: 1px solid var(--line); text-align: right; font-size: 15px; }
+.splits th:first-child, .splits td:first-child { text-align: left; }
+.splits td:first-child { font-weight: 700; }
+.splits .g { color: var(--amber); } .splits .sp { color: var(--blue); font-size: 13px; }
+.splits .tm { font-weight: 800; font-size: 17px; }
+.dfoot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.note { color: var(--mute); font-size: 12px; margin: 8px 0 0; }
 @media (max-width: 480px) {
+  .info { grid-template-columns: repeat(3, 1fr); }
+  .fields { grid-template-columns: 1fr; }
   .viz { grid-template-columns: 1fr; } .viz #gmeter { max-width: 220px; margin: 0 auto; }
   .stats b { font-size: 15px; }
 }

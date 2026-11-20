@@ -3,6 +3,8 @@ import { connectRaceBox } from './devices/racebox.js';
 import { connectDragy } from './devices/dragy.js';
 import { connectPhoneGps } from './devices/phonegps.js';
 import { connectSimulator } from './devices/simulator.js';
+import { openDetail } from './detail.js';
+import { packSamples, analyze } from './analysis.js';
 import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, DIST_TARGETS, BRAKE_TARGETS } from './perf.js';
 
 const $ = id => document.getElementById(id);
@@ -15,14 +17,18 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
 };
 
-let conn = null, history = store.get(HKEY, []), settings = store.get(SKEY, { rollout: false, anyBle: false, speak: true });
+let conn = null, history = store.get(HKEY, []), settings = { rollout: false, anyBle: false, speak: true, weather: true, driver: '', car: '', ...store.get(SKEY, {}) };
 // beri nombor run kepada rekod lama (yang belum bernombor)
 { let n = 0; for (let i = history.length - 1; i >= 0; i--) { if (history[i].no) n = Math.max(n, history[i].no); else history[i].no = ++n; } }
-let cmp = { a: null, b: null };
+let cmp = { a: null, b: null, x: 'd' };
 let current = {}, lastSample = null, rateTimes = [], gTrail = [], chartPts = [];
 
 // ---------- Tetapan ----------
-for (const k of ['rollout', 'anyBle', 'speak']) {
+for (const k of ['driver', 'car']) {
+  $(k).value = settings[k] || '';
+  $(k).addEventListener('change', () => { settings[k] = $(k).value.trim(); store.set(SKEY, settings); });
+}
+for (const k of ['rollout', 'anyBle', 'speak', 'weather']) {
   $(k).checked = !!settings[k];
   $(k).addEventListener('change', () => {
     settings[k] = $(k).checked; store.set(SKEY, settings);
@@ -46,7 +52,10 @@ const timer = new PerfTimer({
       renderResults();
     } else if (r.kind === 'final') {
       Object.assign(current, r.results); renderResults();
-      saveRun({ at: r.at, device: conn?.name || '-', rollout: r.rollout, maxKmh: r.maxKmh, results: r.results, pts: thin(r.pts) });
+      const run = saveRun({ at: r.at, device: conn?.name || '-', rollout: r.rollout, maxKmh: r.maxKmh, results: r.results,
+        raw: packSamples(r.samples), driver: settings.driver, car: settings.car });
+      lastRunNo = run.no; $('lastDetail').hidden = false;
+      fetchWeather(run);
       announce(r.results);
     } else { // rolling / brake di luar larian
       Object.assign(current, r.results); renderResults();
@@ -164,16 +173,59 @@ function renderResults() {
 function saveRun(run) {
   run.no = history.reduce((m, h) => Math.max(m, h.no || 0), 0) + 1;
   history.unshift(run); history = history.slice(0, 200);
+  // simpan data mentah (graf & analisis) untuk 60 larian terkini sahaja supaya storan tidak penuh
+  history.forEach((h, i) => { if (i >= 60) delete h.raw; });
   // larian baru jadi B, larian sebelumnya jadi A
   cmp.b = run.no; if (!cmp.a || cmp.a === run.no) cmp.a = history[1]?.no ?? null;
-  store.set(HKEY, history); renderHistory();
+  persist(); renderHistory();
+  return run;
 }
-// kurangkan titik graf ke ~10 Hz supaya storan kecil
-function thin(pts = []) {
-  const out = []; let last = -1;
-  for (const [t, v] of pts) if (t - last >= 0.1) { out.push([+t.toFixed(2), +v.toFixed(1)]); last = t; }
-  return out;
+function persist() {
+  try { localStorage.setItem(HKEY, JSON.stringify(history)); } catch {
+    // storan penuh: buang data mentah larian lama dan cuba lagi
+    for (let i = history.length - 1; i > 5; i--) delete history[i].raw;
+    store.set(HKEY, history);
+  }
 }
+let lastRunNo = null;
+$('lastDetail').addEventListener('click', () => showDetail(lastRunNo));
+
+// Cuaca semasa larian (untuk DA). Tidak wajib; gagal secara senyap jika luar talian.
+async function fetchWeather(run) {
+  if (!settings.weather || !run.raw) return;
+  const lat = lastSample?.lat, lon = lastSample?.lon;
+  if (lat == null || lon == null || !isFinite(lat) || !isFinite(lon)) return;
+  try {
+    const u = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&current=temperature_2m,surface_pressure`;
+    const j = await (await fetch(u)).json();
+    run.weather = { temp: j.current.temperature_2m, pressure: j.current.surface_pressure };
+    persist();
+  } catch { /* abaikan */ }
+}
+
+function showDetail(no) {
+  const run = byNo(no); if (!run) return;
+  openDetail(run, $('detail'), {
+    onChange: () => { persist(); renderHistory(); },
+    onDelete: () => { history = history.filter(h => h.no !== run.no); persist(); renderHistory(); }
+  });
+}
+// siri kelajuan [t, km/j] untuk graf banding
+function curve(run, xk = 't') {
+  if (run.raw) {
+    const a = analyze(run, run.rollout);
+    // fasa pecutan sahaja (hingga kelajuan maksimum), tanpa brek
+    const s = a.series.filter(p => p.t >= 0);
+    let iMax = 0; s.forEach((p, i) => { if (p.v > s[iMax].v) iMax = i; });
+    return { pts: s.slice(0, iMax + 1).map(p => [p[xk], p.v]), shifts: a.shifts.map(g => [g[xk], g.v, g.d]) };
+  }
+  return { pts: xk === 't' ? (run.pts || []) : [], shifts: [] }; // larian lama tiada data jarak
+}
+document.querySelectorAll('[data-cx]').forEach(b => b.addEventListener('click', () => {
+  cmp.x = b.dataset.cx;
+  document.querySelectorAll('[data-cx]').forEach(o => o.classList.toggle('on', o === b));
+  renderCompare();
+}));
 const byNo = no => history.find(h => h.no === no);
 const label = h => { const d = new Date(h.at); return `Run ${h.no} · ${d.getDate()}/${d.getMonth() + 1} ${d.toTimeString().slice(0, 5)}`; };
 
@@ -185,8 +237,8 @@ function renderHistory() {
   $('history').innerHTML = history.length ? history.map((h, i) => {
     const vals = ALL.filter(k => h.results[k]).map(k => `${k} <b>${h.results[k].time.toFixed(2)}</b>`).join(' · ');
     const d = new Date(h.at);
-    return `<li><div><div class="meta"><span class="runno">Run ${h.no}</span>${d.toLocaleDateString('ms-MY')} ${d.toLocaleTimeString('ms-MY')} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ' · maks ' + h.maxKmh.toFixed(0) + ' km/j' : ''}</div>
-      <div class="vals">${vals}</div></div><div class="acts">
+    return `<li><div class="info" data-open="${h.no}"><div class="meta"><span class="runno">Run ${h.no}</span>${d.toLocaleDateString('ms-MY')} ${d.toLocaleTimeString('ms-MY')} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ' · maks ' + h.maxKmh.toFixed(0) + ' km/j' : ''}</div>
+      <div class="vals">${vals}</div><div class="open">${h.car ? esc(h.car) + ' · ' : ''}Lihat butiran ›</div></div><div class="acts">
       <button class="pick a ${cmp.a === h.no ? 'on' : ''}" data-pick="a" data-no="${h.no}" aria-label="Pilih sebagai A">A</button>
       <button class="pick b ${cmp.b === h.no ? 'on' : ''}" data-pick="b" data-no="${h.no}" aria-label="Pilih sebagai B">B</button>
       <button data-del="${h.no}" aria-label="Padam">×</button></div></li>`;
@@ -226,12 +278,20 @@ function renderCompare() {
   body.innerHTML = `<canvas id="cmpChart" width="600" height="300" aria-label="Graf banding kelajuan"></canvas>
     <table class="cmp"><thead><tr><th>Metrik (s)</th><th><span class="tag a">A</span> Run ${A.no}</th><th><span class="tag b">B</span> Run ${B.no}</th><th>Beza B−A</th></tr></thead>
     <tbody>${rows}${vmax}</tbody></table><p class="cmpSum">${sum} Beza hijau = B lebih pantas.</p>`;
-  drawCompare(A, B);
+  const ca = curve(A, cmp.x), cb = curve(B, cmp.x);
+  const n = Math.max(ca.shifts.length, cb.shifts.length);
+  if (n) {
+    const cell = (g, o) => g ? `${g[2].toFixed(0)} m · ${g[1].toFixed(0)}` + (o ? ` <span class="dm">(${g[2] < o[2] ? '−' : '+'}${Math.abs(g[2] - o[2]).toFixed(0)} m)</span>` : '') : '–';
+    body.insertAdjacentHTML('beforeend', `<table class="cmp"><thead><tr><th>Tukar gear</th><th><span class="tag a">A</span> jarak · km/j</th><th><span class="tag b">B</span> jarak · km/j</th></tr></thead><tbody>${
+      Array.from({ length: n }, (_, i) => `<tr><td>${i + 1}→${i + 2}</td><td>${cell(ca.shifts[i])}</td><td>${cell(cb.shifts[i], ca.shifts[i])}</td></tr>`).join('')
+    }</tbody></table><p class="cmpSum">Garis putus-putus pada graf = titik tukar gear. Nilai dalam kurungan = B tukar gear lebih awal (−) atau lewat (+) berbanding A.</p>`);
+  }
+  drawCompare(A, B, ca, cb);
 }
 
-function drawCompare(A, B) {
+function drawCompare(A, B, ca, cb) {
   const c = $('cmpChart'), x = c.getContext('2d'), w = c.width, h = c.height, p = 30;
-  const all = [...(A.pts || []), ...(B.pts || [])];
+  const pa = ca.pts, pb = cb.pts, all = [...pa, ...pb];
   x.clearRect(0, 0, w, h);
   if (all.length < 2) {
     x.fillStyle = '#8b95a3'; x.font = '18px system-ui';
@@ -241,13 +301,22 @@ function drawCompare(A, B) {
   x.strokeStyle = '#242a32'; x.fillStyle = '#8b95a3'; x.font = '16px system-ui'; x.lineWidth = 1;
   for (let v = 0; v <= vMax; v += 50) { const y = h - p - (v / vMax) * (h - 2 * p);
     x.beginPath(); x.moveTo(p, y); x.lineTo(w - 8, y); x.stroke(); x.fillText(v, 2, y + 5); }
-  x.fillText(tMax.toFixed(0) + ' s', w - 50, h - 8);
-  for (const [run, col] of [[A, '#ff3b30'], [B, '#4aa3ff']]) {
-    if (!run.pts?.length) continue;
+  x.textAlign = 'right'; x.fillText(tMax.toFixed(0) + (cmp.x === 't' ? ' s' : ' m'), w - 8, h - 8); x.textAlign = 'left';
+  for (const [pts, col] of [[pa, '#ff3b30'], [pb, '#4aa3ff']]) {
+    if (!pts.length) continue;
     x.strokeStyle = col; x.lineWidth = 3; x.beginPath();
-    run.pts.forEach(([t, v], i) => { const px = p + (t / tMax) * (w - p - 8), py = h - p - (v / vMax) * (h - 2 * p);
+    pts.forEach(([t, v], i) => { const px = p + (t / tMax) * (w - p - 8), py = h - p - (v / vMax) * (h - 2 * p);
       i ? x.lineTo(px, py) : x.moveTo(px, py); });
     x.stroke();
+  }
+  // penanda tukar gear (A di atas paksi, B di bawah)
+  for (const [sh, col, top] of [[ca.shifts, '#ff3b30', true], [cb.shifts, '#4aa3ff', false]]) {
+    for (const [t, v] of sh) {
+      const px = p + (t / tMax) * (w - p - 8), py = h - p - (v / vMax) * (h - 2 * p);
+      x.strokeStyle = col; x.lineWidth = 1.5; x.setLineDash([3, 4]);
+      x.beginPath(); x.moveTo(px, top ? 30 : py); x.lineTo(px, top ? py : h - p); x.stroke(); x.setLineDash([]);
+      x.fillStyle = col; x.beginPath(); x.arc(px, py, 4.5, 0, Math.PI * 2); x.fill();
+    }
   }
   x.font = 'bold 16px system-ui';
   x.fillStyle = '#ff3b30'; x.fillText('A · Run ' + A.no, p + 10, 22);
@@ -258,10 +327,12 @@ for (const k of ['a', 'b']) $('cmp' + k.toUpperCase()).addEventListener('change'
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 $('history').addEventListener('click', e => {
+  const op = e.target.closest('[data-open]');
+  if (op) { showDetail(+op.dataset.open); return; }
   const { del, pick, no } = e.target.dataset;
   if (pick) { cmp[pick] = +no; renderHistory(); $('compareCard').scrollIntoView({ behavior: 'smooth' }); return; }
   if (del === undefined) return;
-  history = history.filter(h => h.no !== +del); store.set(HKEY, history); renderHistory();
+  history = history.filter(h => h.no !== +del); persist(); renderHistory();
 });
 $('clearHist').addEventListener('click', () => {
   if (history.length && confirm('Padam semua sejarah larian?')) { history = []; store.set(HKEY, history); renderHistory(); }

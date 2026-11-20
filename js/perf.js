@@ -11,7 +11,8 @@ export const ROLLING_TARGETS = [          // bergolek (km/j)
   { key: '100-200', from: 100, to: 200 }
 ];
 export const DIST_TARGETS = [             // jarak (m)
-  { key: '60ft', m: 60 * FT }, { key: '1/8 batu', m: MILE / 8 },
+  { key: '60ft', m: 60 * FT }, { key: '100ft', m: 100 * FT }, { key: '330ft', m: 330 * FT },
+  { key: '1/8 batu', m: MILE / 8 },
   { key: '1000ft', m: 1000 * FT }, { key: '1/4 batu', m: MILE / 4 }
 ];
 export const BRAKE_TARGETS = [{ key: '100-0', from: 100 }];
@@ -57,7 +58,8 @@ export class PerfTimer {
         const f = frac(pk, kmh, this.startKmh);
         const t0 = lerp(p.t, s.t, f);
         const dPart = dd * (1 - f);
-        this.run = { t0, dist: dPart, startT: t0, results: {}, maxKmh: kmh, rolloutDone: !this.rollout, pts: [] };
+        this.run = { t0, dist: dPart, startT: t0, results: {}, maxKmh: kmh, rolloutDone: !this.rollout, pts: [],
+          samples: [p, s] };
         if (this.rollout && dPart >= FT) { this.run.rolloutDone = true; }
         this.setState('run');
         this.emit();
@@ -95,6 +97,7 @@ export class PerfTimer {
     r.dist = d1; r.maxKmh = Math.max(r.maxKmh, kmh);
     r.elapsed = base !== null ? (s.t - base) / 1000 : 0;
     r.pts.push([r.elapsed, kmh]);
+    r.samples.push(s);
 
     if (kmh < this.stopKmh) this.finish();
     else this.emit();
@@ -147,7 +150,8 @@ export class PerfTimer {
     this.setState('armed');
     if (r && Object.keys(r.results).length) {
       this.onResult && this.onResult({ kind: 'final', at: Date.now(), results: r.results,
-        maxKmh: r.maxKmh, dist: r.dist, rollout: this.rollout, pts: r.pts });
+        maxKmh: r.maxKmh, dist: r.dist, rollout: this.rollout, pts: r.pts,
+        startT: r.startT, samples: r.samples });
     }
   }
 }
