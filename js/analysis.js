@@ -154,8 +154,8 @@ export function analyze(run, rollout, customDist = []) {
   };
 
   return {
-    results, series, shifts, maxG, maxKmh, slope, elev, sats,
-    da: densityAltitude(run.weather?.temp, run.weather?.pressure),
+    results, series, shifts, maxG, maxKmh, slope: slope ?? run.slope ?? null, elev, sats,
+    da: run.weather?.da ?? densityAltitude(run.weather?.temp, run.weather?.pressure),
     temp: run.weather?.temp ?? null,
     hasRaw: samples.length > 2,
     rows: {

@@ -192,9 +192,31 @@
         <li data-i18n-html="imp.s2"></li>
         <li data-i18n-html="imp.s3"></li>
       </ol>
+      <button id="impShot" class="primary wide shotBtn" data-i18n="imp.shot">📷 Dari screenshot</button>
+      <p class="note" data-i18n="imp.shotHint"></p>
       <button id="impTpl" class="ghost wide" data-i18n="imp.tpl">Muat turun templat</button>
       <div class="sheetBtns"><button id="impClose" class="ghost" data-i18n="done.close">Tutup</button><button id="impPick" class="primary" data-i18n="imp.pick">Pilih fail CSV</button></div>
       <input id="impFile" type="file" accept=".csv,text/csv,text/plain" hidden>
+      <input id="shotFile" type="file" accept="image/*" multiple hidden>
+    </div>
+  </div>
+
+  <div id="ocrBox" class="sheet" hidden role="dialog" aria-modal="true">
+    <div class="sheetBox ocrBox">
+      <h3 class="impTitle"><span data-i18n="ocr.title">Semak data screenshot</span> <small id="ocrCount"></small></h3>
+      <div class="ocrTop"><img id="ocrImg" alt=""><div id="ocrStatus" class="ocrStatus"></div></div>
+      <div id="ocrForm" hidden>
+        <div id="ocrRows" class="ocrRows"></div>
+        <button id="ocrAdd" class="ghost wide" data-i18n="ocr.add">+ Tambah metrik</button>
+        <div class="fields ocrFields">
+          <label><span data-i18n="ocr.when">Tarikh & masa</span><input id="ocrWhen" type="datetime-local"></label>
+          <label><span data-i18n="set.car">Kereta</span><input id="ocrCar" maxlength="40"></label>
+          <label><span data-i18n="ocr.device">Peranti</span><input id="ocrDev" maxlength="30"></label>
+          <label><span data-i18n="live.top">Laju maks</span><input id="ocrMax" type="number" inputmode="decimal" step="any" placeholder="km/j"></label>
+        </div>
+        <p id="ocrCond" class="note"></p>
+      </div>
+      <div class="sheetBtns"><button id="ocrSkip" class="ghost" data-i18n="ocr.skip">Langkau</button><button id="ocrSave" class="primary" data-i18n="ocr.save">Simpan larian</button></div>
     </div>
   </div>
 

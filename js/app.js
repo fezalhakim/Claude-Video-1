@@ -5,6 +5,7 @@ import { connectPhoneGps } from './devices/phonegps.js';
 import { connectSimulator } from './devices/simulator.js';
 import { openDetail } from './detail.js';
 import { importRuns, templateCSV, runFingerprint } from './importer.js';
+import { ocrImage, parseReportText } from './ocrimport.js';
 import { t, metric, setLang, getLang, locale, applyStatic, detectLang, LANGS } from './i18n.js';
 import { packSamples, analyze } from './analysis.js';
 import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets, customKey, isDistKey, UNIT_M } from './perf.js';
@@ -826,5 +827,66 @@ $('impFile').addEventListener('change', async e => {
   $('importBox').hidden = true;
   const dup = runs.length - fresh.length;
   toast(t('imp.done', { n: fresh.length }) + (dup ? ' · ' + t('imp.dup', { n: dup }) : ''));
+});
+
+// ---------- Import dari screenshot (OCR) ----------
+let shotQueue = [], shotIdx = 0, shotCond = {}, shotUrl = null;
+$('impShot').addEventListener('click', () => $('shotFile').click());
+$('shotFile').addEventListener('change', e => {
+  shotQueue = [...e.target.files]; e.target.value = ''; shotIdx = 0;
+  if (!shotQueue.length) return;
+  $('importBox').hidden = true; $('ocrBox').hidden = false; nextShot();
+});
+const pad2 = n => String(n).padStart(2, '0');
+const toLocalInput = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`; };
+function ocrRow(k = '0-100', time = '', trap = '') {
+  const opts = ALL.map(x => `<option value="${esc(x)}" ${x === k ? 'selected' : ''}>${esc(metric(x))}</option>`).join('');
+  return `<div class="ocrRow"><select>${opts}</select><input type="number" inputmode="decimal" step="0.001" value="${time}" placeholder="0.00"><input type="number" inputmode="decimal" step="0.01" value="${trap}" placeholder="—"><button aria-label="${t('aria.del')}">×</button></div>`;
+}
+async function nextShot() {
+  if (shotIdx >= shotQueue.length) { $('ocrBox').hidden = true; return; }
+  const file = shotQueue[shotIdx];
+  $('ocrCount').textContent = shotQueue.length > 1 ? `(${shotIdx + 1}/${shotQueue.length})` : '';
+  if (shotUrl) URL.revokeObjectURL(shotUrl); shotUrl = URL.createObjectURL(file); $('ocrImg').src = shotUrl;
+  $('ocrForm').hidden = true; $('ocrSave').disabled = true;
+  $('ocrStatus').innerHTML = `${t('ocr.reading')}<div class="bar"><i id="ocrBar"></i></div>`;
+  let parsed = { results: {} };
+  try {
+    const txt = await ocrImage(file, p => { const b = document.getElementById('ocrBar'); if (b) b.style.width = Math.round(p * 100) + '%'; });
+    parsed = parseReportText(txt);
+  } catch { $('ocrStatus').textContent = t('ocr.fail'); }
+  const keys = ALL.filter(k => parsed.results[k]);
+  if ($('ocrStatus').textContent !== t('ocr.fail'))
+    $('ocrStatus').innerHTML = keys.length ? t('ocr.found', { n: keys.length }) : t('ocr.nothing');
+  $('ocrRows').innerHTML = `<div class="ocrHead"><span>${t('ocr.metric')}</span><span>${t('ocr.time')}</span><span>${t('ocr.trap')}</span></div>` +
+    (keys.length ? keys.map(k => ocrRow(k, parsed.results[k].time, parsed.results[k].trap ?? '')).join('') : ocrRow());
+  $('ocrWhen').value = toLocalInput(file.lastModified || Date.now());
+  $('ocrCar').value = settings.car || ''; $('ocrDev').value = parsed.device || 'Dragy'; $('ocrMax').value = '';
+  shotCond = { temp: parsed.temp, da: parsed.da, alt: parsed.alt, slope: parsed.slope };
+  const c = [shotCond.temp != null && `${shotCond.temp}°C`, shotCond.alt != null && `${shotCond.alt} m`, shotCond.da != null && `DA ${shotCond.da} m`, shotCond.slope != null && `${t('d.slope')} ${shotCond.slope}%`].filter(Boolean);
+  $('ocrCond').textContent = c.length ? t('ocr.cond', { c: c.join(' · ') }) : '';
+  $('ocrForm').hidden = false; $('ocrSave').disabled = false;
+}
+$('ocrAdd').addEventListener('click', () => $('ocrRows').insertAdjacentHTML('beforeend', ocrRow()));
+$('ocrRows').addEventListener('click', e => { if (e.target.tagName === 'BUTTON') e.target.closest('.ocrRow').remove(); });
+$('ocrSkip').addEventListener('click', () => { shotIdx++; nextShot(); });
+$('ocrSave').addEventListener('click', () => {
+  const results = {};
+  $('ocrRows').querySelectorAll('.ocrRow').forEach(r => {
+    const [sel, ti, tr] = r.querySelectorAll('select, input');
+    const v = parseFloat(String(ti.value).replace(',', '.')), tp = parseFloat(String(tr.value).replace(',', '.'));
+    if (v > 0) { results[sel.value] = { time: v }; if (tp > 0) results[sel.value].trap = tp; }
+  });
+  if (!Object.keys(results).length) return toast(t('ocr.needOne'));
+  const at = new Date($('ocrWhen').value).getTime() || Date.now();
+  const max = parseFloat($('ocrMax').value);
+  const run = { at, imported: true, device: $('ocrDev').value.trim() || 'Dragy', car: $('ocrCar').value.trim(), driver: settings.driver || '',
+    rollout: true, maxKmh: max > 0 ? max : undefined, results, slope: shotCond.slope,
+    weather: (shotCond.temp != null || shotCond.da != null) ? { temp: shotCond.temp, da: shotCond.da } : undefined, note: 'screenshot' };
+  if (history.some(h => runFingerprint(h) === runFingerprint(run))) { toast(t('imp.dup', { n: 1 })); shotIdx++; return nextShot(); }
+  run.no = history.reduce((m, h) => Math.max(m, h.no || 0), 0) + 1;
+  history = [...history, run].sort((a, b) => b.at - a.at);
+  persist(); renderHistory(); toast(t('ocr.saved'));
+  shotIdx++; nextShot();
 });
 

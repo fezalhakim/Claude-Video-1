@@ -72,6 +72,10 @@ const D = {
     'imp.s1': 'Muat turun <b>templat</b> dan buka dalam Excel atau Google Sheets.', 'imp.s2': 'Salin keputusan dari app Dragy (tarikh, kereta, 0-100, 60ft, 1/8 mile, 1/4 mile, trap…) — satu baris setiap larian. Padam baris CONTOH.',
     'imp.s3': 'Simpan sebagai <b>CSV</b>, kemudian tekan "Pilih fail CSV". Fail eksport MGear juga boleh diimport.',
     'imp.tpl': '⬇ Muat turun templat', 'imp.pick': 'Pilih fail CSV', 'imp.done': '{n} larian diimport', 'imp.dup': '{n} sudah ada (dilangkau)', 'imp.none': 'Tiada larian sah dalam fail ini. Pastikan tajuk lajur seperti dalam templat (cth. 0-100, 60ft, 1/4 mile).', 'imp.tag': 'Import', 'imp.noGraph': 'Larian import tiada data GPS penuh — hanya keputusan masa dipaparkan.',
+    'imp.shot': '📷 Dari screenshot', 'imp.shotHint': 'Pilih screenshot laporan Dragy (boleh beberapa). MGear baca nombornya — anda semak sebelum simpan. Perlu internet kali pertama.',
+    'ocr.title': 'Semak data screenshot', 'ocr.reading': 'Membaca gambar…', 'ocr.found': 'Dijumpai <b>{n}</b> keputusan. Semak & betulkan jika perlu.', 'ocr.nothing': 'Tiada keputusan dijumpai. Tambah secara manual atau langkau.',
+    'ocr.fail': 'Gagal membaca gambar (perlu internet untuk memuat pembaca teks kali pertama).', 'ocr.add': '+ Tambah metrik', 'ocr.when': 'Tarikh & masa', 'ocr.device': 'Peranti',
+    'ocr.skip': 'Langkau', 'ocr.save': 'Simpan larian', 'ocr.metric': 'Metrik', 'ocr.time': 'Masa (s)', 'ocr.trap': 'Laju km/j', 'ocr.cond': 'Keadaan: {c}', 'ocr.saved': 'Larian disimpan', 'ocr.needOne': 'Masukkan sekurang-kurangnya satu masa.',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -142,6 +146,10 @@ const D = {
     'imp.s1': 'Download the <b>template</b> and open it in Excel or Google Sheets.', 'imp.s2': 'Copy results from the Dragy app (date, car, 0-100, 60ft, 1/8 mile, 1/4 mile, trap…) — one row per run. Delete the EXAMPLE row.',
     'imp.s3': 'Save as <b>CSV</b>, then tap "Choose CSV file". MGear export files can be imported too.',
     'imp.tpl': '⬇ Download template', 'imp.pick': 'Choose CSV file', 'imp.done': '{n} runs imported', 'imp.dup': '{n} already exist (skipped)', 'imp.none': 'No valid runs in this file. Make sure the column headers match the template (e.g. 0-100, 60ft, 1/4 mile).', 'imp.tag': 'Import', 'imp.noGraph': 'Imported runs have no full GPS data — only times are shown.',
+    'imp.shot': '📷 From screenshot', 'imp.shotHint': 'Choose Dragy report screenshots (several allowed). MGear reads the numbers — you review before saving. Needs internet the first time.',
+    'ocr.title': 'Review screenshot data', 'ocr.reading': 'Reading image…', 'ocr.found': 'Found <b>{n}</b> results. Check & correct if needed.', 'ocr.nothing': 'No results found. Add them manually or skip.',
+    'ocr.fail': 'Could not read the image (internet is needed to load the text reader the first time).', 'ocr.add': '+ Add metric', 'ocr.when': 'Date & time', 'ocr.device': 'Device',
+    'ocr.skip': 'Skip', 'ocr.save': 'Save run', 'ocr.metric': 'Metric', 'ocr.time': 'Time (s)', 'ocr.trap': 'Speed km/h', 'ocr.cond': 'Conditions: {c}', 'ocr.saved': 'Run saved', 'ocr.needOne': 'Enter at least one time.',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -212,6 +220,10 @@ const D = {
     'imp.s1': 'Unduh <b>template</b> lalu buka di Excel atau Google Sheets.', 'imp.s2': 'Salin hasil dari aplikasi Dragy (tanggal, mobil, 0-100, 60ft, 1/8 mile, 1/4 mile, trap…) — satu baris per run. Hapus baris CONTOH.',
     'imp.s3': 'Simpan sebagai <b>CSV</b>, lalu ketuk "Pilih file CSV". File ekspor MGear juga bisa diimpor.',
     'imp.tpl': '⬇ Unduh template', 'imp.pick': 'Pilih file CSV', 'imp.done': '{n} run diimpor', 'imp.dup': '{n} sudah ada (dilewati)', 'imp.none': 'Tidak ada run valid di file ini. Pastikan judul kolom sesuai template (mis. 0-100, 60ft, 1/4 mile).', 'imp.tag': 'Impor', 'imp.noGraph': 'Run impor tidak punya data GPS lengkap — hanya waktu yang ditampilkan.',
+    'imp.shot': '📷 Dari screenshot', 'imp.shotHint': 'Pilih screenshot laporan Dragy (boleh beberapa). MGear membaca angkanya — Anda periksa sebelum menyimpan. Perlu internet pertama kali.',
+    'ocr.title': 'Periksa data screenshot', 'ocr.reading': 'Membaca gambar…', 'ocr.found': 'Ditemukan <b>{n}</b> hasil. Periksa & perbaiki jika perlu.', 'ocr.nothing': 'Tidak ada hasil ditemukan. Tambah manual atau lewati.',
+    'ocr.fail': 'Gagal membaca gambar (perlu internet untuk memuat pembaca teks pertama kali).', 'ocr.add': '+ Tambah metrik', 'ocr.when': 'Tanggal & waktu', 'ocr.device': 'Perangkat',
+    'ocr.skip': 'Lewati', 'ocr.save': 'Simpan run', 'ocr.metric': 'Metrik', 'ocr.time': 'Waktu (s)', 'ocr.trap': 'Kecepatan km/j', 'ocr.cond': 'Kondisi: {c}', 'ocr.saved': 'Run disimpan', 'ocr.needOne': 'Masukkan minimal satu waktu.',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -282,6 +294,10 @@ const D = {
     'imp.s1': '下载<b>模板</b>，用 Excel 或 Google 表格打开。', 'imp.s2': '从 Dragy 应用复制成绩（日期、车辆、0-100、60ft、1/8 英里、1/4 英里、尾速…）— 每次测试一行。删除示例行。',
     'imp.s3': '保存为 <b>CSV</b>，然后点击"选择 CSV 文件"。也可导入 MGear 导出的文件。',
     'imp.tpl': '⬇ 下载模板', 'imp.pick': '选择 CSV 文件', 'imp.done': '已导入 {n} 次测试', 'imp.dup': '{n} 次已存在（已跳过）', 'imp.none': '文件中没有有效记录。请确认列标题与模板一致（如 0-100、60ft、1/4 mile）。', 'imp.tag': '导入', 'imp.noGraph': '导入的记录没有完整 GPS 数据 — 仅显示时间。',
+    'imp.shot': '📷 从截图导入', 'imp.shotHint': '选择 Dragy 报告截图（可多张）。MGear 会识别数字 — 保存前请核对。首次使用需联网。',
+    'ocr.title': '核对截图数据', 'ocr.reading': '正在识别图片…', 'ocr.found': '识别到 <b>{n}</b> 项成绩。如有错误请更正。', 'ocr.nothing': '未识别到成绩。可手动添加或跳过。',
+    'ocr.fail': '无法识别图片（首次加载文字识别需要联网）。', 'ocr.add': '+ 添加项目', 'ocr.when': '日期和时间', 'ocr.device': '设备',
+    'ocr.skip': '跳过', 'ocr.save': '保存', 'ocr.metric': '项目', 'ocr.time': '时间 (秒)', 'ocr.trap': '速度 km/h', 'ocr.cond': '条件：{c}', 'ocr.saved': '已保存', 'ocr.needOne': '请至少输入一个时间。',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
