@@ -112,12 +112,14 @@ function render() {
   draw(el.querySelector('#dCanvas'), a, main?.time, state.xAxis, b);
 
   el.onclick = e => {
-    const t = e.target;
-    if (t.dataset.act === 'close') return close();
-    if (t.dataset.act === 'del') { if (confirm(t('d.confirmDel', { no: run.no }))) { state.onDelete(); close(); } return; }
-    if (t.dataset.focus) { state.focus = t.dataset.focus; return render(); }
-    if (t.dataset.tab) { state.tab = t.dataset.tab; return render(); }
-    if (t.dataset.x) { state.xAxis = t.dataset.x; return render(); }
+    const tg = e.target.closest('[data-act],[data-focus],[data-tab],[data-x]'); // (jangan guna nama 't' — itu fungsi terjemahan)
+    if (!tg) return;
+    const ds = tg.dataset;
+    if (ds.act === 'close') return close();
+    if (ds.act === 'del') { if (confirm(t('d.confirmDel', { no: run.no }))) { state.onDelete(); close(); } return; }
+    if (ds.focus) { state.focus = ds.focus; return render(); }
+    if (ds.tab) { state.tab = ds.tab; return render(); }
+    if (ds.x) { state.xAxis = ds.x; return render(); }
   };
   el.querySelector('#dCmp').onchange = e => { state.cmpNo = e.target.value ? +e.target.value : null; render(); };
   el.querySelector('#dRoll').onchange = e => { state.rollout = e.target.checked; render(); };
