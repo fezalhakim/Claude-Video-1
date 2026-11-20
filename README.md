@@ -8,7 +8,8 @@ Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS *
 - Mula automatik bila kenderaan bergerak dari pegun; pilihan **rollout 1 kaki**.
 - Masa dikira dari **cap masa GNSS peranti** dan diinterpolasi antara sampel (bukan masa ketibaan Bluetooth).
 - Paparan langsung: kelajuan, satelit, fix, kadar Hz, bateri, G-meter, graf kelajuan.
-- Sejarah larian, rekod terbaik, eksport CSV, pengumuman suara.
+- Sejarah larian bernombor (Run 1, Run 2, ...), rekod terbaik, eksport CSV, pengumuman suara.
+- **Banding larian:** pilih Run A vs Run B — jadual beza masa setiap metrik + graf kelajuan bertindih.
 
 ## Cara guna
 1. Hos fail ini di HTTPS (cth. GitHub Pages) atau jalankan secara lokal: `npm start` → buka `http://localhost:8080`.

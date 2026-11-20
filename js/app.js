@@ -16,6 +16,9 @@ const store = {
 };
 
 let conn = null, history = store.get(HKEY, []), settings = store.get(SKEY, { rollout: false, anyBle: false, speak: true });
+// beri nombor run kepada rekod lama (yang belum bernombor)
+{ let n = 0; for (let i = history.length - 1; i >= 0; i--) { if (history[i].no) n = Math.max(n, history[i].no); else history[i].no = ++n; } }
+let cmp = { a: null, b: null };
 let current = {}, lastSample = null, rateTimes = [], gTrail = [], chartPts = [];
 
 // ---------- Tetapan ----------
@@ -43,7 +46,7 @@ const timer = new PerfTimer({
       renderResults();
     } else if (r.kind === 'final') {
       Object.assign(current, r.results); renderResults();
-      saveRun({ at: r.at, device: conn?.name || '-', rollout: r.rollout, maxKmh: r.maxKmh, results: r.results });
+      saveRun({ at: r.at, device: conn?.name || '-', rollout: r.rollout, maxKmh: r.maxKmh, results: r.results, pts: thin(r.pts) });
       announce(r.results);
     } else { // rolling / brake di luar larian
       Object.assign(current, r.results); renderResults();
@@ -158,7 +161,21 @@ function renderResults() {
 }
 
 // ---------- Sejarah ----------
-function saveRun(run) { history.unshift(run); history = history.slice(0, 200); store.set(HKEY, history); renderHistory(); }
+function saveRun(run) {
+  run.no = history.reduce((m, h) => Math.max(m, h.no || 0), 0) + 1;
+  history.unshift(run); history = history.slice(0, 200);
+  // larian baru jadi B, larian sebelumnya jadi A
+  cmp.b = run.no; if (!cmp.a || cmp.a === run.no) cmp.a = history[1]?.no ?? null;
+  store.set(HKEY, history); renderHistory();
+}
+// kurangkan titik graf ke ~10 Hz supaya storan kecil
+function thin(pts = []) {
+  const out = []; let last = -1;
+  for (const [t, v] of pts) if (t - last >= 0.1) { out.push([+t.toFixed(2), +v.toFixed(1)]); last = t; }
+  return out;
+}
+const byNo = no => history.find(h => h.no === no);
+const label = h => { const d = new Date(h.at); return `Run ${h.no} · ${d.getDate()}/${d.getMonth() + 1} ${d.toTimeString().slice(0, 5)}`; };
 
 function renderHistory() {
   const best = {};
@@ -168,22 +185,90 @@ function renderHistory() {
   $('history').innerHTML = history.length ? history.map((h, i) => {
     const vals = ALL.filter(k => h.results[k]).map(k => `${k} <b>${h.results[k].time.toFixed(2)}</b>`).join(' · ');
     const d = new Date(h.at);
-    return `<li><div><div class="meta">${d.toLocaleDateString('ms-MY')} ${d.toLocaleTimeString('ms-MY')} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ' · maks ' + h.maxKmh.toFixed(0) + ' km/j' : ''}</div>
-      <div class="vals">${vals}</div></div><button data-del="${i}" aria-label="Padam">×</button></li>`;
+    return `<li><div><div class="meta"><span class="runno">Run ${h.no}</span>${d.toLocaleDateString('ms-MY')} ${d.toLocaleTimeString('ms-MY')} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ' · maks ' + h.maxKmh.toFixed(0) + ' km/j' : ''}</div>
+      <div class="vals">${vals}</div></div><div class="acts">
+      <button class="pick a ${cmp.a === h.no ? 'on' : ''}" data-pick="a" data-no="${h.no}" aria-label="Pilih sebagai A">A</button>
+      <button class="pick b ${cmp.b === h.no ? 'on' : ''}" data-pick="b" data-no="${h.no}" aria-label="Pilih sebagai B">B</button>
+      <button data-del="${h.no}" aria-label="Padam">×</button></div></li>`;
   }).join('') : '<li class="empty">Belum ada larian. Sambung peranti dan mula memecut.</li>';
+  renderCompare();
 }
+
+// ---------- Banding larian ----------
+function renderCompare() {
+  if (!byNo(cmp.a)) cmp.a = history[1]?.no ?? null;
+  if (!byNo(cmp.b)) cmp.b = history[0]?.no ?? null;
+  for (const k of ['a', 'b']) {
+    $('cmp' + k.toUpperCase()).innerHTML = history.map(h =>
+      `<option value="${h.no}" ${cmp[k] === h.no ? 'selected' : ''}>${esc(label(h))}</option>`).join('');
+  }
+  const A = byNo(cmp.a), B = byNo(cmp.b), body = $('cmpBody');
+  if (history.length < 2 || !A || !B) {
+    body.innerHTML = '<p class="empty">Perlu sekurang-kurangnya 2 larian untuk dibanding.</p>'; return;
+  }
+  if (A === B) { body.innerHTML = '<p class="empty">Pilih dua larian yang berbeza.</p>'; return; }
+  const keys = ALL.filter(k => A.results[k] || B.results[k]);
+  let winA = 0, winB = 0;
+  const rows = keys.map(k => {
+    const a = A.results[k], b = B.results[k];
+    let diff = '–', ca = '', cb = '';
+    if (a && b) {
+      const d = b.time - a.time;
+      diff = `<span class="${d < 0 ? 'faster' : d > 0 ? 'slower' : ''}">${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d).toFixed(2)}</span>`;
+      if (d < 0) { cb = 'win'; winB++; } else if (d > 0) { ca = 'win'; winA++; }
+    }
+    return `<tr><td>${k}</td><td class="${ca}">${a ? a.time.toFixed(2) : '–'}</td><td class="${cb}">${b ? b.time.toFixed(2) : '–'}</td><td>${diff}</td></tr>`;
+  }).join('');
+  const vmax = (A.maxKmh || B.maxKmh)
+    ? `<tr><td>Maks km/j</td><td>${A.maxKmh?.toFixed(0) ?? '–'}</td><td>${B.maxKmh?.toFixed(0) ?? '–'}</td><td></td></tr>` : '';
+  const sum = winA === winB ? `Seri — masing-masing menang <b>${winA}</b> metrik.`
+    : `<b>Run ${winB > winA ? B.no : A.no}</b> lebih pantas dalam <b>${Math.max(winA, winB)}</b> daripada ${winA + winB} metrik.`;
+  body.innerHTML = `<canvas id="cmpChart" width="600" height="300" aria-label="Graf banding kelajuan"></canvas>
+    <table class="cmp"><thead><tr><th>Metrik (s)</th><th><span class="tag a">A</span> Run ${A.no}</th><th><span class="tag b">B</span> Run ${B.no}</th><th>Beza B−A</th></tr></thead>
+    <tbody>${rows}${vmax}</tbody></table><p class="cmpSum">${sum} Beza hijau = B lebih pantas.</p>`;
+  drawCompare(A, B);
+}
+
+function drawCompare(A, B) {
+  const c = $('cmpChart'), x = c.getContext('2d'), w = c.width, h = c.height, p = 30;
+  const all = [...(A.pts || []), ...(B.pts || [])];
+  x.clearRect(0, 0, w, h);
+  if (all.length < 2) {
+    x.fillStyle = '#8b95a3'; x.font = '18px system-ui';
+    x.fillText('Tiada data graf untuk larian ini', w / 2 - 125, h / 2); return;
+  }
+  const tMax = Math.max(...all.map(q => q[0])), vMax = Math.max(100, ...all.map(q => q[1])) * 1.1;
+  x.strokeStyle = '#242a32'; x.fillStyle = '#8b95a3'; x.font = '16px system-ui'; x.lineWidth = 1;
+  for (let v = 0; v <= vMax; v += 50) { const y = h - p - (v / vMax) * (h - 2 * p);
+    x.beginPath(); x.moveTo(p, y); x.lineTo(w - 8, y); x.stroke(); x.fillText(v, 2, y + 5); }
+  x.fillText(tMax.toFixed(0) + ' s', w - 50, h - 8);
+  for (const [run, col] of [[A, '#ff3b30'], [B, '#4aa3ff']]) {
+    if (!run.pts?.length) continue;
+    x.strokeStyle = col; x.lineWidth = 3; x.beginPath();
+    run.pts.forEach(([t, v], i) => { const px = p + (t / tMax) * (w - p - 8), py = h - p - (v / vMax) * (h - 2 * p);
+      i ? x.lineTo(px, py) : x.moveTo(px, py); });
+    x.stroke();
+  }
+  x.font = 'bold 16px system-ui';
+  x.fillStyle = '#ff3b30'; x.fillText('A · Run ' + A.no, p + 10, 22);
+  x.fillStyle = '#4aa3ff'; x.fillText('B · Run ' + B.no, p + 110, 22);
+}
+
+for (const k of ['a', 'b']) $('cmp' + k.toUpperCase()).addEventListener('change', e => { cmp[k] = +e.target.value; renderHistory(); });
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 $('history').addEventListener('click', e => {
-  const i = e.target.dataset.del; if (i === undefined) return;
-  history.splice(+i, 1); store.set(HKEY, history); renderHistory();
+  const { del, pick, no } = e.target.dataset;
+  if (pick) { cmp[pick] = +no; renderHistory(); $('compareCard').scrollIntoView({ behavior: 'smooth' }); return; }
+  if (del === undefined) return;
+  history = history.filter(h => h.no !== +del); store.set(HKEY, history); renderHistory();
 });
 $('clearHist').addEventListener('click', () => {
   if (history.length && confirm('Padam semua sejarah larian?')) { history = []; store.set(HKEY, history); renderHistory(); }
 });
 $('exportCsv').addEventListener('click', () => {
-  const rows = [['tarikh', 'peranti', 'rollout', 'maks_kmj', ...ALL.map(k => k + '_s')]];
-  for (const h of history) rows.push([new Date(h.at).toISOString(), h.device, h.rollout ? 1 : 0, h.maxKmh?.toFixed(1) ?? '',
+  const rows = [['run', 'tarikh', 'peranti', 'rollout', 'maks_kmj', ...ALL.map(k => k + '_s')]];
+  for (const h of history) rows.push([h.no, new Date(h.at).toISOString(), h.device, h.rollout ? 1 : 0, h.maxKmh?.toFixed(1) ?? '',
     ...ALL.map(k => h.results[k]?.time.toFixed(3) ?? '')]);
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
