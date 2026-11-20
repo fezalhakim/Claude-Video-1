@@ -34,7 +34,7 @@ if (!settings.rolloutUser) settings.rollout = true;
 // beri nombor run kepada rekod lama (yang belum bernombor)
 { let n = 0; for (let i = history.length - 1; i >= 0; i--) { if (history[i].no) n = Math.max(n, history[i].no); else history[i].no = ++n; } }
 let cmp = { a: null, b: null, x: 'd' };
-let gpsOk = false;
+let gpsOk = false, locked = false, holdT = null;
 let current = {}, lastSample = null, rateTimes = [], gTrail = [], chartPts = [];
 
 // ---------- Bahasa ----------
@@ -214,7 +214,7 @@ $('resetRun').addEventListener('click', () => { timer.reset(); current = {}; cha
 function setButtons(dis) { document.querySelectorAll('.dev').forEach(b => b.disabled = dis); }
 
 function onDisconnect() {
-  conn = null; keepAwake(false);
+  conn = null; keepAwake(false); setLock(false);
   setPill('off');
   $('livePanel').hidden = true; $('connectPanel').hidden = false;
 }
@@ -254,6 +254,7 @@ function refreshState(state = timer.state) {
   const st = state !== 'run' && lastSample && !gpsOk ? 'gps' : state;
   if (el.dataset.st === st) return;
   el.dataset.st = st; el.className = 'state ' + st; el.textContent = t('state.' + st);
+  $('lkState').className = 'state ' + st; $('lkState').textContent = t('state.' + st);
 }
 const buzz = p => { try { navigator.vibrate?.(p); } catch { /* abaikan */ } };
 
@@ -262,6 +263,10 @@ function draw() {
   const s = lastSample; if (!s) return;
   $('speed').textContent = Math.round(s.speed * 3.6);
   $('topSpeed').textContent = topKmh.toFixed(1);
+  if (locked) {
+    $('lkSpeed').textContent = Math.round(s.speed * 3.6); $('lkTop').textContent = topKmh.toFixed(1);
+    $('lkTime').textContent = $('elapsed').textContent; $('lkDist').textContent = $('dist').textContent;
+  }
   $('sats').textContent = s.sats ?? '-';
   $('fix').textContent = s.fix >= 3 ? '3D' : s.fix === 2 ? '2D' : t('fix.none');
   $('fix').style.color = s.fix >= 2 ? 'var(--green)' : 'var(--red)';
@@ -649,3 +654,33 @@ $('installBtn').addEventListener('click', async () => {
   installEvt.prompt(); await installEvt.userChoice.catch(() => {}); installEvt = null; $('installBar').hidden = true;
 });
 window.addEventListener('appinstalled', () => { $('installBar').hidden = true; });
+
+// ---------- Kunci skrin dalam app (halang tertekan butang semasa memandu) ----------
+// Lapisan hitam menyekat semua sentuhan; buka dengan tekan & tahan 🔓 selama 1.5 s.
+function setLock(on) {
+  if (on === locked) return;
+  locked = on; $('lockScr').hidden = !on;
+  if (on) {
+    $('lkSpeed').textContent = $('speed').textContent; $('lkTop').textContent = $('topSpeed').textContent;
+    $('lkState').className = $('runState').className; $('lkState').textContent = $('runState').textContent;
+    $('lkTime').textContent = $('elapsed').textContent; $('lkDist').textContent = $('dist').textContent;
+    try { window.history.pushState({ mgLock: 1 }, ''); } catch { /* abaikan */ }        // sekat butang Back Android
+    document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {});
+    buzz(30);
+  } else {
+    cancelHold();
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    if (window.history.state?.mgLock) window.history.back(); // buang entri sekatan Back
+  }
+}
+$('lockBtn').addEventListener('click', () => setLock(true));
+window.addEventListener('popstate', () => { if (locked) { try { window.history.pushState({ mgLock: 1 }, ''); } catch { /* abaikan */ } } });
+function cancelHold() { clearTimeout(holdT); holdT = null; $('unlockBtn').classList.remove('holding'); }
+$('unlockBtn').addEventListener('pointerdown', e => {
+  e.preventDefault(); $('unlockBtn').classList.add('holding');
+  holdT = setTimeout(() => { holdT = null; setLock(false); buzz([20, 40, 20]); }, 1500);
+});
+for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) $('unlockBtn').addEventListener(ev, cancelHold);
+// telan semua sentuhan lain pada lapisan kunci
+for (const ev of ['click', 'contextmenu', 'touchmove', 'wheel']) $('lockScr').addEventListener(ev, e => { if (!e.target.closest('#unlockBtn')) e.preventDefault(); e.stopPropagation(); }, { passive: false });
+

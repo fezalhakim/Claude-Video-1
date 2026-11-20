@@ -51,7 +51,10 @@
     <section id="livePanel" class="card live" hidden>
       <div class="liveHead">
         <span id="devName">-</span>
-        <button id="disconnect" class="ghost" data-i18n="btn.disconnect">Putus</button>
+        <div class="liveBtns">
+          <button id="lockBtn" class="ghost lockBtn"><span aria-hidden="true">🔒</span> <span data-i18n="lock.btn">Kunci</span></button>
+          <button id="disconnect" class="ghost" data-i18n="btn.disconnect">Putus</button>
+        </div>
       </div>
       <div class="speedo">
         <div id="speed" class="speed">0</div>
@@ -164,6 +167,18 @@
       <p id="onbBody"></p>
       <div class="dots" id="onbDots"><i></i><i></i><i></i></div>
       <div class="sheetBtns"><button id="onbSkip" class="ghost" data-i18n="onb.skip">Langkau</button><button id="onbNext" class="primary" data-i18n="onb.next">Seterusnya</button></div>
+    </div>
+  </div>
+
+  <div id="lockScr" class="lockScr" hidden role="dialog" aria-modal="true">
+    <div class="lkBadge">🔒 <span data-i18n="lock.locked">Skrin dikunci</span></div>
+    <div class="lkSpeed"><b id="lkSpeed">0</b><span data-i18n="kmh">km/j</span></div>
+    <div class="lkTop"><small data-i18n="live.top">Laju maks</small><b id="lkTop">0.0</b></div>
+    <div id="lkState" class="state"></div>
+    <div class="lkRun"><span><span data-i18n="live.time">Masa</span> <b id="lkTime">0.00</b> s</span><span><span data-i18n="live.dist">Jarak</span> <b id="lkDist">0</b> m</span></div>
+    <div class="lkUnlock">
+      <button id="unlockBtn" class="unlockBtn" aria-label="Unlock"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="45" class="track"/><circle cx="50" cy="50" r="45" class="prog" id="unlockRing"/></svg><span>🔓</span></button>
+      <p data-i18n="lock.hold">Tekan & tahan untuk buka kunci</p>
     </div>
   </div>
 
