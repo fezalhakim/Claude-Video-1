@@ -72,7 +72,7 @@ $('shownList').addEventListener('change', e => {
   settings.shown = ALL.filter(x => sh.has(x)); store.set(SKEY, settings);
   renderResults(); renderHistory();
 });
-document.addEventListener('pgear:lang', () => renderShown());
+document.addEventListener('pgear:lang', () => { renderShown(); renderLockSplits(); });
 
 // ---------- Jarak tersuai ----------
 function renderCustom() {
@@ -352,10 +352,11 @@ function renderResults() {
     `<div class="res ${current[k] ? 'hit' : ''} ${ck.includes(k) ? 'custom' : ''}"><small>${metric(k)}${isDistKey(k) ? '' : ' ' + t('kmh')}</small>${fmt(k, current[k])}</div>`).join('');
   renderLockSplits();
 }
-// Skrin kunci: masa 60ft, 330ft & 660ft (= 1/8 batu, 201.168 m)
-const LOCK_SPLITS = [['60ft', '60ft'], ['330ft', '330ft'], ['660ft', '1/8 batu']];
+// Skrin kunci: masa 60ft, 330ft & 1/8 batu (660ft, 201.168 m)
+const LOCK_SPLITS = ['60ft', '330ft', '1/8 batu'];
 function renderLockSplits() {
-  $('lkSplits').innerHTML = LOCK_SPLITS.map(([label, k]) => {
+  $('lkSplits').innerHTML = LOCK_SPLITS.map(k => {
+    const label = metric(k);
     const r = current[k];
     return `<div class="${r ? 'hit' : ''}"><small>${label}</small><b>${r ? r.time.toFixed(2) : '--.--'}</b><em>${r?.trap != null ? r.trap.toFixed(1) + ' ' + t('kmh') : '&nbsp;'}</em></div>`;
   }).join('');
