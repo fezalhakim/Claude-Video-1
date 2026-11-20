@@ -4,7 +4,6 @@ import { connectDragy } from './devices/dragy.js';
 import { connectPhoneGps } from './devices/phonegps.js';
 import { connectSimulator } from './devices/simulator.js';
 import { openDetail } from './detail.js';
-import { openShare, runCard } from './share.js';
 import { t, metric, setLang, getLang, locale, applyStatic, detectLang, LANGS } from './i18n.js';
 import { packSamples, analyze } from './analysis.js';
 import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets, customKey, isDistKey, UNIT_M } from './perf.js';
@@ -165,11 +164,6 @@ function onDisconnect() {
 let topKmh = 0, topFlash = 0;
 function resetTop() { topKmh = 0; $('topSpeed').textContent = '0.0'; }
 $('resetMax').addEventListener('click', resetTop);
-$('shareMax').addEventListener('click', () => {
-  if (!(topKmh > 0)) return toast(t('share.none'));
-  openShare({ label: t('live.top'), value: topKmh.toFixed(1), unit: t('kmh'), rows: [],
-    who: [settings.driver, settings.car].filter(Boolean).join(' · '), when: new Date(), device: conn?.name, tag: '' }, toast);
-});
 function trackTop(s) {
   if (!(s.fix >= 2) || (s.hAcc != null && s.hAcc > 25) || (s.sAcc != null && s.sAcc > 2)) return;
   const k = s.speed * 3.6;
@@ -309,7 +303,6 @@ function showDetail(no) {
   const run = byNo(no); if (!run) return;
   openDetail(run, $('detail'), {
     runs: history, customDist: settings.customDist,
-    onShare: r => openShare(runCard(r, customKeys()), toast),
     onChange: () => { persist(); renderHistory(); },
     onDelete: () => removeRun(run.no)
   });
@@ -503,7 +496,6 @@ function showSummary(run) {
   if (document.querySelector('[data-nav=history]').classList.contains('on') === false) { newRuns++; updateBadge(); }
 }
 $('sheetClose').addEventListener('click', () => { $('sheet').hidden = true; });
-$('sheetShare').addEventListener('click', () => { const r = byNo(lastRunNo); if (r) openShare(runCard(r, customKeys()), toast); });
 $('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('sheet').hidden = true; });
 $('sheetDetail').addEventListener('click', () => { $('sheet').hidden = true; showDetail(lastRunNo); });
 
