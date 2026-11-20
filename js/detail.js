@@ -3,12 +3,12 @@ import { analyze } from './analysis.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const f2 = x => (x == null || !isFinite(x) ? '–' : x.toFixed(2));
-const COL = { shift: '#c58bff', g: '#ffb340', alt: '#30d158', v: '#4aa3ff', grid: '#2a313a', text: '#8b95a3' };
+const COL = { other: '#e8ecf1', shift: '#c58bff', g: '#ffb340', alt: '#30d158', v: '#4aa3ff', grid: '#2a313a', text: '#8b95a3' };
 
 let state = null;
 
-export function openDetail(run, el, { onChange, onDelete }) {
-  state = { run, el, onChange, onDelete, rollout: !!run.rollout, tab: 'dist', focus: null, xAxis: 'd' };
+export function openDetail(run, el, { onChange, onDelete, runs = [] }) {
+  state = { run, el, onChange, onDelete, runs, rollout: !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
   el.hidden = false; document.body.style.overflow = 'hidden';
   render();
 }
@@ -25,13 +25,23 @@ function render() {
   const main = a.results[state.focus];
   const d = new Date(run.at);
   const tabRows = a.rows[state.tab];
+  // larian pembanding (dikira dengan tetapan rollout yang sama supaya adil)
+  const others = state.runs.filter(h => h.no !== run.no);
+  const oRun = others.find(h => h.no === state.cmpNo) || null;
+  const b = oRun ? analyze(oRun, state.rollout) : null;
+  const delta = (x, y) => {
+    if (x == null || y == null) return '<span class="dm">–</span>';
+    const dd = x - y;
+    return `<span class="${dd < 0 ? 'faster' : dd > 0 ? 'slower' : ''}">${dd > 0 ? '+' : dd < 0 ? '−' : '±'}${Math.abs(dd).toFixed(2)}</span>`;
+  };
+  const mainB = b?.results[state.focus];
 
   el.innerHTML = `<div class="dwrap">
     <div class="dtop"><button class="ghost" data-act="close">‹ Kembali</button>
       <h3>Run ${run.no}</h3><button class="ghost danger" data-act="del">Padam</button></div>
 
     <div class="hero">
-      <div class="main"><small>Keputusan ${esc(state.focus || '')}</small><b>${f2(main?.time)}</b><i>s</i></div>
+      <div class="main"><small>Keputusan ${esc(state.focus || '')}</small><b>${f2(main?.time)}</b><i>s</i>${b ? `<span class="hdelta">${delta(main?.time, mainB?.time)} vs Run ${oRun.no}</span>` : ''}</div>
       <div><small>G maks</small><b>${a.maxG == null ? '–' : a.maxG.toFixed(2)}</b><i>g</i></div>
       <div><small>Laju maks</small><b>${a.maxKmh == null ? '–' : a.maxKmh.toFixed(1)}</b><i>km/j</i></div>
     </div>
@@ -49,16 +59,26 @@ function render() {
 
     <div class="chips">${keys.map(k => `<button data-focus="${esc(k)}" class="${k === state.focus ? 'on' : ''}">${esc(k)}</button>`).join('')}</div>
 
+    <div class="cmpPick">
+      <label for="dCmp">Banding dengan</label>
+      <select id="dCmp"><option value="">— Tiada —</option>${others.map(h => {
+        const dt = new Date(h.at);
+        return `<option value="${h.no}" ${h.no === state.cmpNo ? 'selected' : ''}>Run ${h.no} · ${dt.getDate()}/${dt.getMonth() + 1} ${dt.toTimeString().slice(0, 5)}${h.car ? ' · ' + esc(h.car) : ''}${h.results[state.focus] ? ' · ' + h.results[state.focus].time.toFixed(2) + 's' : ''}</option>`;
+      }).join('')}</select>
+    </div>
+
     <div class="dchart">
       <div class="axisSw"><button data-x="t" class="${state.xAxis === 't' ? 'on' : ''}">Masa (s)</button><button data-x="d" class="${state.xAxis === 'd' ? 'on' : ''}">Jarak (m)</button></div>
-      <div class="legend"><span style="--c:${COL.g}">Pecutan (g)</span><span style="--c:${COL.alt}">Ketinggian (m)</span><span style="--c:${COL.v}">Kelajuan (km/j)</span>${a.shifts.length ? `<span style="--c:${COL.shift}">Tukar gear</span>` : ''}</div>
+      <div class="legend"><span style="--c:${COL.g}">Pecutan (g)</span><span style="--c:${COL.alt}">Ketinggian (m)</span><span style="--c:${COL.v}">Kelajuan (km/j)</span>${a.shifts.length ? `<span style="--c:${COL.shift}">Tukar gear</span>` : ''}${b ? `<span class="dash" style="--c:${COL.other}">Run ${oRun.no} (kelajuan)</span>` : ''}</div>
       <canvas id="dCanvas" width="700" height="440" aria-label="Graf larian"></canvas>
     </div>
 
     ${a.shifts.length ? `<h4 class="sub">Tukar gear</h4><table class="splits gears"><thead><tr>
-      <th>Gear</th><th>Jarak m</th><th>Laju km/j</th><th>Masa s</th><th>G hilang</th></tr></thead>
-      <tbody>${a.shifts.map((g, i) => `<tr><td><span class="gearTag">${i + 1}→${i + 2}</span></td><td>${g.d.toFixed(1)}</td>
-        <td>${g.v.toFixed(1)}</td><td>${g.t.toFixed(2)}</td><td class="g">−${g.drop.toFixed(2)}g · ${g.dur.toFixed(2)}s</td></tr>`).join('')}</tbody></table>`
+      <th>Gear</th><th>Jarak m</th><th>Laju km/j</th><th>Masa s</th>${b ? `<th>Run ${oRun.no}</th>` : '<th>G hilang</th>'}</tr></thead>
+      <tbody>${a.shifts.map((g, i) => { const o = b?.shifts[i]; return `<tr><td><span class="gearTag">${i + 1}→${i + 2}</span></td><td>${g.d.toFixed(1)}</td>
+        <td>${g.v.toFixed(1)}</td><td>${g.t.toFixed(2)}</td>${b
+          ? `<td class="oth">${o ? `<span class="nw">${o.d.toFixed(0)} m · ${o.v.toFixed(0)}</span><br><span class="dm">(${g.d < o.d ? '−' : '+'}${Math.abs(g.d - o.d).toFixed(0)} m)</span>` : '–'}</td>`
+          : `<td class="g">−${g.drop.toFixed(2)}g · ${g.dur.toFixed(2)}s</td>`}</tr>`; }).join('')}</tbody></table>`
       : a.hasRaw ? '<p class="note">Tiada tukar gear dikesan dalam larian ini.</p>' : ''}
 
     <div class="tabs">
@@ -66,14 +86,15 @@ function render() {
       <button data-tab="speed" class="${state.tab === 'speed' ? 'on' : ''}">Kelajuan</button>
       <button data-tab="roll" class="${state.tab === 'roll' ? 'on' : ''}">Bergolek / Brek</button>
     </div>
-    ${tabRows.length ? `<table class="splits"><thead><tr>
-      <th>${state.tab === 'dist' ? 'Jarak' : 'Julat km/j'}</th><th>G</th><th>${state.tab === 'dist' ? 'Laju km/j' : 'Jarak m'}</th><th>Split</th><th>Masa s</th></tr></thead>
+    ${tabRows.length ? `<table class="splits ${b ? 'withCmp' : ''}"><thead><tr>
+      <th>${state.tab === 'dist' ? 'Jarak' : 'Julat km/j'}</th><th>G</th><th>${state.tab === 'dist' ? 'Laju km/j' : 'Jarak m'}</th><th>Split</th><th>Masa s</th>${b ? `<th>vs Run ${oRun.no}</th>` : ''}</tr></thead>
       <tbody>${tabRows.map(r => `<tr>
         <td>${esc(r.key)}</td>
         <td class="g">${r.g == null ? '–' : r.g.toFixed(2) + 'g'}</td>
         <td>${state.tab === 'dist' ? f2(r.speed) : r.dist == null ? '–' : r.dist.toFixed(1)}</td>
         <td class="sp">${r.split == null ? '' : '+' + r.split.toFixed(2)}</td>
-        <td class="tm">${f2(r.time)}</td></tr>`).join('')}</tbody></table>`
+        <td class="tm">${f2(r.time)}</td>${b ? `<td class="dl">${delta(r.time, b.results[r.key]?.time)}</td>` : ''}</tr>`).join('')}</tbody></table>
+      ${b ? `<p class="note">"vs Run ${oRun.no}": hijau (−) = larian ini lebih pantas, merah (+) = lebih perlahan.</p>` : ''}`
       : '<p class="empty">Tiada keputusan dalam kategori ini.</p>'}
 
     <div class="dfoot">
@@ -85,7 +106,7 @@ function render() {
     <p class="note">G = pecutan membujur pada titik itu. Split = masa dari baris sebelumnya. Tukar gear dikesan bila G jatuh mendadak lalu pulih; "G hilang" = berapa banyak G jatuh dan berapa lama. Cerun &amp; beza tinggi diukur sepanjang fasa pecutan.</p>
   </div>`;
 
-  draw(el.querySelector('#dCanvas'), a, main?.time, state.xAxis);
+  draw(el.querySelector('#dCanvas'), a, main?.time, state.xAxis, b);
 
   el.onclick = e => {
     const t = e.target;
@@ -95,11 +116,12 @@ function render() {
     if (t.dataset.tab) { state.tab = t.dataset.tab; return render(); }
     if (t.dataset.x) { state.xAxis = t.dataset.x; return render(); }
   };
+  el.querySelector('#dCmp').onchange = e => { state.cmpNo = e.target.value ? +e.target.value : null; render(); };
   el.querySelector('#dRoll').onchange = e => { state.rollout = e.target.checked; render(); };
   el.querySelector('#dCar').onchange = e => { run.car = e.target.value.trim(); state.onChange(); };
 }
 
-function draw(c, a, tEnd, xk = 't') {
+function draw(c, a, tEnd, xk = 't', b = null) {
   const x = c.getContext('2d'), W = c.width, H = c.height;
   const L = 78, R = 56, T = 14, B = 44, w = W - L - R, h = H - T - B;
   x.clearRect(0, 0, W, H);
@@ -108,8 +130,15 @@ function draw(c, a, tEnd, xk = 't') {
   const tMax = tEnd && tEnd > 0.5 ? tEnd : s[s.length - 1].t;
   const pts = s.filter(p => p.t <= tMax + 1e-6);
   const xMax = xk === 't' ? tMax : Math.max(1, pts[pts.length - 1].d);
+  // siri pembanding: fasa pecutan sahaja, dipotong pada had paksi X
+  let bPts = [];
+  if (b) {
+    const bs = b.series.filter(p => p.t >= 0);
+    let iM = 0; bs.forEach((p, i) => { if (p.v > bs[iM].v) iM = i; });
+    bPts = bs.slice(0, iM + 1).filter(p => p[xk] <= xMax + 1e-6);
+  }
 
-  const vTop = niceMax(Math.max(...pts.map(p => p.v)));
+  const vTop = niceMax(Math.max(...pts.map(p => p.v), ...bPts.map(p => p.v)));
   const gv = pts.map(p => p.g).filter(v => v != null);
   const gTop = Math.max(0.5, Math.ceil(Math.max(...gv, 0.1) * 2) / 2), gBot = Math.min(0, Math.floor(Math.min(...gv, 0) * 2) / 2);
   const av = pts.map(p => p.alt).filter(v => v != null);
@@ -148,6 +177,17 @@ function draw(c, a, tEnd, xk = 't') {
   if (gv.length) area('g', Yg, COL.g, Yg(Math.max(gBot, 0)));
   area('v', Yv, COL.v, T + h);
   if (av.length) area('alt', Ya, COL.alt, null);
+
+  // larian pembanding: garis kelajuan putus-putus + titik tukar gear berongga
+  if (bPts.length > 1) {
+    x.strokeStyle = COL.other; x.lineWidth = 2.5; x.setLineDash([8, 6]); x.beginPath();
+    bPts.forEach((p, i) => (i ? x.lineTo(X(p[xk]), Yv(p.v)) : x.moveTo(X(p[xk]), Yv(p.v))));
+    x.stroke(); x.setLineDash([]);
+    for (const g of b.shifts) {
+      if (g[xk] > xMax) continue;
+      x.strokeStyle = COL.other; x.lineWidth = 2; x.beginPath(); x.arc(X(g[xk]), Yv(g.v), 6, 0, Math.PI * 2); x.stroke();
+    }
+  }
 
   // penanda tukar gear
   a.shifts.forEach((g, i) => {

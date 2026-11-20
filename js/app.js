@@ -206,6 +206,7 @@ async function fetchWeather(run) {
 function showDetail(no) {
   const run = byNo(no); if (!run) return;
   openDetail(run, $('detail'), {
+    runs: history,
     onChange: () => { persist(); renderHistory(); },
     onDelete: () => { history = history.filter(h => h.no !== run.no); persist(); renderHistory(); }
   });

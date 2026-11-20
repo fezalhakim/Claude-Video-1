@@ -9,7 +9,7 @@ Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS *
 - Masa dikira dari **cap masa GNSS peranti** dan diinterpolasi antara sampel (bukan masa ketibaan Bluetooth).
 - Paparan langsung: kelajuan, satelit, fix, kadar Hz, bateri, G-meter, graf kelajuan.
 - Sejarah larian bernombor (Run 1, Run 2, ...), rekod terbaik, eksport CSV, pengumuman suara.
-- **Butiran larian** (tekan mana-mana run dalam Sejarah): keputusan, G maks, laju maks, pemandu & kereta, satelit, cerun, DA (ketinggian ketumpatan), beza tinggi, suhu; graf pecutan (g) + ketinggian + kelajuan dengan paksi **Masa atau Jarak**; jadual split (Jarak / Kelajuan / Bergolek & Brek) dengan G, laju dan split; togol rollout yang mengira semula keputusan.
+- **Butiran larian** (tekan mana-mana run dalam Sejarah): keputusan, G maks, laju maks, pemandu & kereta, satelit, cerun, DA (ketinggian ketumpatan), beza tinggi, suhu; graf pecutan (g) + ketinggian + kelajuan dengan paksi **Masa atau Jarak**; jadual split (Jarak / Kelajuan / Bergolek & Brek) dengan G, laju dan split; togol rollout yang mengira semula keputusan; pilihan **"Banding dengan"** untuk tindih larian lain pada graf dan tunjuk beza masa setiap metrik serta titik tukar gear.
 - **Pengesanan tukar gear automatik:** titik tukar gear ditanda pada graf, dengan jarak, kelajuan, masa dan G yang hilang setiap kali tukar gear.
 - **Banding larian:** pilih Run A vs Run B — jadual beza masa setiap metrik + graf kelajuan bertindih (paksi masa atau jarak) + perbandingan titik tukar gear.
 

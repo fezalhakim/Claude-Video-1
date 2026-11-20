@@ -1,4 +1,4 @@
-const CACHE = 'pgear-v3';
+const CACHE = 'pgear-v4';
 const ASSETS = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg',
   './js/app.js', './js/analysis.js', './js/detail.js', './js/perf.js', './js/nmea.js', './js/ble.js',

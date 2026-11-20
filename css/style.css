@@ -122,6 +122,16 @@ h2 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacin
 .dchart canvas { width: 100%; height: auto; display: block; }
 .legend { display: flex; justify-content: center; gap: 14px; font-size: 12px; color: var(--mute); margin-bottom: 4px; }
 .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.cmpPick { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.cmpPick label { color: var(--mute); font-size: 13px; flex: none; }
+.cmpPick select { flex: 1; min-width: 0; background: #1b2027; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px; font: inherit; font-size: 13px; }
+.hdelta { display: block; font-size: 12px; color: var(--mute); margin-top: 2px; }
+.hdelta .faster, .splits .faster { color: var(--green); font-weight: 700; } .hdelta .slower, .splits .slower { color: var(--red); font-weight: 700; }
+.splits .dm, .hdelta .dm { color: var(--mute); font-size: 12px; font-weight: 400; }
+.splits.withCmp td, .splits.withCmp th { padding-left: 6px; padding-right: 6px; }
+.splits.withCmp td { font-size: 14px; } .splits.withCmp .tm { font-size: 15px; }
+.splits .oth { font-size: 13px; } .nw { white-space: nowrap; }
+.legend span.dash::before { background: none; border-top: 2px dashed var(--c); height: 0; width: 14px; vertical-align: 3px; border-radius: 0; }
 .axisSw { display: flex; justify-content: center; gap: 4px; margin-bottom: 6px; }
 .axisSw button { background: #1b2027; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; font-size: 12px; color: var(--mute); }
 .axisSw button.on { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 700; }
