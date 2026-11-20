@@ -51,6 +51,14 @@ const D = {
     'set.custom': 'Jarak tersuai (ujian masa & laju maks)', 'set.customHint': 'Tambah jarak sendiri, cth. 500 m, 1000 m, 800 ft atau 0.5 batu. Larian lama yang ada data penuh juga dikira semula.',
     'btn.add': 'Tambah', 'unit.mi': 'batu', 'cd.invalid': 'Masukkan jarak antara 1 m dan 10 km.', 'cd.max': 'Maksimum 10 jarak tersuai.', 'cd.exists': 'Jarak ini sudah ada.',
     'res.max': 'maks {v}', 'd.speedMax': 'Laju / maks km/j', 'd.custom': 'tersuai',
+    'nav.measure': 'Ukur', 'help.tip': 'Hidupkan Bluetooth & Lokasi telefon, dan tutup app rasmi RaceBox/Dragy dahulu (peranti hanya boleh sambung ke satu app).',
+    'conn.searching': 'Mencari peranti…', 'step.conn': 'Bersambung', 'step.gps': 'GPS kuat', 'step.stop': 'Berhenti',
+    'state.gps': 'Isyarat GPS lemah — pergi ke kawasan terbuka', 'done.title': 'Larian siap!', 'done.close': 'Tutup',
+    'hist.tryDemo': 'Cuba Demo', 'undo': 'Buat asal', 'deleted': 'Run {no} dipadam', 'deletedAll': 'Semua sejarah dipadam',
+    'set.guide': 'Tunjuk panduan semula', 'onb.next': 'Seterusnya', 'onb.skip': 'Langkau', 'onb.start': 'Mula',
+    'onb.t1': 'Sambung peranti', 'onb.b1': 'Tekan RaceBox atau Dragy dan pilih peranti anda. Tiada peranti? Tekan Demo untuk mencuba dahulu.',
+    'onb.t2': 'Tunggu tanda hijau', 'onb.b2': 'Pastikan ketiga-tiga tanda hijau: Bersambung, GPS kuat dan Berhenti. Status akan bertukar kepada SEDIA.',
+    'onb.t3': 'Pecut!', 'onb.b3': 'Masa bermula sendiri bila kenderaan bergerak, dan disimpan bila anda berhenti. Lihat semua larian dalam tab Sejarah.',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -100,6 +108,14 @@ const D = {
     'set.custom': 'Custom distances (time & top speed test)', 'set.customHint': 'Add your own distances, e.g. 500 m, 1000 m, 800 ft or 0.5 mile. Older runs with full data are recalculated too.',
     'btn.add': 'Add', 'unit.mi': 'mile', 'cd.invalid': 'Enter a distance between 1 m and 10 km.', 'cd.max': 'Maximum of 10 custom distances.', 'cd.exists': 'This distance already exists.',
     'res.max': 'max {v}', 'd.speedMax': 'Speed / max km/h', 'd.custom': 'custom',
+    'nav.measure': 'Measure', 'help.tip': 'Turn on Bluetooth & Location, and close the official RaceBox/Dragy app first (the device can only connect to one app).',
+    'conn.searching': 'Searching…', 'step.conn': 'Connected', 'step.gps': 'Good GPS', 'step.stop': 'Stopped',
+    'state.gps': 'Weak GPS signal — move to an open area', 'done.title': 'Run complete!', 'done.close': 'Close',
+    'hist.tryDemo': 'Try Demo', 'undo': 'Undo', 'deleted': 'Run {no} deleted', 'deletedAll': 'All history deleted',
+    'set.guide': 'Show guide again', 'onb.next': 'Next', 'onb.skip': 'Skip', 'onb.start': 'Start',
+    'onb.t1': 'Connect a device', 'onb.b1': 'Tap RaceBox or Dragy and pick your device. No device? Tap Demo to try it first.',
+    'onb.t2': 'Wait for green ticks', 'onb.b2': 'Make sure all three ticks are green: Connected, Good GPS and Stopped. The status changes to READY.',
+    'onb.t3': 'Launch!', 'onb.b3': 'Timing starts by itself when the vehicle moves and is saved when you stop. See every run in the History tab.',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -149,6 +165,14 @@ const D = {
     'set.custom': 'Jarak kustom (uji waktu & kecepatan maks)', 'set.customHint': 'Tambahkan jarak sendiri, mis. 500 m, 1000 m, 800 ft atau 0,5 mil. Run lama yang punya data lengkap juga dihitung ulang.',
     'btn.add': 'Tambah', 'unit.mi': 'mil', 'cd.invalid': 'Masukkan jarak antara 1 m dan 10 km.', 'cd.max': 'Maksimal 10 jarak kustom.', 'cd.exists': 'Jarak ini sudah ada.',
     'res.max': 'maks {v}', 'd.speedMax': 'Kecepatan / maks km/j', 'd.custom': 'kustom',
+    'nav.measure': 'Ukur', 'help.tip': 'Nyalakan Bluetooth & Lokasi ponsel, dan tutup aplikasi resmi RaceBox/Dragy dulu (perangkat hanya bisa terhubung ke satu aplikasi).',
+    'conn.searching': 'Mencari…', 'step.conn': 'Terhubung', 'step.gps': 'GPS kuat', 'step.stop': 'Berhenti',
+    'state.gps': 'Sinyal GPS lemah — pindah ke area terbuka', 'done.title': 'Run selesai!', 'done.close': 'Tutup',
+    'hist.tryDemo': 'Coba Demo', 'undo': 'Urungkan', 'deleted': 'Run {no} dihapus', 'deletedAll': 'Semua riwayat dihapus',
+    'set.guide': 'Tampilkan panduan lagi', 'onb.next': 'Lanjut', 'onb.skip': 'Lewati', 'onb.start': 'Mulai',
+    'onb.t1': 'Hubungkan perangkat', 'onb.b1': 'Ketuk RaceBox atau Dragy lalu pilih perangkat Anda. Tidak punya perangkat? Ketuk Demo untuk mencoba dulu.',
+    'onb.t2': 'Tunggu tanda hijau', 'onb.b2': 'Pastikan ketiga tanda hijau: Terhubung, GPS kuat dan Berhenti. Status akan berubah menjadi SIAP.',
+    'onb.t3': 'Gas!', 'onb.b3': 'Waktu mulai otomatis saat kendaraan bergerak dan disimpan saat Anda berhenti. Lihat semua run di tab Riwayat.',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -198,6 +222,14 @@ const D = {
     'set.custom': '自定义距离（计时和最高速度）', 'set.customHint': '添加自定义距离，例如 500 m、1000 m、800 ft 或 0.5 英里。有完整数据的旧记录也会重新计算。',
     'btn.add': '添加', 'unit.mi': '英里', 'cd.invalid': '请输入 1 m 至 10 km 之间的距离。', 'cd.max': '最多 10 个自定义距离。', 'cd.exists': '该距离已存在。',
     'res.max': '最高 {v}', 'd.speedMax': '速度 / 最高 km/h', 'd.custom': '自定义',
+    'nav.measure': '测试', 'help.tip': '请打开手机蓝牙和定位，并先关闭 RaceBox/Dragy 官方应用（设备一次只能连接一个应用）。',
+    'conn.searching': '搜索中…', 'step.conn': '已连接', 'step.gps': 'GPS 良好', 'step.stop': '已停车',
+    'state.gps': 'GPS 信号弱 — 请移至开阔地带', 'done.title': '测试完成！', 'done.close': '关闭',
+    'hist.tryDemo': '试试演示', 'undo': '撤销', 'deleted': '已删除 Run {no}', 'deletedAll': '已删除全部历史',
+    'set.guide': '再次显示引导', 'onb.next': '下一步', 'onb.skip': '跳过', 'onb.start': '开始',
+    'onb.t1': '连接设备', 'onb.b1': '点击 RaceBox 或 Dragy 并选择你的设备。没有设备？点击"演示"先试一试。',
+    'onb.t2': '等待绿色勾', 'onb.b2': '确保三个勾都变绿：已连接、GPS 良好、已停车。状态会变为"就绪"。',
+    'onb.t3': '起步！', 'onb.b3': '车辆一动自动开始计时，停车后自动保存。在"历史记录"中查看所有成绩。',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };

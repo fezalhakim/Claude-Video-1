@@ -17,6 +17,7 @@
   </header>
 
   <main>
+   <div class="view" data-view="measure">
     <section id="connectPanel" class="card">
       <h2 data-i18n="h.connect">Sambung peranti</h2>
       <div class="devices">
@@ -26,6 +27,7 @@
         <button data-dev="sim" class="dev"><span class="dot sm"></span><span data-i18n="dev.demo">Demo</span><small data-i18n="dev.demo.sub">Simulator larian</small></button>
       </div>
       <p id="bleWarn" class="warn" hidden data-i18n-html="ble.warn">Pelayar ini tiada Web Bluetooth. Guna <b>Chrome</b> di Android/PC, atau aplikasi <b>Bluefy</b> di iPhone.</p>
+      <p class="tip" data-i18n="help.tip"></p>
     </section>
 
     <section id="livePanel" class="card live" hidden>
@@ -36,6 +38,11 @@
       <div class="speedo">
         <div id="speed" class="speed">0</div>
         <div class="unit" data-i18n="kmh">km/j</div>
+      </div>
+      <div class="steps" id="steps">
+        <span id="stepConn" class="ok"><i></i><em data-i18n="step.conn">Bersambung</em></span>
+        <span id="stepGps"><i></i><em data-i18n="step.gps">GPS kuat</em></span>
+        <span id="stepStop"><i></i><em data-i18n="step.stop">Berhenti</em></span>
       </div>
       <div id="runState" class="state wait" data-i18n="state.wait">Tunggu kenderaan berhenti</div>
       <div class="runline"><span><span data-i18n="live.time">Masa</span> <b id="elapsed">0.00</b> s</span><span><span data-i18n="live.dist">Jarak</span> <b id="dist">0</b> m</span><span><span data-i18n="live.max">Maks</span> <b id="vmax">0</b> <span data-i18n="kmh">km/j</span></span></div>
@@ -55,6 +62,9 @@
       <div class="rowhead"><h2 data-i18n="h.results">Keputusan larian</h2><div><button id="lastDetail" class="ghost" hidden data-i18n="btn.detail">Lihat butiran</button> <button id="resetRun" class="ghost" data-i18n="btn.reset">Set semula</button></div></div>
       <div id="results" class="results"></div>
     </section>
+   </div>
+
+   <div class="view" data-view="history" hidden>
 
     <section class="card">
       <div class="rowhead"><h2 data-i18n="h.history">Sejarah</h2>
@@ -74,6 +84,9 @@
       <div class="axisSw"><button data-cx="t" data-i18n="axis.time">Masa (s)</button><button data-cx="d" class="on" data-i18n="axis.dist">Jarak (m)</button></div>
       <div id="cmpBody"></div>
     </section>
+   </div>
+
+   <div class="view" data-view="settings" hidden>
 
     <section class="card">
       <h2 data-i18n="h.settings">Tetapan</h2>
@@ -98,8 +111,34 @@
       <label class="toggle"><input type="checkbox" id="weather" checked><span data-i18n="set.weather"></span></label>
     </section>
 
+    <button id="showGuide" class="ghost wide" data-i18n="set.guide"></button>
     <p class="foot" data-i18n="foot"></p>
+   </div>
   </main>
+
+  <nav class="tabbar" aria-label="Menu">
+    <button data-nav="measure" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 1 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16l4-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="16" r="1.8" fill="currentColor"/></svg><span data-i18n="nav.measure">Ukur</span></button>
+    <button data-nav="history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-i18n="h.history">Sejarah</span><b id="histBadge" hidden></b></button>
+    <button data-nav="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-i18n="h.settings">Tetapan</span></button>
+  </nav>
+
+  <div id="sheet" class="sheet" hidden role="dialog" aria-modal="true">
+    <div class="sheetBox">
+      <div class="sheetHead"><span class="check">✓</span><h3 data-i18n="done.title">Larian siap!</h3></div>
+      <div id="sheetBody" class="sheetBody"></div>
+      <div class="sheetBtns"><button id="sheetClose" class="ghost" data-i18n="done.close">Tutup</button><button id="sheetDetail" class="primary" data-i18n="btn.detail">Lihat butiran</button></div>
+    </div>
+  </div>
+
+  <div id="onb" class="onb" hidden role="dialog" aria-modal="true">
+    <div class="onbBox">
+      <div id="onbArt" class="onbArt"></div>
+      <h3 id="onbTitle"></h3>
+      <p id="onbBody"></p>
+      <div class="dots" id="onbDots"><i></i><i></i><i></i></div>
+      <div class="sheetBtns"><button id="onbSkip" class="ghost" data-i18n="onb.skip">Langkau</button><button id="onbNext" class="primary" data-i18n="onb.next">Seterusnya</button></div>
+    </div>
+  </div>
 
   <div id="detail" class="detail" hidden role="dialog" aria-modal="true" aria-label="Butiran larian"></div>
 

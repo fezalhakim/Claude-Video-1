@@ -31,6 +31,7 @@ setLang(settings.lang);
 // beri nombor run kepada rekod lama (yang belum bernombor)
 { let n = 0; for (let i = history.length - 1; i >= 0; i--) { if (history[i].no) n = Math.max(n, history[i].no); else history[i].no = ++n; } }
 let cmp = { a: null, b: null, x: 'd' };
+let gpsOk = false;
 let current = {}, lastSample = null, rateTimes = [], gTrail = [], chartPts = [];
 
 // ---------- Bahasa ----------
@@ -41,7 +42,7 @@ function changeLang(l) {
   settings.lang = l; store.set(SKEY, settings); setLang(l);
   $('lang').value = l; $('langTop').value = l;
   applyStatic();
-  $('runState').textContent = t('state.' + timer.state) || '';
+  $('runState').dataset.st = ''; refreshState();
   $('conn').textContent = conn ? t('conn.on', { name: conn.name }) : t('conn.off');
   renderResults(); renderHistory(); scheduleDraw();
   document.dispatchEvent(new Event('pgear:lang'));
@@ -94,8 +95,10 @@ if (!bleSupported()) $('bleWarn').hidden = false;
 // ---------- Enjin masa ----------
 const timer = new PerfTimer({
   rollout: settings.rollout, customDist: settings.customDist,
-  onState: s => { const el = $('runState'); el.className = 'state ' + s; el.textContent = t('state.' + s);
-    if (s === 'run') { current = {}; chartPts = []; renderResults(); } },
+  onState: s => {
+    refreshState(s);
+    if (s === 'run') { current = {}; chartPts = []; renderResults(); buzz(60); }
+  },
   onResult: r => {
     if (r.kind === 'live') {
       Object.assign(current, r.run.results);
@@ -109,6 +112,7 @@ const timer = new PerfTimer({
       const run = saveRun({ at: r.at, device: conn?.name || '-', rollout: r.rollout, maxKmh: r.maxKmh, results: r.results,
         raw: packSamples(r.samples), driver: settings.driver, car: settings.car, customDist: [...settings.customDist] });
       lastRunNo = run.no; $('lastDetail').hidden = false;
+      showSummary(run); buzz([80, 60, 80]);
       fetchWeather(run);
       announce(r.results);
     } else { // rolling / brake di luar larian
@@ -130,6 +134,8 @@ const CONNECTORS = {
 document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', async () => {
   if (conn) conn.disconnect();
   setButtons(true);
+  const sub = btn.querySelector('small'), orig = sub.textContent;
+  btn.classList.add('busy'); sub.textContent = t('conn.searching');
   try {
     conn = await CONNECTORS[btn.dataset.dev]({ onSample, onDisconnect, onError: e => toast(e.message) });
     timer.reset(); lastSample = null; rateTimes = [];
@@ -139,7 +145,7 @@ document.querySelectorAll('.dev').forEach(btn => btn.addEventListener('click', a
   } catch (e) {
     if (e.name !== 'NotFoundError') toast(e.message || String(e)); // NotFoundError = pengguna batal
     conn = null;
-  } finally { setButtons(false); }
+  } finally { setButtons(false); btn.classList.remove('busy'); sub.textContent = orig; }
 }));
 
 $('disconnect').addEventListener('click', () => { if (conn) conn.disconnect(); onDisconnect(); });
@@ -166,6 +172,14 @@ function onSample(s) {
 let drawPending = false;
 function scheduleDraw() { if (!drawPending) { drawPending = true; requestAnimationFrame(draw); } }
 
+function refreshState(state = timer.state) {
+  const el = $('runState');
+  const st = state !== 'run' && lastSample && !gpsOk ? 'gps' : state;
+  if (el.dataset.st === st) return;
+  el.dataset.st = st; el.className = 'state ' + st; el.textContent = t('state.' + st);
+}
+const buzz = p => { try { navigator.vibrate?.(p); } catch { /* abaikan */ } };
+
 function draw() {
   drawPending = false;
   const s = lastSample; if (!s) return;
@@ -175,6 +189,11 @@ function draw() {
   $('fix').style.color = s.fix >= 2 ? 'var(--green)' : 'var(--red)';
   $('hz').textContent = rateTimes.length + ' Hz';
   $('bat').textContent = s.battery != null ? s.battery + '%' + (s.charging ? '⚡' : '') : '-';
+  // senarai semak: GPS kuat (3D + >= 6 satelit, atau ketepatan <= 15 m untuk GPS telefon) & berhenti
+  gpsOk = s.fix >= 3 && (s.sats == null ? (s.hAcc == null || s.hAcc <= 15) : s.sats >= 6);
+  $('stepGps').classList.toggle('ok', gpsOk);
+  $('stepStop').classList.toggle('ok', s.speed * 3.6 < 0.8);
+  refreshState();
   drawG(s); drawChart();
 }
 
@@ -223,7 +242,9 @@ function fmt(key, r) {
 }
 function renderResults() {
   const ck = customKeys();
-  $('results').innerHTML = ALL.map(k =>
+  // tunjuk metrik utama + jarak tersuai; yang lain hanya bila dicapai
+  const CORE = ['0-60', '0-100', '100-200', '60ft', '1/8 batu', '1/4 batu'];
+  $('results').innerHTML = ALL.filter(k => CORE.includes(k) || ck.includes(k) || current[k]).map(k =>
     `<div class="res ${current[k] ? 'hit' : ''} ${ck.includes(k) ? 'custom' : ''}"><small>${metric(k)}${isDistKey(k) ? '' : ' ' + t('kmh')}</small>${fmt(k, current[k])}</div>`).join('');
 }
 
@@ -266,7 +287,7 @@ function showDetail(no) {
   openDetail(run, $('detail'), {
     runs: history, customDist: settings.customDist,
     onChange: () => { persist(); renderHistory(); },
-    onDelete: () => { history = history.filter(h => h.no !== run.no); persist(); renderHistory(); }
+    onDelete: () => removeRun(run.no)
   });
 }
 // siri kelajuan [t, km/j] untuk graf banding
@@ -302,7 +323,7 @@ function renderHistory() {
       <button class="pick a ${cmp.a === h.no ? 'on' : ''}" data-pick="a" data-no="${h.no}" aria-label="${t('aria.pickA')}">A</button>
       <button class="pick b ${cmp.b === h.no ? 'on' : ''}" data-pick="b" data-no="${h.no}" aria-label="${t('aria.pickB')}">B</button>
       <button data-del="${h.no}" aria-label="${t('aria.del')}">×</button></div></li>`;
-  }).join('') : `<li class="empty">${t('hist.empty')}</li>`;
+  }).join('') : `<li class="empty">${t('hist.empty')} <button class="ghost" data-demo>${t('hist.tryDemo')}</button></li>`;
   renderCompare();
 }
 
@@ -391,11 +412,14 @@ $('history').addEventListener('click', e => {
   if (op) { showDetail(+op.dataset.open); return; }
   const { del, pick, no } = e.target.dataset;
   if (pick) { cmp[pick] = +no; renderHistory(); $('compareCard').scrollIntoView({ behavior: 'smooth' }); return; }
+  if (e.target.dataset.demo !== undefined) { go('measure'); document.querySelector('[data-dev=sim]').click(); return; }
   if (del === undefined) return;
-  history = history.filter(h => h.no !== +del); persist(); renderHistory();
+  removeRun(+del);
 });
 $('clearHist').addEventListener('click', () => {
-  if (history.length && confirm(t('confirm.clear'))) { history = []; store.set(HKEY, history); renderHistory(); }
+  if (!history.length || !confirm(t('confirm.clear'))) return;
+  const old = history; history = []; persist(); renderHistory();
+  toast(t('deletedAll'), t('undo'), () => { history = old; persist(); renderHistory(); });
 });
 $('exportCsv').addEventListener('click', () => {
   const rows = [['run', 'date', 'device', 'rollout', 'max_kmh', ...ALL.map(k => metric(k) + '_s')]];
@@ -417,11 +441,63 @@ function announce(results) {
   u.lang = locale(); speechSynthesis.speak(u);
 }
 let toastT;
-function toast(msg) {
+function toast(msg, actionLabel, action) {
   let el = document.querySelector('.toast');
-  if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); }
-  el.textContent = msg; clearTimeout(toastT); toastT = setTimeout(() => el.remove(), 4500);
+  if (!el) { el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.innerHTML = ''; const sp = document.createElement('span'); sp.textContent = msg; el.appendChild(sp);
+  if (actionLabel) {
+    const b = document.createElement('button'); b.textContent = actionLabel;
+    b.onclick = () => { action(); el.remove(); }; el.appendChild(b);
+  }
+  clearTimeout(toastT); toastT = setTimeout(() => el.remove(), actionLabel ? 6000 : 4500);
 }
+
+function removeRun(no) {
+  const i = history.findIndex(h => h.no === no); if (i < 0) return;
+  const [run] = history.splice(i, 1); persist(); renderHistory();
+  toast(t('deleted', { no }), t('undo'), () => { history.splice(i, 0, run); persist(); renderHistory(); });
+}
+
+// ---------- Navigasi tab ----------
+let newRuns = 0;
+function go(view) {
+  document.querySelectorAll('.view').forEach(v => { v.hidden = v.dataset.view !== view; });
+  document.querySelectorAll('[data-nav]').forEach(b => b.classList.toggle('on', b.dataset.nav === view));
+  window.scrollTo(0, 0);
+  if (view === 'history') { newRuns = 0; updateBadge(); }
+}
+function updateBadge() { const b = $('histBadge'); b.hidden = !newRuns; b.textContent = newRuns; }
+document.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click', () => go(b.dataset.nav)));
+
+// ---------- Ringkasan selepas larian ----------
+function showSummary(run) {
+  const pick = ['0-100', '100-200', '60ft', '1/8 batu', '1/4 batu', ...customKeys(), '0-200', '0-60'].filter((k, i, a) => run.results[k] && a.indexOf(k) === i).slice(0, 5);
+  const tiles = pick.map(k => `<div><small>${esc(metric(k))}</small><b>${run.results[k].time.toFixed(2)}</b><i>s</i></div>`);
+  if (run.maxKmh) tiles.push(`<div><small>${t('d.maxV')}</small><b>${run.maxKmh.toFixed(0)}</b><i>${t('kmh')}</i></div>`);
+  $('sheetBody').innerHTML = tiles.join('');
+  $('sheet').hidden = false;
+  if (document.querySelector('[data-nav=history]').classList.contains('on') === false) { newRuns++; updateBadge(); }
+}
+$('sheetClose').addEventListener('click', () => { $('sheet').hidden = true; });
+$('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('sheet').hidden = true; });
+$('sheetDetail').addEventListener('click', () => { $('sheet').hidden = true; showDetail(lastRunNo); });
+
+// ---------- Panduan kali pertama ----------
+const ONB = [['📡', 'onb.t1', 'onb.b1'], ['✅', 'onb.t2', 'onb.b2'], ['🏁', 'onb.t3', 'onb.b3']];
+let onbStep = 0;
+function renderOnb() {
+  const [art, ti, bo] = ONB[onbStep];
+  $('onbArt').textContent = art; $('onbTitle').textContent = t(ti); $('onbBody').textContent = t(bo);
+  $('onbDots').querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === onbStep));
+  $('onbNext').textContent = onbStep === ONB.length - 1 ? t('onb.start') : t('onb.next');
+  $('onbSkip').style.visibility = onbStep === ONB.length - 1 ? 'hidden' : '';
+}
+function openOnb() { onbStep = 0; renderOnb(); $('onb').hidden = false; }
+function closeOnb() { $('onb').hidden = true; settings.onboarded = true; store.set(SKEY, settings); }
+$('onbNext').addEventListener('click', () => { if (onbStep < ONB.length - 1) { onbStep++; renderOnb(); } else closeOnb(); });
+$('onbSkip').addEventListener('click', closeOnb);
+$('showGuide').addEventListener('click', openOnb);
+document.addEventListener('pgear:lang', () => { if (!$('onb').hidden) renderOnb(); });
 
 // Elak skrin tidur semasa larian
 async function wakeLock() { try { await navigator.wakeLock?.request('screen'); } catch { /* abaikan */ } }
@@ -431,3 +507,4 @@ document.addEventListener('click', wakeLock, { once: true });
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 
 rebuildKeys(); renderCustom(); renderResults(); renderHistory();
+if (!settings.onboarded) openOnb();
