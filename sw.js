@@ -1,7 +1,7 @@
-const CACHE = 'pgear-v4';
+const CACHE = 'pgear-v5';
 const ASSETS = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg',
-  './js/app.js', './js/analysis.js', './js/detail.js', './js/perf.js', './js/nmea.js', './js/ble.js',
+  './js/app.js', './js/analysis.js', './js/i18n.js', './js/detail.js', './js/perf.js', './js/nmea.js', './js/ble.js',
   './js/devices/racebox.js', './js/devices/dragy.js',
   './js/devices/phonegps.js', './js/devices/simulator.js'
 ];

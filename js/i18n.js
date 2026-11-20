@@ -1,0 +1,226 @@
+// Sokongan pelbagai bahasa. Kunci metrik dalam data (cth. '1/4 batu') kekal sama;
+// hanya label paparan yang diterjemah.
+export const LANGS = { ms: 'Bahasa Melayu', en: 'English', id: 'Bahasa Indonesia', zh: '中文' };
+const LOCALE = { ms: 'ms-MY', en: 'en-GB', id: 'id-ID', zh: 'zh-CN' };
+
+const D = {
+  ms: {
+    'conn.off': 'Tidak bersambung', 'conn.on': 'Bersambung: {name}',
+    'h.connect': 'Sambung peranti', 'dev.dg.sub': 'GPS 10 Hz / Pro', 'dev.phone': 'GPS Telefon',
+    'dev.phone.sub': '~1 Hz, kurang tepat', 'dev.demo': 'Demo', 'dev.demo.sub': 'Simulator larian',
+    'ble.warn': 'Pelayar ini tiada Web Bluetooth. Guna <b>Chrome</b> di Android/PC, atau aplikasi <b>Bluefy</b> di iPhone.',
+    'btn.disconnect': 'Putus', 'kmh': 'km/j', 'live.time': 'Masa', 'live.dist': 'Jarak', 'live.max': 'Maks',
+    'st.sats': 'Satelit', 'st.fix': 'Fix', 'st.rate': 'Kadar', 'st.bat': 'Bateri', 'fix.none': 'Tiada',
+    'state.wait': 'Tunggu kenderaan berhenti', 'state.armed': 'Sedia — pecut bila-bila', 'state.run': 'Merekod…',
+    'h.results': 'Keputusan larian', 'btn.detail': 'Lihat butiran', 'btn.reset': 'Set semula',
+    'h.history': 'Sejarah', 'btn.csv': 'Eksport CSV', 'btn.clear': 'Padam semua',
+    'h.compare': 'Banding larian', 'axis.time': 'Masa (s)', 'axis.dist': 'Jarak (m)',
+    'h.settings': 'Tetapan', 'set.lang': 'Bahasa', 'set.driver': 'Nama pemandu', 'set.car': 'Kereta',
+    'ph.driver': 'cth. Faizal', 'ph.car': 'cth. Proton Satria Neo',
+    'set.rollout': 'Rollout 1 kaki (gaya dragstrip, masa lebih pantas ~0.2 s)',
+    'set.anyBle': 'Dragy: tunjuk semua peranti BLE (jika nama peranti lain)',
+    'set.speak': 'Umum keputusan dengan suara',
+    'set.weather': 'Ambil suhu & tekanan udara dari internet untuk kira DA (lokasi larian dihantar ke open-meteo.com)',
+    'foot': 'PGear · Masa dikira dari cap masa GNSS peranti & diinterpolasi antara sampel. Gunakan hanya di litar / kawasan tertutup.',
+    'g.nodata': 'Tiada data G', 'chart.live': 'Graf kelajuan larian', 'chart.nodata': 'Tiada data graf',
+    'best': 'Terbaik {k}', 'hist.max': 'maks', 'hist.open': 'Lihat butiran ›',
+    'hist.empty': 'Belum ada larian. Sambung peranti dan mula memecut.',
+    'aria.pickA': 'Pilih sebagai A', 'aria.pickB': 'Pilih sebagai B', 'aria.del': 'Padam',
+    'confirm.clear': 'Padam semua sejarah larian?',
+    'cmp.need2': 'Perlu sekurang-kurangnya 2 larian untuk dibanding.', 'cmp.diff2': 'Pilih dua larian yang berbeza.',
+    'cmp.metric': 'Metrik (s)', 'cmp.delta': 'Beza B−A', 'cmp.maxkmh': 'Maks km/j',
+    'cmp.tie': 'Seri — masing-masing menang <b>{n}</b> metrik.',
+    'cmp.win': '<b>Run {no}</b> lebih pantas dalam <b>{n}</b> daripada {total} metrik.',
+    'cmp.green': 'Beza hijau = B lebih pantas.', 'cmp.shift': 'Tukar gear', 'cmp.distkmh': 'jarak · km/j',
+    'cmp.shiftNote': 'Garis putus-putus pada graf = titik tukar gear. Nilai dalam kurungan = B tukar gear lebih awal (−) atau lewat (+) berbanding A.',
+    'speak.to': ' ke ', 'speak.sec': 'saat',
+    'err.ble': 'Pelayar ini tidak menyokong Web Bluetooth. Guna Chrome (Android/PC) atau Bluefy (iPhone).',
+    'err.service': 'Servis data peranti tidak dijumpai.', 'err.gps': 'GPS tidak disokong pada pelayar ini.',
+    'd.back': '‹ Kembali', 'd.del': 'Padam', 'd.result': 'Keputusan {k}', 'd.maxG': 'G maks', 'd.maxV': 'Laju maks',
+    'd.driver': 'Pemandu', 'd.carPh': 'Nama kereta', 'd.sats': 'Satelit', 'd.slope': 'Cerun', 'd.da': 'DA',
+    'd.elev': 'Beza tinggi', 'd.temp': 'Suhu', 'd.cmpWith': 'Banding dengan', 'd.none': '— Tiada —',
+    'd.lgG': 'Pecutan (g)', 'd.lgAlt': 'Ketinggian (m)', 'd.lgV': 'Kelajuan (km/j)', 'd.lgShift': 'Tukar gear',
+    'd.lgOther': 'Run {no} (kelajuan)', 'd.shifts': 'Tukar gear', 'd.gear': 'Gear', 'd.distM': 'Jarak m',
+    'd.speedKmh': 'Laju km/j', 'd.timeS': 'Masa s', 'd.gLost': 'G hilang', 'd.noShift': 'Tiada tukar gear dikesan dalam larian ini.',
+    'd.tabDist': 'Jarak', 'd.tabSpeed': 'Kelajuan', 'd.tabRoll': 'Bergolek / Brek', 'd.colDist': 'Jarak', 'd.colRange': 'Julat km/j',
+    'd.split': 'Split', 'd.vs': 'vs Run {no}', 'd.empty': 'Tiada keputusan dalam kategori ini.',
+    'd.vsNote': '"vs Run {no}": hijau (−) = larian ini lebih pantas, merah (+) = lebih perlahan.',
+    'd.rollout': 'Rollout 1 kaki', 'd.old': 'Larian lama ini tiada data mentah — graf G/ketinggian dan togol rollout tidak tersedia.',
+    'd.note': 'G = pecutan membujur pada titik itu. Split = masa dari baris sebelumnya. Tukar gear dikesan bila G jatuh mendadak lalu pulih; "G hilang" = berapa banyak G jatuh dan berapa lama. Cerun & beza tinggi diukur sepanjang fasa pecutan.',
+    'd.confirmDel': 'Padam Run {no}?',
+    'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
+  },
+  en: {
+    'conn.off': 'Not connected', 'conn.on': 'Connected: {name}',
+    'h.connect': 'Connect device', 'dev.dg.sub': 'GPS 10 Hz / Pro', 'dev.phone': 'Phone GPS',
+    'dev.phone.sub': '~1 Hz, less accurate', 'dev.demo': 'Demo', 'dev.demo.sub': 'Run simulator',
+    'ble.warn': 'This browser has no Web Bluetooth. Use <b>Chrome</b> on Android/PC, or the <b>Bluefy</b> app on iPhone.',
+    'btn.disconnect': 'Disconnect', 'kmh': 'km/h', 'live.time': 'Time', 'live.dist': 'Distance', 'live.max': 'Max',
+    'st.sats': 'Satellites', 'st.fix': 'Fix', 'st.rate': 'Rate', 'st.bat': 'Battery', 'fix.none': 'None',
+    'state.wait': 'Waiting for vehicle to stop', 'state.armed': 'Ready — launch any time', 'state.run': 'Recording…',
+    'h.results': 'Run results', 'btn.detail': 'View details', 'btn.reset': 'Reset',
+    'h.history': 'History', 'btn.csv': 'Export CSV', 'btn.clear': 'Delete all',
+    'h.compare': 'Compare runs', 'axis.time': 'Time (s)', 'axis.dist': 'Distance (m)',
+    'h.settings': 'Settings', 'set.lang': 'Language', 'set.driver': 'Driver name', 'set.car': 'Car',
+    'ph.driver': 'e.g. Faizal', 'ph.car': 'e.g. Proton Satria Neo',
+    'set.rollout': '1-ft rollout (dragstrip style, ~0.2 s quicker)',
+    'set.anyBle': 'Dragy: show all BLE devices (if the device name differs)',
+    'set.speak': 'Announce results by voice',
+    'set.weather': 'Fetch temperature & air pressure online to compute DA (run location is sent to open-meteo.com)',
+    'foot': 'PGear · Times are computed from the device GNSS timestamps & interpolated between samples. Use only on a track / closed area.',
+    'g.nodata': 'No G data', 'chart.live': 'Run speed graph', 'chart.nodata': 'No graph data',
+    'best': 'Best {k}', 'hist.max': 'max', 'hist.open': 'View details ›',
+    'hist.empty': 'No runs yet. Connect a device and launch.',
+    'aria.pickA': 'Pick as A', 'aria.pickB': 'Pick as B', 'aria.del': 'Delete',
+    'confirm.clear': 'Delete all run history?',
+    'cmp.need2': 'At least 2 runs are needed to compare.', 'cmp.diff2': 'Pick two different runs.',
+    'cmp.metric': 'Metric (s)', 'cmp.delta': 'Diff B−A', 'cmp.maxkmh': 'Max km/h',
+    'cmp.tie': 'Tie — each wins <b>{n}</b> metrics.',
+    'cmp.win': '<b>Run {no}</b> is quicker in <b>{n}</b> of {total} metrics.',
+    'cmp.green': 'Green diff = B is quicker.', 'cmp.shift': 'Gear shift', 'cmp.distkmh': 'distance · km/h',
+    'cmp.shiftNote': 'Dashed lines on the graph = shift points. Value in brackets = B shifted earlier (−) or later (+) than A.',
+    'speak.to': ' to ', 'speak.sec': 'seconds',
+    'err.ble': 'This browser does not support Web Bluetooth. Use Chrome (Android/PC) or Bluefy (iPhone).',
+    'err.service': 'Device data service not found.', 'err.gps': 'GPS is not supported in this browser.',
+    'd.back': '‹ Back', 'd.del': 'Delete', 'd.result': '{k} result', 'd.maxG': 'Max G', 'd.maxV': 'Max speed',
+    'd.driver': 'Driver', 'd.carPh': 'Car name', 'd.sats': 'Satellites', 'd.slope': 'Slope', 'd.da': 'DA',
+    'd.elev': 'Elevation', 'd.temp': 'Temp', 'd.cmpWith': 'Compare with', 'd.none': '— None —',
+    'd.lgG': 'Acceleration (g)', 'd.lgAlt': 'Altitude (m)', 'd.lgV': 'Speed (km/h)', 'd.lgShift': 'Gear shift',
+    'd.lgOther': 'Run {no} (speed)', 'd.shifts': 'Gear shifts', 'd.gear': 'Gear', 'd.distM': 'Dist m',
+    'd.speedKmh': 'Speed km/h', 'd.timeS': 'Time s', 'd.gLost': 'G lost', 'd.noShift': 'No gear shifts detected in this run.',
+    'd.tabDist': 'Distance', 'd.tabSpeed': 'Speed', 'd.tabRoll': 'Rolling / Brake', 'd.colDist': 'Distance', 'd.colRange': 'Range km/h',
+    'd.split': 'Split', 'd.vs': 'vs Run {no}', 'd.empty': 'No results in this category.',
+    'd.vsNote': '"vs Run {no}": green (−) = this run is quicker, red (+) = slower.',
+    'd.rollout': '1-ft rollout', 'd.old': 'This older run has no raw data — G/altitude graph and rollout toggle are unavailable.',
+    'd.note': 'G = longitudinal acceleration at that point. Split = time since the previous row. Gear shifts are detected when G drops sharply then recovers; "G lost" = how much G dropped and for how long. Slope & elevation are measured over the acceleration phase.',
+    'd.confirmDel': 'Delete Run {no}?',
+    'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
+  },
+  id: {
+    'conn.off': 'Tidak terhubung', 'conn.on': 'Terhubung: {name}',
+    'h.connect': 'Hubungkan perangkat', 'dev.dg.sub': 'GPS 10 Hz / Pro', 'dev.phone': 'GPS Ponsel',
+    'dev.phone.sub': '~1 Hz, kurang akurat', 'dev.demo': 'Demo', 'dev.demo.sub': 'Simulator run',
+    'ble.warn': 'Browser ini tidak mendukung Web Bluetooth. Gunakan <b>Chrome</b> di Android/PC, atau aplikasi <b>Bluefy</b> di iPhone.',
+    'btn.disconnect': 'Putuskan', 'kmh': 'km/j', 'live.time': 'Waktu', 'live.dist': 'Jarak', 'live.max': 'Maks',
+    'st.sats': 'Satelit', 'st.fix': 'Fix', 'st.rate': 'Laju data', 'st.bat': 'Baterai', 'fix.none': 'Tidak ada',
+    'state.wait': 'Tunggu kendaraan berhenti', 'state.armed': 'Siap — gas kapan saja', 'state.run': 'Merekam…',
+    'h.results': 'Hasil run', 'btn.detail': 'Lihat detail', 'btn.reset': 'Reset',
+    'h.history': 'Riwayat', 'btn.csv': 'Ekspor CSV', 'btn.clear': 'Hapus semua',
+    'h.compare': 'Bandingkan run', 'axis.time': 'Waktu (s)', 'axis.dist': 'Jarak (m)',
+    'h.settings': 'Pengaturan', 'set.lang': 'Bahasa', 'set.driver': 'Nama pengemudi', 'set.car': 'Mobil',
+    'ph.driver': 'mis. Faizal', 'ph.car': 'mis. Proton Satria Neo',
+    'set.rollout': 'Rollout 1 kaki (gaya dragstrip, ~0,2 s lebih cepat)',
+    'set.anyBle': 'Dragy: tampilkan semua perangkat BLE (jika nama perangkat berbeda)',
+    'set.speak': 'Umumkan hasil dengan suara',
+    'set.weather': 'Ambil suhu & tekanan udara dari internet untuk menghitung DA (lokasi run dikirim ke open-meteo.com)',
+    'foot': 'PGear · Waktu dihitung dari stempel waktu GNSS perangkat & diinterpolasi antar sampel. Gunakan hanya di sirkuit / area tertutup.',
+    'g.nodata': 'Tidak ada data G', 'chart.live': 'Grafik kecepatan run', 'chart.nodata': 'Tidak ada data grafik',
+    'best': 'Terbaik {k}', 'hist.max': 'maks', 'hist.open': 'Lihat detail ›',
+    'hist.empty': 'Belum ada run. Hubungkan perangkat dan mulai gas.',
+    'aria.pickA': 'Pilih sebagai A', 'aria.pickB': 'Pilih sebagai B', 'aria.del': 'Hapus',
+    'confirm.clear': 'Hapus semua riwayat run?',
+    'cmp.need2': 'Perlu minimal 2 run untuk dibandingkan.', 'cmp.diff2': 'Pilih dua run yang berbeda.',
+    'cmp.metric': 'Metrik (s)', 'cmp.delta': 'Selisih B−A', 'cmp.maxkmh': 'Maks km/j',
+    'cmp.tie': 'Seri — masing-masing menang <b>{n}</b> metrik.',
+    'cmp.win': '<b>Run {no}</b> lebih cepat di <b>{n}</b> dari {total} metrik.',
+    'cmp.green': 'Selisih hijau = B lebih cepat.', 'cmp.shift': 'Pindah gigi', 'cmp.distkmh': 'jarak · km/j',
+    'cmp.shiftNote': 'Garis putus-putus di grafik = titik pindah gigi. Nilai dalam kurung = B pindah gigi lebih awal (−) atau lebih lambat (+) dibanding A.',
+    'speak.to': ' ke ', 'speak.sec': 'detik',
+    'err.ble': 'Browser ini tidak mendukung Web Bluetooth. Gunakan Chrome (Android/PC) atau Bluefy (iPhone).',
+    'err.service': 'Layanan data perangkat tidak ditemukan.', 'err.gps': 'GPS tidak didukung di browser ini.',
+    'd.back': '‹ Kembali', 'd.del': 'Hapus', 'd.result': 'Hasil {k}', 'd.maxG': 'G maks', 'd.maxV': 'Kecepatan maks',
+    'd.driver': 'Pengemudi', 'd.carPh': 'Nama mobil', 'd.sats': 'Satelit', 'd.slope': 'Kemiringan', 'd.da': 'DA',
+    'd.elev': 'Beda tinggi', 'd.temp': 'Suhu', 'd.cmpWith': 'Bandingkan dengan', 'd.none': '— Tidak ada —',
+    'd.lgG': 'Akselerasi (g)', 'd.lgAlt': 'Ketinggian (m)', 'd.lgV': 'Kecepatan (km/j)', 'd.lgShift': 'Pindah gigi',
+    'd.lgOther': 'Run {no} (kecepatan)', 'd.shifts': 'Pindah gigi', 'd.gear': 'Gigi', 'd.distM': 'Jarak m',
+    'd.speedKmh': 'Kecepatan km/j', 'd.timeS': 'Waktu s', 'd.gLost': 'G hilang', 'd.noShift': 'Tidak ada pindah gigi terdeteksi di run ini.',
+    'd.tabDist': 'Jarak', 'd.tabSpeed': 'Kecepatan', 'd.tabRoll': 'Rolling / Rem', 'd.colDist': 'Jarak', 'd.colRange': 'Rentang km/j',
+    'd.split': 'Split', 'd.vs': 'vs Run {no}', 'd.empty': 'Tidak ada hasil di kategori ini.',
+    'd.vsNote': '"vs Run {no}": hijau (−) = run ini lebih cepat, merah (+) = lebih lambat.',
+    'd.rollout': 'Rollout 1 kaki', 'd.old': 'Run lama ini tidak punya data mentah — grafik G/ketinggian dan tombol rollout tidak tersedia.',
+    'd.note': 'G = akselerasi longitudinal di titik itu. Split = waktu dari baris sebelumnya. Pindah gigi terdeteksi saat G turun tajam lalu pulih; "G hilang" = seberapa besar G turun dan berapa lama. Kemiringan & beda tinggi diukur selama fase akselerasi.',
+    'd.confirmDel': 'Hapus Run {no}?',
+    'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
+  },
+  zh: {
+    'conn.off': '未连接', 'conn.on': '已连接：{name}',
+    'h.connect': '连接设备', 'dev.dg.sub': 'GPS 10 Hz / Pro', 'dev.phone': '手机 GPS',
+    'dev.phone.sub': '约 1 Hz，精度较低', 'dev.demo': '演示', 'dev.demo.sub': '模拟测试',
+    'ble.warn': '此浏览器不支持 Web Bluetooth。请在 Android/电脑上使用 <b>Chrome</b>，或在 iPhone 上使用 <b>Bluefy</b>。',
+    'btn.disconnect': '断开', 'kmh': 'km/h', 'live.time': '时间', 'live.dist': '距离', 'live.max': '最高',
+    'st.sats': '卫星', 'st.fix': '定位', 'st.rate': '频率', 'st.bat': '电量', 'fix.none': '无',
+    'state.wait': '等待车辆停止', 'state.armed': '就绪 — 随时起步', 'state.run': '记录中…',
+    'h.results': '测试结果', 'btn.detail': '查看详情', 'btn.reset': '重置',
+    'h.history': '历史记录', 'btn.csv': '导出 CSV', 'btn.clear': '全部删除',
+    'h.compare': '成绩对比', 'axis.time': '时间 (s)', 'axis.dist': '距离 (m)',
+    'h.settings': '设置', 'set.lang': '语言', 'set.driver': '车手姓名', 'set.car': '车辆',
+    'ph.driver': '例如 Faizal', 'ph.car': '例如 Proton Satria Neo',
+    'set.rollout': '1 英尺 Rollout（直线加速赛标准，约快 0.2 秒）',
+    'set.anyBle': 'Dragy：显示所有 BLE 设备（若设备名称不同）',
+    'set.speak': '语音播报成绩',
+    'set.weather': '联网获取气温和气压以计算 DA（测试位置将发送至 open-meteo.com）',
+    'foot': 'PGear · 时间根据设备 GNSS 时间戳计算，并在采样点之间插值。仅限在赛道或封闭场地使用。',
+    'g.nodata': '无 G 值数据', 'chart.live': '速度曲线', 'chart.nodata': '无曲线数据',
+    'best': '最佳 {k}', 'hist.max': '最高', 'hist.open': '查看详情 ›',
+    'hist.empty': '暂无记录。连接设备后开始加速。',
+    'aria.pickA': '选为 A', 'aria.pickB': '选为 B', 'aria.del': '删除',
+    'confirm.clear': '删除全部历史记录？',
+    'cmp.need2': '至少需要 2 次测试才能对比。', 'cmp.diff2': '请选择两次不同的测试。',
+    'cmp.metric': '项目 (s)', 'cmp.delta': '差值 B−A', 'cmp.maxkmh': '最高 km/h',
+    'cmp.tie': '平手 — 各赢 <b>{n}</b> 项。',
+    'cmp.win': '<b>Run {no}</b> 在 {total} 项中有 <b>{n}</b> 项更快。',
+    'cmp.green': '绿色差值 = B 更快。', 'cmp.shift': '换挡', 'cmp.distkmh': '距离 · km/h',
+    'cmp.shiftNote': '曲线上的虚线 = 换挡点。括号内数值 = B 比 A 提前 (−) 或推迟 (+) 换挡的距离。',
+    'speak.to': '到', 'speak.sec': '秒',
+    'err.ble': '此浏览器不支持 Web Bluetooth。请使用 Chrome（Android/电脑）或 Bluefy（iPhone）。',
+    'err.service': '未找到设备数据服务。', 'err.gps': '此浏览器不支持 GPS。',
+    'd.back': '‹ 返回', 'd.del': '删除', 'd.result': '{k} 成绩', 'd.maxG': '最大 G 值', 'd.maxV': '最高速度',
+    'd.driver': '车手', 'd.carPh': '车辆名称', 'd.sats': '卫星', 'd.slope': '坡度', 'd.da': '密度高度',
+    'd.elev': '高差', 'd.temp': '气温', 'd.cmpWith': '对比', 'd.none': '— 无 —',
+    'd.lgG': '加速度 (g)', 'd.lgAlt': '海拔 (m)', 'd.lgV': '速度 (km/h)', 'd.lgShift': '换挡',
+    'd.lgOther': 'Run {no}（速度）', 'd.shifts': '换挡', 'd.gear': '挡位', 'd.distM': '距离 m',
+    'd.speedKmh': '速度 km/h', 'd.timeS': '时间 s', 'd.gLost': 'G 值损失', 'd.noShift': '此次测试未检测到换挡。',
+    'd.tabDist': '距离', 'd.tabSpeed': '速度', 'd.tabRoll': '中段加速 / 刹车', 'd.colDist': '距离', 'd.colRange': '速度区间',
+    'd.split': '分段', 'd.vs': '对比 Run {no}', 'd.empty': '此类别暂无成绩。',
+    'd.vsNote': '"对比 Run {no}"：绿色 (−) = 本次更快，红色 (+) = 更慢。',
+    'd.rollout': '1 英尺 Rollout', 'd.old': '此旧记录没有原始数据 — 无法显示 G 值/海拔曲线和 Rollout 开关。',
+    'd.note': 'G = 该点的纵向加速度。分段 = 与上一行的时间差。当 G 值骤降后回升时判定为换挡；"G 值损失" = G 值下降的幅度和持续时间。坡度和高差按加速阶段计算。',
+    'd.confirmDel': '删除 Run {no}？',
+    'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
+  }
+};
+
+let lang = 'ms';
+
+export function detectLang() {
+  const n = (typeof navigator !== 'undefined' && navigator.language || 'ms').toLowerCase();
+  if (n.startsWith('zh')) return 'zh';
+  if (n.startsWith('id')) return 'id';
+  if (n.startsWith('ms')) return 'ms';
+  if (n.startsWith('en')) return 'en';
+  return 'ms';
+}
+export function setLang(l) {
+  lang = D[l] ? l : 'ms';
+  if (typeof document !== 'undefined') document.documentElement.lang = lang;
+}
+export const getLang = () => lang;
+export const locale = () => LOCALE[lang];
+
+/** Terjemah kunci; {nama} digantikan dengan vars.nama. */
+export function t(key, vars) {
+  let s = D[lang][key] ?? D.ms[key] ?? key;
+  if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+  return s;
+}
+/** Label paparan bagi kunci metrik. */
+export const metric = k => D[lang]['m.' + k] ?? k;
+
+/** Isi semua elemen statik yang bertanda data-i18n*. */
+export function applyStatic(root = document) {
+  root.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  root.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  root.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+}
+
+export const _dict = D; // untuk ujian

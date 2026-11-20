@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 // Pembantu Web Bluetooth generik.
 export function bleSupported() {
   return typeof navigator !== 'undefined' && !!navigator.bluetooth;
@@ -13,7 +14,7 @@ export function bleSupported() {
  */
 export async function connectBle({ filters, acceptAllDevices, optionalServices, candidates, onData, onDisconnect }) {
   if (!bleSupported()) {
-    throw new Error('Pelayar ini tidak menyokong Web Bluetooth. Guna Chrome (Android/PC) atau Bluefy (iPhone).');
+    throw new Error(t('err.ble'));
   }
   const device = await navigator.bluetooth.requestDevice(
     acceptAllDevices ? { acceptAllDevices: true, optionalServices } : { filters, optionalServices });
@@ -32,7 +33,7 @@ export async function connectBle({ filters, acceptAllDevices, optionalServices, 
   }
   if (!notifyChar) {
     device.gatt.disconnect();
-    throw new Error('Servis data peranti tidak dijumpai.');
+    throw new Error(t('err.service'));
   }
   notifyChar.addEventListener('characteristicvaluechanged', ev => onData(ev.target.value));
   await notifyChar.startNotifications();

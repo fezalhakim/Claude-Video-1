@@ -13,37 +13,37 @@
 <body>
   <header class="top">
     <div class="brand"><img src="icon.svg" alt=""><span>P<b>GEAR</b></span></div>
-    <div id="conn" class="pill off">Tidak bersambung</div>
+    <div class="topR"><select id="langTop" class="langSel" aria-label="Language"></select><div id="conn" class="pill off" data-i18n="conn.off">Tidak bersambung</div></div>
   </header>
 
   <main>
     <section id="connectPanel" class="card">
-      <h2>Sambung peranti</h2>
+      <h2 data-i18n="h.connect">Sambung peranti</h2>
       <div class="devices">
         <button data-dev="racebox" class="dev"><span class="dot rb"></span>RaceBox<small>Mini / Mini S / Micro</small></button>
-        <button data-dev="dragy" class="dev"><span class="dot dg"></span>Dragy<small>GPS 10 Hz / Pro</small></button>
-        <button data-dev="phone" class="dev"><span class="dot ph"></span>GPS Telefon<small>~1 Hz, kurang tepat</small></button>
-        <button data-dev="sim" class="dev"><span class="dot sm"></span>Demo<small>Simulator larian</small></button>
+        <button data-dev="dragy" class="dev"><span class="dot dg"></span>Dragy<small data-i18n="dev.dg.sub">GPS 10 Hz / Pro</small></button>
+        <button data-dev="phone" class="dev"><span class="dot ph"></span><span data-i18n="dev.phone">GPS Telefon</span><small data-i18n="dev.phone.sub">~1 Hz, kurang tepat</small></button>
+        <button data-dev="sim" class="dev"><span class="dot sm"></span><span data-i18n="dev.demo">Demo</span><small data-i18n="dev.demo.sub">Simulator larian</small></button>
       </div>
-      <p id="bleWarn" class="warn" hidden>Pelayar ini tiada Web Bluetooth. Guna <b>Chrome</b> di Android/PC, atau aplikasi <b>Bluefy</b> di iPhone.</p>
+      <p id="bleWarn" class="warn" hidden data-i18n-html="ble.warn">Pelayar ini tiada Web Bluetooth. Guna <b>Chrome</b> di Android/PC, atau aplikasi <b>Bluefy</b> di iPhone.</p>
     </section>
 
     <section id="livePanel" class="card live" hidden>
       <div class="liveHead">
         <span id="devName">-</span>
-        <button id="disconnect" class="ghost">Putus</button>
+        <button id="disconnect" class="ghost" data-i18n="btn.disconnect">Putus</button>
       </div>
       <div class="speedo">
         <div id="speed" class="speed">0</div>
-        <div class="unit">km/j</div>
+        <div class="unit" data-i18n="kmh">km/j</div>
       </div>
-      <div id="runState" class="state wait">Tunggu kenderaan berhenti</div>
-      <div class="runline"><span>Masa <b id="elapsed">0.00</b> s</span><span>Jarak <b id="dist">0</b> m</span><span>Maks <b id="vmax">0</b> km/j</span></div>
+      <div id="runState" class="state wait" data-i18n="state.wait">Tunggu kenderaan berhenti</div>
+      <div class="runline"><span><span data-i18n="live.time">Masa</span> <b id="elapsed">0.00</b> s</span><span><span data-i18n="live.dist">Jarak</span> <b id="dist">0</b> m</span><span><span data-i18n="live.max">Maks</span> <b id="vmax">0</b> <span data-i18n="kmh">km/j</span></span></div>
       <div class="stats">
-        <div><small>Satelit</small><b id="sats">-</b></div>
-        <div><small>Fix</small><b id="fix">-</b></div>
-        <div><small>Kadar</small><b id="hz">-</b></div>
-        <div><small>Bateri</small><b id="bat">-</b></div>
+        <div><small data-i18n="st.sats">Satelit</small><b id="sats">-</b></div>
+        <div><small data-i18n="st.fix">Fix</small><b id="fix">-</b></div>
+        <div><small data-i18n="st.rate">Kadar</small><b id="hz">-</b></div>
+        <div><small data-i18n="st.bat">Bateri</small><b id="bat">-</b></div>
       </div>
       <div class="viz">
         <canvas id="gmeter" width="300" height="300" aria-label="G-meter"></canvas>
@@ -52,42 +52,43 @@
     </section>
 
     <section class="card">
-      <div class="rowhead"><h2>Keputusan larian</h2><div><button id="lastDetail" class="ghost" hidden>Lihat butiran</button> <button id="resetRun" class="ghost">Set semula</button></div></div>
+      <div class="rowhead"><h2 data-i18n="h.results">Keputusan larian</h2><div><button id="lastDetail" class="ghost" hidden data-i18n="btn.detail">Lihat butiran</button> <button id="resetRun" class="ghost" data-i18n="btn.reset">Set semula</button></div></div>
       <div id="results" class="results"></div>
     </section>
 
     <section class="card">
-      <div class="rowhead"><h2>Sejarah</h2>
-        <div><button id="exportCsv" class="ghost">Eksport CSV</button> <button id="clearHist" class="ghost danger">Padam semua</button></div>
+      <div class="rowhead"><h2 data-i18n="h.history">Sejarah</h2>
+        <div><button id="exportCsv" class="ghost" data-i18n="btn.csv">Eksport CSV</button> <button id="clearHist" class="ghost danger" data-i18n="btn.clear">Padam semua</button></div>
       </div>
       <div id="best" class="best"></div>
       <ol id="history" class="history"></ol>
     </section>
 
     <section class="card" id="compareCard">
-      <h2>Banding larian</h2>
+      <h2 data-i18n="h.compare">Banding larian</h2>
       <div class="cmpSel">
         <label><span class="tag a">A</span><select id="cmpA" aria-label="Larian A"></select></label>
         <span class="vs">vs</span>
         <label><span class="tag b">B</span><select id="cmpB" aria-label="Larian B"></select></label>
       </div>
-      <div class="axisSw"><button data-cx="t">Masa (s)</button><button data-cx="d" class="on">Jarak (m)</button></div>
+      <div class="axisSw"><button data-cx="t" data-i18n="axis.time">Masa (s)</button><button data-cx="d" class="on" data-i18n="axis.dist">Jarak (m)</button></div>
       <div id="cmpBody"></div>
     </section>
 
     <section class="card">
-      <h2>Tetapan</h2>
+      <h2 data-i18n="h.settings">Tetapan</h2>
       <div class="fields">
-        <label>Nama pemandu<input id="driver" maxlength="30" placeholder="cth. Faizal"></label>
-        <label>Kereta<input id="car" maxlength="40" placeholder="cth. Proton Satria Neo"></label>
+        <label><span data-i18n="set.lang">Bahasa</span><select id="lang"></select></label>
+        <label><span data-i18n="set.driver">Nama pemandu</span><input id="driver" maxlength="30" data-i18n-ph="ph.driver"></label>
+        <label><span data-i18n="set.car">Kereta</span><input id="car" maxlength="40" data-i18n-ph="ph.car"></label>
       </div>
-      <label class="toggle"><input type="checkbox" id="rollout"><span>Rollout 1 kaki (gaya dragstrip, masa lebih pantas ~0.2 s)</span></label>
-      <label class="toggle"><input type="checkbox" id="anyBle"><span>Dragy: tunjuk semua peranti BLE (jika nama peranti lain)</span></label>
-      <label class="toggle"><input type="checkbox" id="speak" checked><span>Umum keputusan dengan suara</span></label>
-      <label class="toggle"><input type="checkbox" id="weather" checked><span>Ambil suhu &amp; tekanan udara dari internet untuk kira DA (lokasi larian dihantar ke open-meteo.com)</span></label>
+      <label class="toggle"><input type="checkbox" id="rollout"><span data-i18n="set.rollout"></span></label>
+      <label class="toggle"><input type="checkbox" id="anyBle"><span data-i18n="set.anyBle"></span></label>
+      <label class="toggle"><input type="checkbox" id="speak" checked><span data-i18n="set.speak"></span></label>
+      <label class="toggle"><input type="checkbox" id="weather" checked><span data-i18n="set.weather"></span></label>
     </section>
 
-    <p class="foot">PGear · Masa dikira dari cap masa GNSS peranti &amp; diinterpolasi antara sampel. Gunakan hanya di litar / kawasan tertutup.</p>
+    <p class="foot" data-i18n="foot"></p>
   </main>
 
   <div id="detail" class="detail" hidden role="dialog" aria-modal="true" aria-label="Butiran larian"></div>

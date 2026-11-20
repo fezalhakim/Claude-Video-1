@@ -1,5 +1,6 @@
 // Skrin "Butiran larian": ringkasan, graf G/ketinggian/kelajuan, jadual split, togol rollout.
 import { analyze } from './analysis.js';
+import { t, metric, locale } from './i18n.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const f2 = x => (x == null || !isFinite(x) ? '–' : x.toFixed(2));
@@ -37,73 +38,73 @@ function render() {
   const mainB = b?.results[state.focus];
 
   el.innerHTML = `<div class="dwrap">
-    <div class="dtop"><button class="ghost" data-act="close">‹ Kembali</button>
-      <h3>Run ${run.no}</h3><button class="ghost danger" data-act="del">Padam</button></div>
+    <div class="dtop"><button class="ghost" data-act="close">${t('d.back')}</button>
+      <h3>Run ${run.no}</h3><button class="ghost danger" data-act="del">${t('d.del')}</button></div>
 
     <div class="hero">
-      <div class="main"><small>Keputusan ${esc(state.focus || '')}</small><b>${f2(main?.time)}</b><i>s</i>${b ? `<span class="hdelta">${delta(main?.time, mainB?.time)} vs Run ${oRun.no}</span>` : ''}</div>
-      <div><small>G maks</small><b>${a.maxG == null ? '–' : a.maxG.toFixed(2)}</b><i>g</i></div>
-      <div><small>Laju maks</small><b>${a.maxKmh == null ? '–' : a.maxKmh.toFixed(1)}</b><i>km/j</i></div>
+      <div class="main"><small>${t('d.result', { k: esc(metric(state.focus || '')) })}</small><b>${f2(main?.time)}</b><i>s</i>${b ? `<span class="hdelta">${delta(main?.time, mainB?.time)} ${t('d.vs', { no: oRun.no })}</span>` : ''}</div>
+      <div><small>${t('d.maxG')}</small><b>${a.maxG == null ? '–' : a.maxG.toFixed(2)}</b><i>g</i></div>
+      <div><small>${t('d.maxV')}</small><b>${a.maxKmh == null ? '–' : a.maxKmh.toFixed(1)}</b><i>${t('kmh')}</i></div>
     </div>
 
-    <div class="dcar"><span class="who">${esc(run.driver || 'Pemandu')}</span>
-      <input id="dCar" maxlength="40" placeholder="Nama kereta" value="${esc(run.car)}" aria-label="Nama kereta"></div>
+    <div class="dcar"><span class="who">${esc(run.driver || t('d.driver'))}</span>
+      <input id="dCar" maxlength="40" placeholder="${t('d.carPh')}" value="${esc(run.car)}" aria-label="${t('d.carPh')}"></div>
 
     <div class="info">
-      <div><small>Satelit</small><b>${a.sats ?? '–'}</b></div>
-      <div><small>Cerun</small><b>${a.slope == null ? '–' : (a.slope > 0 ? '+' : '') + a.slope.toFixed(2) + '%'}</b></div>
-      <div><small>DA</small><b>${a.da == null ? '–' : a.da.toFixed(0) + ' m'}</b></div>
-      <div><small>Beza tinggi</small><b>${a.elev == null ? '–' : (a.elev > 0 ? '+' : '') + a.elev.toFixed(1) + ' m'}</b></div>
-      <div><small>Suhu</small><b>${a.temp == null ? '–' : a.temp.toFixed(1) + '°C'}</b></div>
+      <div><small>${t('d.sats')}</small><b>${a.sats ?? '–'}</b></div>
+      <div><small>${t('d.slope')}</small><b>${a.slope == null ? '–' : (a.slope > 0 ? '+' : '') + a.slope.toFixed(2) + '%'}</b></div>
+      <div><small>${t('d.da')}</small><b>${a.da == null ? '–' : a.da.toFixed(0) + ' m'}</b></div>
+      <div><small>${t('d.elev')}</small><b>${a.elev == null ? '–' : (a.elev > 0 ? '+' : '') + a.elev.toFixed(1) + ' m'}</b></div>
+      <div><small>${t('d.temp')}</small><b>${a.temp == null ? '–' : a.temp.toFixed(1) + '°C'}</b></div>
     </div>
 
-    <div class="chips">${keys.map(k => `<button data-focus="${esc(k)}" class="${k === state.focus ? 'on' : ''}">${esc(k)}</button>`).join('')}</div>
+    <div class="chips">${keys.map(k => `<button data-focus="${esc(k)}" class="${k === state.focus ? 'on' : ''}">${esc(metric(k))}</button>`).join('')}</div>
 
     <div class="cmpPick">
-      <label for="dCmp">Banding dengan</label>
-      <select id="dCmp"><option value="">— Tiada —</option>${others.map(h => {
+      <label for="dCmp">${t('d.cmpWith')}</label>
+      <select id="dCmp"><option value="">${t('d.none')}</option>${others.map(h => {
         const dt = new Date(h.at);
         return `<option value="${h.no}" ${h.no === state.cmpNo ? 'selected' : ''}>Run ${h.no} · ${dt.getDate()}/${dt.getMonth() + 1} ${dt.toTimeString().slice(0, 5)}${h.car ? ' · ' + esc(h.car) : ''}${h.results[state.focus] ? ' · ' + h.results[state.focus].time.toFixed(2) + 's' : ''}</option>`;
       }).join('')}</select>
     </div>
 
     <div class="dchart">
-      <div class="axisSw"><button data-x="t" class="${state.xAxis === 't' ? 'on' : ''}">Masa (s)</button><button data-x="d" class="${state.xAxis === 'd' ? 'on' : ''}">Jarak (m)</button></div>
-      <div class="legend"><span style="--c:${COL.g}">Pecutan (g)</span><span style="--c:${COL.alt}">Ketinggian (m)</span><span style="--c:${COL.v}">Kelajuan (km/j)</span>${a.shifts.length ? `<span style="--c:${COL.shift}">Tukar gear</span>` : ''}${b ? `<span class="dash" style="--c:${COL.other}">Run ${oRun.no} (kelajuan)</span>` : ''}</div>
+      <div class="axisSw"><button data-x="t" class="${state.xAxis === 't' ? 'on' : ''}">${t('axis.time')}</button><button data-x="d" class="${state.xAxis === 'd' ? 'on' : ''}">${t('axis.dist')}</button></div>
+      <div class="legend"><span style="--c:${COL.g}">${t('d.lgG')}</span><span style="--c:${COL.alt}">${t('d.lgAlt')}</span><span style="--c:${COL.v}">${t('d.lgV')}</span>${a.shifts.length ? `<span style="--c:${COL.shift}">${t('d.lgShift')}</span>` : ''}${b ? `<span class="dash" style="--c:${COL.other}">${t('d.lgOther', { no: oRun.no })}</span>` : ''}</div>
       <canvas id="dCanvas" width="700" height="440" aria-label="Graf larian"></canvas>
     </div>
 
-    ${a.shifts.length ? `<h4 class="sub">Tukar gear</h4><table class="splits gears"><thead><tr>
-      <th>Gear</th><th>Jarak m</th><th>Laju km/j</th><th>Masa s</th>${b ? `<th>Run ${oRun.no}</th>` : '<th>G hilang</th>'}</tr></thead>
+    ${a.shifts.length ? `<h4 class="sub">${t('d.shifts')}</h4><table class="splits gears"><thead><tr>
+      <th>${t('d.gear')}</th><th>${t('d.distM')}</th><th>${t('d.speedKmh')}</th><th>${t('d.timeS')}</th>${b ? `<th>Run ${oRun.no}</th>` : `<th>${t('d.gLost')}</th>`}</tr></thead>
       <tbody>${a.shifts.map((g, i) => { const o = b?.shifts[i]; return `<tr><td><span class="gearTag">${i + 1}→${i + 2}</span></td><td>${g.d.toFixed(1)}</td>
         <td>${g.v.toFixed(1)}</td><td>${g.t.toFixed(2)}</td>${b
           ? `<td class="oth">${o ? `<span class="nw">${o.d.toFixed(0)} m · ${o.v.toFixed(0)}</span><br><span class="dm">(${g.d < o.d ? '−' : '+'}${Math.abs(g.d - o.d).toFixed(0)} m)</span>` : '–'}</td>`
           : `<td class="g">−${g.drop.toFixed(2)}g · ${g.dur.toFixed(2)}s</td>`}</tr>`; }).join('')}</tbody></table>`
-      : a.hasRaw ? '<p class="note">Tiada tukar gear dikesan dalam larian ini.</p>' : ''}
+      : a.hasRaw ? `<p class="note">${t('d.noShift')}</p>` : ''}
 
     <div class="tabs">
-      <button data-tab="dist" class="${state.tab === 'dist' ? 'on' : ''}">Jarak</button>
-      <button data-tab="speed" class="${state.tab === 'speed' ? 'on' : ''}">Kelajuan</button>
-      <button data-tab="roll" class="${state.tab === 'roll' ? 'on' : ''}">Bergolek / Brek</button>
+      <button data-tab="dist" class="${state.tab === 'dist' ? 'on' : ''}">${t('d.tabDist')}</button>
+      <button data-tab="speed" class="${state.tab === 'speed' ? 'on' : ''}">${t('d.tabSpeed')}</button>
+      <button data-tab="roll" class="${state.tab === 'roll' ? 'on' : ''}">${t('d.tabRoll')}</button>
     </div>
     ${tabRows.length ? `<table class="splits ${b ? 'withCmp' : ''}"><thead><tr>
-      <th>${state.tab === 'dist' ? 'Jarak' : 'Julat km/j'}</th><th>G</th><th>${state.tab === 'dist' ? 'Laju km/j' : 'Jarak m'}</th><th>Split</th><th>Masa s</th>${b ? `<th>vs Run ${oRun.no}</th>` : ''}</tr></thead>
+      <th>${state.tab === 'dist' ? t('d.colDist') : t('d.colRange')}</th><th>G</th><th>${state.tab === 'dist' ? t('d.speedKmh') : t('d.distM')}</th><th>${t('d.split')}</th><th>${t('d.timeS')}</th>${b ? `<th>${t('d.vs', { no: oRun.no })}</th>` : ''}</tr></thead>
       <tbody>${tabRows.map(r => `<tr>
-        <td>${esc(r.key)}</td>
+        <td>${esc(metric(r.key))}</td>
         <td class="g">${r.g == null ? '–' : r.g.toFixed(2) + 'g'}</td>
         <td>${state.tab === 'dist' ? f2(r.speed) : r.dist == null ? '–' : r.dist.toFixed(1)}</td>
         <td class="sp">${r.split == null ? '' : '+' + r.split.toFixed(2)}</td>
         <td class="tm">${f2(r.time)}</td>${b ? `<td class="dl">${delta(r.time, b.results[r.key]?.time)}</td>` : ''}</tr>`).join('')}</tbody></table>
-      ${b ? `<p class="note">"vs Run ${oRun.no}": hijau (−) = larian ini lebih pantas, merah (+) = lebih perlahan.</p>` : ''}`
-      : '<p class="empty">Tiada keputusan dalam kategori ini.</p>'}
+      ${b ? `<p class="note">${t('d.vsNote', { no: oRun.no })}</p>` : ''}`
+      : `<p class="empty">${t('d.empty')}</p>`}
 
     <div class="dfoot">
       <label class="toggle"><input type="checkbox" id="dRoll" ${state.rollout ? 'checked' : ''} ${a.hasRaw ? '' : 'disabled'}>
-        <span>Rollout 1 kaki</span></label>
-      <span class="note">${d.toLocaleDateString('ms-MY')} ${d.toLocaleTimeString('ms-MY')} · ${esc(run.device)}</span>
+        <span>${t('d.rollout')}</span></label>
+      <span class="note">${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale())} · ${esc(run.device)}</span>
     </div>
-    ${a.hasRaw ? '' : '<p class="note">Larian lama ini tiada data mentah — graf G/ketinggian dan togol rollout tidak tersedia.</p>'}
-    <p class="note">G = pecutan membujur pada titik itu. Split = masa dari baris sebelumnya. Tukar gear dikesan bila G jatuh mendadak lalu pulih; "G hilang" = berapa banyak G jatuh dan berapa lama. Cerun &amp; beza tinggi diukur sepanjang fasa pecutan.</p>
+    ${a.hasRaw ? '' : `<p class="note">${t('d.old')}</p>`}
+    <p class="note">${esc(t('d.note'))}</p>
   </div>`;
 
   draw(el.querySelector('#dCanvas'), a, main?.time, state.xAxis, b);
@@ -111,7 +112,7 @@ function render() {
   el.onclick = e => {
     const t = e.target;
     if (t.dataset.act === 'close') return close();
-    if (t.dataset.act === 'del') { if (confirm(`Padam Run ${run.no}?`)) { state.onDelete(); close(); } return; }
+    if (t.dataset.act === 'del') { if (confirm(t('d.confirmDel', { no: run.no }))) { state.onDelete(); close(); } return; }
     if (t.dataset.focus) { state.focus = t.dataset.focus; return render(); }
     if (t.dataset.tab) { state.tab = t.dataset.tab; return render(); }
     if (t.dataset.x) { state.xAxis = t.dataset.x; return render(); }
@@ -126,7 +127,7 @@ function draw(c, a, tEnd, xk = 't', b = null) {
   const L = 78, R = 56, T = 14, B = 44, w = W - L - R, h = H - T - B;
   x.clearRect(0, 0, W, H);
   const s = a.series.filter(p => p.t >= 0);
-  if (s.length < 2) { x.fillStyle = COL.text; x.font = '20px system-ui'; x.fillText('Tiada data graf', W / 2 - 70, H / 2); return; }
+  if (s.length < 2) { x.fillStyle = COL.text; x.font = '20px system-ui'; x.textAlign = 'center'; x.fillText(t('chart.nodata'), W / 2, H / 2); x.textAlign = 'left'; return; }
   const tMax = tEnd && tEnd > 0.5 ? tEnd : s[s.length - 1].t;
   const pts = s.filter(p => p.t <= tMax + 1e-6);
   const xMax = xk === 't' ? tMax : Math.max(1, pts[pts.length - 1].d);
@@ -162,7 +163,7 @@ function draw(c, a, tEnd, xk = 't', b = null) {
     x.textAlign = 'right'; x.fillStyle = COL.g; x.fillText((gBot + (gTop - gBot) * fr).toFixed(1), L - 6, y + 6);
     if (av.length) { x.fillStyle = COL.alt; x.fillText((aMid - aSpan / 2 + aSpan * fr).toFixed(0), L - 42, y + 6); }
   }
-  x.setLineDash([]); x.textAlign = 'right'; x.fillStyle = COL.text; x.fillText(xk === 't' ? 'Masa (s)' : 'Jarak (m)', L + w, H - 1);
+  x.setLineDash([]); x.textAlign = 'right'; x.fillStyle = COL.text; x.fillText(xk === 't' ? t('axis.time') : t('axis.dist'), L + w, H - 1);
 
   const area = (key, Y, col, base) => {
     x.beginPath(); pts.forEach((p, i) => (i ? x.lineTo(X(p[xk]), Y(p[key])) : x.moveTo(X(p[xk]), Y(p[key]))));
