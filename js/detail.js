@@ -8,8 +8,10 @@ const COL = { other: '#e8ecf1', shift: '#c58bff', g: '#ffb340', alt: '#30d158', 
 
 let state = null;
 
-export function openDetail(run, el, { onChange, onDelete, runs = [], customDist = [] }) {
-  state = { run, el, onChange, onDelete, runs, customDist, rollout: !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
+export function openDetail(run, el, { onChange, onDelete, runs = [], customDist = [], rollout }) {
+  // ikut tetapan rollout semasa jika larian ada data mentah (boleh dikira semula); jika tidak, ikut cara ia direkod
+  const canRecalc = !!run.raw?.d?.length;
+  state = { run, el, onChange, onDelete, runs, customDist, rollout: canRecalc && rollout != null ? !!rollout : !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
   el.hidden = false; document.body.style.overflow = 'hidden';
   render();
 }

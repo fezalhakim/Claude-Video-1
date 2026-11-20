@@ -26,8 +26,11 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
 };
 
-let conn = null, history = store.get(HKEY, []), settings = { rollout: false, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
+let conn = null, history = store.get(HKEY, []), settings = { rollout: true, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
 setLang(settings.lang);
+// Rollout 1 kaki ON secara lalai. Hanya ikut nilai tersimpan jika pengguna sendiri pernah menukarnya
+// (tetapan lama mungkin menyimpan rollout:false secara automatik walaupun tidak pernah disentuh).
+if (!settings.rolloutUser) settings.rollout = true;
 // beri nombor run kepada rekod lama (yang belum bernombor)
 { let n = 0; for (let i = history.length - 1; i >= 0; i--) { if (history[i].no) n = Math.max(n, history[i].no); else history[i].no = ++n; } }
 let cmp = { a: null, b: null, x: 'd' };
@@ -86,8 +89,9 @@ for (const k of ['driver', 'car']) {
 for (const k of ['rollout', 'anyBle', 'speak', 'weather']) {
   $(k).checked = !!settings[k];
   $(k).addEventListener('change', () => {
-    settings[k] = $(k).checked; store.set(SKEY, settings);
-    if (k === 'rollout') timer.rollout = settings.rollout;
+    settings[k] = $(k).checked;
+    if (k === 'rollout') { settings.rolloutUser = true; timer.rollout = settings.rollout; }
+    store.set(SKEY, settings);
   });
 }
 if (!bleSupported()) $('bleWarn').hidden = false;
@@ -351,7 +355,7 @@ async function fetchWeather(run) {
 function showDetail(no) {
   const run = byNo(no); if (!run) return;
   openDetail(run, $('detail'), {
-    runs: history, customDist: settings.customDist,
+    runs: history, customDist: settings.customDist, rollout: settings.rollout,
     onChange: () => { persist(); renderHistory(); },
     onDelete: () => removeRun(run.no)
   });

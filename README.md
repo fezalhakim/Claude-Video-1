@@ -8,7 +8,7 @@ Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS *
 - **Sambung terus** ke RaceBox Mini / Mini S / Micro, Dragy, GPS telefon, atau mod Demo (simulator).
 - **Pengukuran:** 0-60, 0-100, 0-150, 0-200, 60-100, 80-120, 100-200 km/j, 60ft, 100ft, 330ft, 1/8 batu, 1000ft, 1/4 batu (dengan trap speed), dan brek 100-0.
 - **Jarak tersuai** (Tetapan): tambah sehingga 10 jarak sendiri dalam m, ft atau batu (cth. 500 m, 1 km, 800 ft). Setiap ujian jarak tunjuk masa, laju di garisan dan **laju maksimum** dalam jarak itu. Larian lama yang ada data penuh dikira semula secara automatik.
-- Mula automatik bila kenderaan bergerak dari pegun; pilihan **rollout 1 kaki**.
+- Mula automatik bila kenderaan bergerak dari pegun; **rollout 1 kaki ON secara lalai** (boleh dimatikan di Tetapan).
 - Masa dikira dari **cap masa GNSS peranti** dan diinterpolasi antara sampel (bukan masa ketibaan Bluetooth).
 - Paparan langsung: kelajuan, satelit, fix, kadar Hz, bateri, G-meter, graf kelajuan.
 - Sejarah larian bernombor (Run 1, Run 2, ...), rekod terbaik, eksport CSV, pengumuman suara.
