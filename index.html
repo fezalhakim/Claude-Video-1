@@ -7,7 +7,12 @@
   <title>MGear</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MGear">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,6 +20,13 @@
     <div class="brand"><img src="icon.svg" alt=""><span>M<b>GEAR</b></span></div>
     <div class="topR"><select id="langTop" class="langSel" aria-label="Language"></select><div id="conn" class="pill off" data-i18n="conn.off">Tidak bersambung</div></div>
   </header>
+
+  <div id="installBar" class="installBar" hidden>
+    <img src="icons/icon-192.png" alt="">
+    <div><b data-i18n="inst.title"></b><span id="installHow"></span></div>
+    <button id="installBtn" class="primary sm" hidden data-i18n="inst.btn"></button>
+    <button id="installX" class="x" aria-label="×">×</button>
+  </div>
 
   <main>
    <div class="view" data-view="measure">
@@ -29,6 +41,11 @@
       </div>
       <p id="bleWarn" class="warn" hidden data-i18n-html="ble.warn">Pelayar ini tiada Web Bluetooth. Guna <b>Chrome</b> di Android/PC, atau aplikasi <b>Bluefy</b> di iPhone.</p>
       <p class="tip" data-i18n="help.tip"></p>
+      <div id="iosBle" class="iosBox" hidden>
+        <b data-i18n="ios.bleTitle"></b>
+        <p data-i18n="ios.bleBody"></p>
+        <a class="ghost wide" href="https://apps.apple.com/search?term=Bluefy" target="_blank" rel="noopener" data-i18n="ios.getBluefy"></a>
+      </div>
     </section>
 
     <section id="livePanel" class="card live" hidden>

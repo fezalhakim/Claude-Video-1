@@ -61,6 +61,8 @@ const D = {
     'onb.t3': 'Pecut!', 'onb.b3': 'Masa bermula sendiri bila kenderaan bergerak, dan disimpan bila anda berhenti. Lihat semua larian dalam tab Sejarah.',
     'live.top': 'Laju maks',
     'conn.reconnecting': 'Menyambung semula…', 'conn.lost': 'Sambungan terputus — menyambung semula…', 'conn.resume': '↻ Sambung semula: {name}',
+    'ios.bleTitle': 'iPhone: RaceBox / Dragy perlukan Bluefy', 'ios.bleBody': 'Safari di iPhone tidak boleh sambung ke peranti Bluetooth. Muat turun app percuma Bluefy, kemudian buka link MGear di dalam Bluefy. GPS Telefon dan Demo berfungsi di Safari.', 'ios.getBluefy': 'Dapatkan Bluefy di App Store',
+    'inst.title': 'Pasang MGear', 'inst.btn': 'Pasang', 'inst.ios': 'Tekan Kongsi ⬆︎ kemudian "Add to Home Screen".', 'inst.android': 'Guna skrin penuh & elak refresh tak sengaja.',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -120,6 +122,8 @@ const D = {
     'onb.t3': 'Launch!', 'onb.b3': 'Timing starts by itself when the vehicle moves and is saved when you stop. See every run in the History tab.',
     'live.top': 'Top speed',
     'conn.reconnecting': 'Reconnecting…', 'conn.lost': 'Connection lost — reconnecting…', 'conn.resume': '↻ Reconnect: {name}',
+    'ios.bleTitle': 'iPhone: RaceBox / Dragy need Bluefy', 'ios.bleBody': 'Safari on iPhone cannot connect to Bluetooth devices. Download the free Bluefy app, then open the MGear link inside Bluefy. Phone GPS and Demo work in Safari.', 'ios.getBluefy': 'Get Bluefy on the App Store',
+    'inst.title': 'Install MGear', 'inst.btn': 'Install', 'inst.ios': 'Tap Share ⬆︎ then "Add to Home Screen".', 'inst.android': 'Full screen & no accidental refresh.',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -179,6 +183,8 @@ const D = {
     'onb.t3': 'Gas!', 'onb.b3': 'Waktu mulai otomatis saat kendaraan bergerak dan disimpan saat Anda berhenti. Lihat semua run di tab Riwayat.',
     'live.top': 'Kecepatan maks',
     'conn.reconnecting': 'Menghubungkan ulang…', 'conn.lost': 'Koneksi terputus — menghubungkan ulang…', 'conn.resume': '↻ Hubungkan ulang: {name}',
+    'ios.bleTitle': 'iPhone: RaceBox / Dragy butuh Bluefy', 'ios.bleBody': 'Safari di iPhone tidak bisa terhubung ke perangkat Bluetooth. Unduh aplikasi gratis Bluefy, lalu buka link MGear di dalam Bluefy. GPS Ponsel dan Demo berfungsi di Safari.', 'ios.getBluefy': 'Dapatkan Bluefy di App Store',
+    'inst.title': 'Pasang MGear', 'inst.btn': 'Pasang', 'inst.ios': 'Ketuk Bagikan ⬆︎ lalu "Add to Home Screen".', 'inst.android': 'Layar penuh & tanpa refresh tak sengaja.',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -238,6 +244,8 @@ const D = {
     'onb.t3': '起步！', 'onb.b3': '车辆一动自动开始计时，停车后自动保存。在"历史记录"中查看所有成绩。',
     'live.top': '最高速度',
     'conn.reconnecting': '正在重新连接…', 'conn.lost': '连接中断 — 正在重新连接…', 'conn.resume': '↻ 重新连接：{name}',
+    'ios.bleTitle': 'iPhone：RaceBox / Dragy 需要 Bluefy', 'ios.bleBody': 'iPhone 上的 Safari 无法连接蓝牙设备。请下载免费应用 Bluefy，然后在 Bluefy 中打开 MGear 链接。手机 GPS 和演示可在 Safari 中使用。', 'ios.getBluefy': '在 App Store 获取 Bluefy',
+    'inst.title': '安装 MGear', 'inst.btn': '安装', 'inst.ios': '点击分享 ⬆︎，然后选择"添加到主屏幕"。', 'inst.android': '全屏使用，避免误刷新。',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };

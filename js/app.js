@@ -94,7 +94,10 @@ for (const k of ['rollout', 'anyBle', 'speak', 'weather']) {
     store.set(SKEY, settings);
   });
 }
-if (!bleSupported()) $('bleWarn').hidden = false;
+// iPhone/iPad (termasuk iPad yang mengaku Mac)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+if (!bleSupported()) { if (isIOS) $('iosBle').hidden = false; else $('bleWarn').hidden = false; }
 
 // ---------- Enjin masa ----------
 const timer = new PerfTimer({
@@ -582,3 +585,21 @@ if (!settings.onboarded) openOnb();
 // pulihkan laju maks & sambungan selepas refresh
 { const s0 = sess.get(); if (s0.top > 0) { topKmh = s0.top; $('topSpeed').textContent = topKmh.toFixed(1); } }
 resumeSession();
+
+// ---------- Panduan pasang (iPhone: arahan; Android: butang Pasang) ----------
+let installEvt = null;
+function showInstall(how) {
+  if (isStandalone || settings.installDismissed) return;
+  $('installHow').textContent = how; $('installBar').hidden = false;
+}
+$('installX').addEventListener('click', () => { $('installBar').hidden = true; settings.installDismissed = true; store.set(SKEY, settings); });
+// iPhone hanya boleh dipasang dari Safari (Bluefy/Chrome iOS tiada "Add to Home Screen" untuk PWA penuh)
+if (isIOS && !isStandalone && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent) && bleSupported() === false) showInstall(t('inst.ios'));
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); installEvt = e; $('installBtn').hidden = false; showInstall(t('inst.android'));
+});
+$('installBtn').addEventListener('click', async () => {
+  if (!installEvt) return;
+  installEvt.prompt(); await installEvt.userChoice.catch(() => {}); installEvt = null; $('installBar').hidden = true;
+});
+window.addEventListener('appinstalled', () => { $('installBar').hidden = true; });
