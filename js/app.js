@@ -8,7 +8,7 @@ import { importRuns, templateCSV, runFingerprint } from './importer.js';
 import { ocrImage, parseReportText } from './ocrimport.js';
 import { digitizeChart } from './chartdigitize.js';
 import { t, metric, setLang, getLang, locale, applyStatic, detectLang, LANGS } from './i18n.js';
-import { packSamples, analyze } from './analysis.js';
+import { packSamples, analyze, unpackSamples, recompute } from './analysis.js';
 import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets, customKey, isDistKey, UNIT_M } from './perf.js';
 
 const $ = id => document.getElementById(id);
@@ -744,7 +744,37 @@ document.addEventListener('pointerdown', () => { if (conn && awakeMode !== 'lock
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && conn) keepAwake(true); });
 document.addEventListener('pgear:lang', updateAwake);
 
-if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+// ---------- Kemas kini app ----------
+const APP_VERSION = '32';
+$('appVer').textContent = 'v' + APP_VERSION;
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // semak versi baru setiap kali app dibuka semula
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+  }).catch(() => {});
+  let shown = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || shown) return; shown = true;
+    if (conn && timer.state === 'run') return;                   // jangan ganggu larian yang sedang direkod
+    toast(t('upd.ready'), t('upd.reload'), () => location.reload());
+  });
+}
+
+// Pindahan data: 0-100 & ujian kelajuan kini dari pegun (tanpa rollout). Kira semula larian lama yang ada data penuh.
+{
+  let changed = 0;
+  for (const h of history) {
+    if (h.speedFromStandstill || h.imported || !h.rollout || !h.raw?.d?.length) { h.speedFromStandstill = true; continue; }
+    try {
+      const f = recompute(unpackSamples(h.raw), true, h.customDist || []);
+      if (f) for (const [k, r] of Object.entries(f.results)) if (/^0-\d+$/.test(k)) h.results[k] = r;
+      changed++;
+    } catch { /* biarkan nilai lama */ }
+    h.speedFromStandstill = true;
+  }
+  if (changed) persist();
+}
 
 rebuildKeys(); renderCustom(); renderShown(); renderResults(); renderHistory();
 if (!settings.onboarded) openOnb();

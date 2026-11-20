@@ -77,6 +77,7 @@ const D = {
     'ocr.fail': 'Gagal membaca gambar (perlu internet untuk memuat pembaca teks kali pertama).', 'ocr.add': '+ Tambah metrik', 'ocr.when': 'Tarikh & masa', 'ocr.device': 'Peranti',
     'ocr.skip': 'Langkau', 'ocr.save': 'Simpan larian', 'ocr.metric': 'Metrik', 'ocr.time': 'Masa (s)', 'ocr.trap': 'Laju km/j', 'ocr.cond': 'Keadaan: {c}', 'ocr.saved': 'Larian disimpan', 'ocr.needOne': 'Masukkan sekurang-kurangnya satu masa.',
     'ocr.graph': '📈 Graf dikesan — graf kelajuan, G & ketinggian akan disimpan (metrik lain dikira dari graf).', 'ocr.noGraph': 'Graf tidak dikesan — hanya keputusan masa disimpan.', 'd.fromShot': 'Graf dibina semula dari screenshot — anggaran; nilai dari jadual screenshot digunakan jika ada.',
+    'upd.ready': 'Versi baru MGear tersedia.', 'upd.reload': 'Muat semula', 'upd.version': 'Versi',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -152,6 +153,7 @@ const D = {
     'ocr.fail': 'Could not read the image (internet is needed to load the text reader the first time).', 'ocr.add': '+ Add metric', 'ocr.when': 'Date & time', 'ocr.device': 'Device',
     'ocr.skip': 'Skip', 'ocr.save': 'Save run', 'ocr.metric': 'Metric', 'ocr.time': 'Time (s)', 'ocr.trap': 'Speed km/h', 'ocr.cond': 'Conditions: {c}', 'ocr.saved': 'Run saved', 'ocr.needOne': 'Enter at least one time.',
     'ocr.graph': '📈 Graph detected — speed, G & altitude graph will be saved (other metrics are computed from it).', 'ocr.noGraph': 'Graph not detected — only times will be saved.', 'd.fromShot': 'Graph rebuilt from a screenshot — approximate; values from the screenshot table are used when available.',
+    'upd.ready': 'A new MGear version is available.', 'upd.reload': 'Reload', 'upd.version': 'Version',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -227,6 +229,7 @@ const D = {
     'ocr.fail': 'Gagal membaca gambar (perlu internet untuk memuat pembaca teks pertama kali).', 'ocr.add': '+ Tambah metrik', 'ocr.when': 'Tanggal & waktu', 'ocr.device': 'Perangkat',
     'ocr.skip': 'Lewati', 'ocr.save': 'Simpan run', 'ocr.metric': 'Metrik', 'ocr.time': 'Waktu (s)', 'ocr.trap': 'Kecepatan km/j', 'ocr.cond': 'Kondisi: {c}', 'ocr.saved': 'Run disimpan', 'ocr.needOne': 'Masukkan minimal satu waktu.',
     'ocr.graph': '📈 Grafik terdeteksi — grafik kecepatan, G & ketinggian akan disimpan (metrik lain dihitung dari grafik).', 'ocr.noGraph': 'Grafik tidak terdeteksi — hanya waktu yang disimpan.', 'd.fromShot': 'Grafik dibangun ulang dari screenshot — perkiraan; nilai dari tabel screenshot dipakai jika ada.',
+    'upd.ready': 'Versi baru MGear tersedia.', 'upd.reload': 'Muat ulang', 'upd.version': 'Versi',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -302,6 +305,7 @@ const D = {
     'ocr.fail': '无法识别图片（首次加载文字识别需要联网）。', 'ocr.add': '+ 添加项目', 'ocr.when': '日期和时间', 'ocr.device': '设备',
     'ocr.skip': '跳过', 'ocr.save': '保存', 'ocr.metric': '项目', 'ocr.time': '时间 (秒)', 'ocr.trap': '速度 km/h', 'ocr.cond': '条件：{c}', 'ocr.saved': '已保存', 'ocr.needOne': '请至少输入一个时间。',
     'ocr.graph': '📈 已识别曲线 — 将保存速度、G 值和海拔曲线（其他成绩由曲线计算）。', 'ocr.noGraph': '未识别到曲线 — 仅保存时间。', 'd.fromShot': '曲线由截图重建 — 为估算值；如截图表格中有数值则以其为准。',
+    'upd.ready': 'MGear 有新版本。', 'upd.reload': '重新加载', 'upd.version': '版本',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
