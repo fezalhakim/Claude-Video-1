@@ -1,4 +1,4 @@
-# PGear — Performance Meter (RaceBox & Dragy)
+# MGear — Performance Meter (RaceBox & Dragy)
 
 Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS **RaceBox** atau **Dragy** melalui Bluetooth (Web Bluetooth). Boleh dipasang ke skrin utama telefon dan berfungsi luar talian.
 
@@ -23,7 +23,7 @@ Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS *
 
 ## Protokol
 - **RaceBox:** protokol BLE rasmi (Nordic UART, paket UBX `0xFF 0x01`, 80 bait, sehingga 25 Hz) — termasuk data G-force & bateri.
-- **Dragy:** protokol tidak didokumenkan secara rasmi. PGear membaca aliran NMEA (RMC/GGA) melalui servis UART BLE biasa (FFE0, FFF0, Nordic UART, ISSC). Jika peranti anda tidak dikesan, hidupkan tetapan *"tunjuk semua peranti BLE"*. **Perlu diuji dengan peranti sebenar.**
+- **Dragy:** protokol tidak didokumenkan secara rasmi. MGear membaca aliran NMEA (RMC/GGA) melalui servis UART BLE biasa (FFE0, FFF0, Nordic UART, ISSC). Jika peranti anda tidak dikesan, hidupkan tetapan *"tunjuk semua peranti BLE"*. **Perlu diuji dengan peranti sebenar.**
 
 ## Ujian
 ```

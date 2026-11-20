@@ -1,7 +1,7 @@
 {
-  "name": "pgear",
+  "name": "mgear",
   "version": "1.0.0",
-  "description": "PGear - performance meter app untuk RaceBox & Dragy (Web Bluetooth PWA)",
+  "description": "MGear - performance meter app untuk RaceBox & Dragy (Web Bluetooth PWA)",
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",

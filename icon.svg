@@ -4,5 +4,5 @@
   <path d="M96 352a160 160 0 0 1 250-132" fill="none" stroke="#ff3b30" stroke-width="36" stroke-linecap="round"/>
   <line x1="256" y1="352" x2="352" y2="236" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
   <circle cx="256" cy="352" r="26" fill="#fff"/>
-  <text x="256" y="452" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="72" text-anchor="middle" fill="#fff">PGEAR</text>
+  <text x="256" y="452" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="72" text-anchor="middle" fill="#fff">MGEAR</text>
 </svg>

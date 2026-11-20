@@ -1,6 +1,6 @@
 {
-  "name": "PGear Performance Meter",
-  "short_name": "PGear",
+  "name": "MGear Performance Meter",
+  "short_name": "MGear",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
