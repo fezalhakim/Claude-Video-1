@@ -69,3 +69,17 @@ test('laju maks dalam jarak: angkat minyak sebelum garisan', () => {
   assert.ok(q.vmax > q.trap + 5, `vmax ${q.vmax} trap ${q.trap}`);
   assert.ok(Math.abs(q.vmax - 42 * 3.6) < 1);
 });
+
+test('simulator ikut sasaran: laju maks dan jarak', () => {
+  const peak = s => Math.max(...s.map(x => x.speed)) * 3.6;
+  const s300 = simulateRun({ targetKmh: 300 });
+  assert.ok(peak(s300) >= 300 && peak(s300) < 303, `puncak ${peak(s300)}`);
+  const s120 = simulateRun({ targetKmh: 120 });
+  assert.ok(peak(s120) >= 120 && peak(s120) < 123);
+  // sasaran jarak 1 batu: keputusan 1 batu (kunci tersuai) mesti wujud, 1/4 batu juga
+  let fin; const pt = new PerfTimer({ customDist: [{ v: 1, u: 'mi' }], onResult: r => { if (r.kind === 'final') fin = r; } });
+  for (const x of simulateRun({ targetM: 1609.344 })) pt.push(x);
+  assert.ok(fin.results['1 batu'], 'tiada 1 batu');
+  assert.ok(fin.results['1 batu'].vmax >= fin.results['1/4 batu'].vmax);
+  assert.ok(fin.dist >= 1609);
+});

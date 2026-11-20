@@ -51,6 +51,7 @@ const D = {
     'set.custom': 'Jarak tersuai (ujian masa & laju maks)', 'set.customHint': 'Tambah jarak sendiri, cth. 500 m, 1000 m, 800 ft atau 0.5 batu. Larian lama yang ada data penuh juga dikira semula.',
     'btn.add': 'Tambah', 'unit.mi': 'batu', 'cd.invalid': 'Masukkan jarak antara 1 m dan 10 km.', 'cd.max': 'Maksimum 10 jarak tersuai.', 'cd.exists': 'Jarak ini sudah ada.',
     'res.max': 'maks {v}', 'd.speedMax': 'Laju / maks km/j', 'd.custom': 'tersuai',
+    'demo.until': 'Demo sampai', 'demo.badSpeed': 'Kelajuan demo mesti antara 20 dan 450 km/j.', 'demo.badDist': 'Jarak demo mesti antara 20 m dan 10 km.', 'demo.subSpeed': 'Sampai {v} km/j', 'demo.subDist': 'Sejauh {v}',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -100,6 +101,7 @@ const D = {
     'set.custom': 'Custom distances (time & top speed test)', 'set.customHint': 'Add your own distances, e.g. 500 m, 1000 m, 800 ft or 0.5 mile. Older runs with full data are recalculated too.',
     'btn.add': 'Add', 'unit.mi': 'mile', 'cd.invalid': 'Enter a distance between 1 m and 10 km.', 'cd.max': 'Maximum of 10 custom distances.', 'cd.exists': 'This distance already exists.',
     'res.max': 'max {v}', 'd.speedMax': 'Speed / max km/h', 'd.custom': 'custom',
+    'demo.until': 'Demo until', 'demo.badSpeed': 'Demo speed must be between 20 and 450 km/h.', 'demo.badDist': 'Demo distance must be between 20 m and 10 km.', 'demo.subSpeed': 'Up to {v} km/h', 'demo.subDist': 'Over {v}',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -149,6 +151,7 @@ const D = {
     'set.custom': 'Jarak kustom (uji waktu & kecepatan maks)', 'set.customHint': 'Tambahkan jarak sendiri, mis. 500 m, 1000 m, 800 ft atau 0,5 mil. Run lama yang punya data lengkap juga dihitung ulang.',
     'btn.add': 'Tambah', 'unit.mi': 'mil', 'cd.invalid': 'Masukkan jarak antara 1 m dan 10 km.', 'cd.max': 'Maksimal 10 jarak kustom.', 'cd.exists': 'Jarak ini sudah ada.',
     'res.max': 'maks {v}', 'd.speedMax': 'Kecepatan / maks km/j', 'd.custom': 'kustom',
+    'demo.until': 'Demo sampai', 'demo.badSpeed': 'Kecepatan demo harus antara 20 dan 450 km/j.', 'demo.badDist': 'Jarak demo harus antara 20 m dan 10 km.', 'demo.subSpeed': 'Sampai {v} km/j', 'demo.subDist': 'Sejauh {v}',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -198,6 +201,7 @@ const D = {
     'set.custom': '自定义距离（计时和最高速度）', 'set.customHint': '添加自定义距离，例如 500 m、1000 m、800 ft 或 0.5 英里。有完整数据的旧记录也会重新计算。',
     'btn.add': '添加', 'unit.mi': '英里', 'cd.invalid': '请输入 1 m 至 10 km 之间的距离。', 'cd.max': '最多 10 个自定义距离。', 'cd.exists': '该距离已存在。',
     'res.max': '最高 {v}', 'd.speedMax': '速度 / 最高 km/h', 'd.custom': '自定义',
+    'demo.until': '演示目标', 'demo.badSpeed': '演示速度须在 20 至 450 km/h 之间。', 'demo.badDist': '演示距离须在 20 m 至 10 km 之间。', 'demo.subSpeed': '加速至 {v} km/h', 'demo.subDist': '行驶 {v}',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
