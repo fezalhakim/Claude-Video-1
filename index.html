@@ -82,6 +82,16 @@
         <label><span data-i18n="set.driver">Nama pemandu</span><input id="driver" maxlength="30" data-i18n-ph="ph.driver"></label>
         <label><span data-i18n="set.car">Kereta</span><input id="car" maxlength="40" data-i18n-ph="ph.car"></label>
       </div>
+      <div class="cdBox">
+        <div class="cdTitle" data-i18n="set.custom"></div>
+        <div class="cdRow">
+          <input id="cdVal" type="number" inputmode="decimal" min="0" step="any" placeholder="500" aria-label="Distance">
+          <select id="cdUnit" aria-label="Unit"><option value="m">m</option><option value="ft">ft</option><option value="mi" data-i18n="unit.mi">batu</option></select>
+          <button id="cdAdd" class="ghost" data-i18n="btn.add">Tambah</button>
+        </div>
+        <div id="cdList" class="cdList"></div>
+        <p class="note" data-i18n="set.customHint"></p>
+      </div>
       <label class="toggle"><input type="checkbox" id="rollout"><span data-i18n="set.rollout"></span></label>
       <label class="toggle"><input type="checkbox" id="anyBle"><span data-i18n="set.anyBle"></span></label>
       <label class="toggle"><input type="checkbox" id="speak" checked><span data-i18n="set.speak"></span></label>

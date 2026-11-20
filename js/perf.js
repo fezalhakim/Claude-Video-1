@@ -15,17 +15,38 @@ export const DIST_TARGETS = [             // jarak (m)
   { key: '1/8 batu', m: MILE / 8 },
   { key: '1000ft', m: 1000 * FT }, { key: '1/4 batu', m: MILE / 4 }
 ];
+
+/** Jarak tersuai: { v: nilai, u: 'm' | 'ft' | 'mi' } -> sasaran { key, m, custom: true } */
+export const UNIT_M = { m: 1, ft: FT, mi: MILE };
+export function customKey(c) {
+  const n = +(+c.v).toFixed(3);
+  return c.u === 'ft' ? `${n}ft` : c.u === 'mi' ? `${n} batu` : `${n} m`;
+}
+export function makeDistTargets(custom = []) {
+  const out = [...DIST_TARGETS];
+  for (const c of custom) {
+    const key = customKey(c), m = c.v * UNIT_M[c.u];
+    if (!(m > 0) || out.some(g => g.key === key || Math.abs(g.m - m) < 0.01)) continue;
+    out.push({ key, m, custom: true });
+  }
+  return out.sort((a, b) => a.m - b.m);
+}
+export const isDistKey = k => /(ft|batu| m)$/.test(k);
+
 export const BRAKE_TARGETS = [{ key: '100-0', from: 100 }];
 
 const lerp = (a, b, f) => a + (b - a) * f;
 const frac = (x0, x1, x) => (x1 === x0 ? 1 : (x - x0) / (x1 - x0));
 
 export class PerfTimer {
-  constructor({ rollout = false, startKmh = 0.8, stopKmh = 0.8, onResult, onState } = {}) {
+  constructor({ rollout = false, startKmh = 0.8, stopKmh = 0.8, onResult, onState, customDist = [] } = {}) {
+    this.distTargets = makeDistTargets(customDist);
     this.rollout = rollout; this.startKmh = startKmh; this.stopKmh = stopKmh;
     this.onResult = onResult; this.onState = onState;
     this.reset();
   }
+
+  setCustomDist(list) { this.distTargets = makeDistTargets(list); }
 
   reset() {
     this.state = 'wait';         // wait (belum pegun) | armed (pegun, sedia) | run
@@ -86,11 +107,12 @@ export class PerfTimer {
           r.results[g.key] = { time: (tt - base) / 1000, dist: lerp(d0, d1, frac(pk, kmh, g.to)) - distOff };
         }
       }
-      for (const g of DIST_TARGETS) {
+      for (const g of this.distTargets) {
         const m = g.m + distOff;
         if (!r.results[g.key] && d0 < m && d1 >= m) {
-          const f = frac(d0, d1, m);
-          r.results[g.key] = { time: (lerp(p.t, s.t, f) - base) / 1000, trap: lerp(pk, kmh, f) };
+          const f = frac(d0, d1, m), trap = lerp(pk, kmh, f);
+          // vmax = laju maksimum sepanjang jarak ini (penting jika pemandu angkat minyak sebelum garisan)
+          r.results[g.key] = { time: (lerp(p.t, s.t, f) - base) / 1000, trap, vmax: Math.max(r.maxKmh, trap) };
         }
       }
     }

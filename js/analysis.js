@@ -1,6 +1,6 @@
 // Analisis terperinci satu larian: siri masa (kelajuan, G, ketinggian), split,
 // cerun, ketinggian ketumpatan (DA), dan pengiraan semula dengan/tanpa rollout.
-import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, DIST_TARGETS, BRAKE_TARGETS } from './perf.js';
+import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets } from './perf.js';
 
 const G = 9.80665;
 
@@ -17,9 +17,9 @@ export function unpackSamples(raw) {
 }
 
 /** Kira semula keputusan dari sampel mentah (cth. bila togol rollout ditukar). */
-export function recompute(samples, rollout) {
+export function recompute(samples, rollout, customDist = []) {
   let final = null;
-  const pt = new PerfTimer({ rollout, onResult: r => { if (r.kind === 'final') final = r; } });
+  const pt = new PerfTimer({ rollout, customDist, onResult: r => { if (r.kind === 'final') final = r; } });
   for (const s of samples) pt.push(s);
   if (!final) pt.finish();
   return final;
@@ -112,11 +112,13 @@ export function densityAltitude(tempC, pressureHpa) {
 }
 
 /** Analisis penuh. run = rekod sejarah. */
-export function analyze(run, rollout) {
+/** customDist: jarak tersuai semasa — boleh dikira semula untuk larian lama yang ada data mentah. */
+export function analyze(run, rollout, customDist = []) {
+  const allCustom = [...(run.customDist || []), ...customDist];
   const samples = unpackSamples(run.raw);
   let results = run.results, startT = null, maxKmh = run.maxKmh;
   if (samples.length > 2) {
-    const f = recompute(samples, rollout);
+    const f = recompute(samples, rollout, allCustom);
     if (f) { results = f.results; startT = f.startT; maxKmh = f.maxKmh; }
   }
   let series = [];
@@ -145,7 +147,7 @@ export function analyze(run, rollout) {
       const r = results[g.key];
       const row = { key: g.key, time: r.time, split: prev ? r.time - prev : null,
         g: hasG && kind !== 'roll' ? at(series, r.time, 'g') : null,
-        speed: r.trap ?? null, dist: r.dist ?? null };
+        speed: r.trap ?? null, vmax: r.vmax ?? null, dist: r.dist ?? null, custom: !!g.custom };
       if (kind !== 'roll') prev = r.time;
       return row;
     });
@@ -157,7 +159,7 @@ export function analyze(run, rollout) {
     temp: run.weather?.temp ?? null,
     hasRaw: samples.length > 2,
     rows: {
-      dist: rowsFor(DIST_TARGETS, 'dist'),
+      dist: rowsFor(makeDistTargets(allCustom), 'dist'),
       speed: rowsFor(SPEED_TARGETS, 'speed'),
       roll: rowsFor([...ROLLING_TARGETS, ...BRAKE_TARGETS], 'roll')
     }

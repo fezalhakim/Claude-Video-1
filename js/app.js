@@ -6,10 +6,19 @@ import { connectSimulator } from './devices/simulator.js';
 import { openDetail } from './detail.js';
 import { t, metric, setLang, getLang, locale, applyStatic, detectLang, LANGS } from './i18n.js';
 import { packSamples, analyze } from './analysis.js';
-import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, DIST_TARGETS, BRAKE_TARGETS } from './perf.js';
+import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets, customKey, isDistKey, UNIT_M } from './perf.js';
 
 const $ = id => document.getElementById(id);
-const ALL = [...SPEED_TARGETS, ...ROLLING_TARGETS, ...DIST_TARGETS, ...BRAKE_TARGETS].map(g => g.key);
+// senarai metrik semasa: termasuk jarak tersuai & metrik tersuai lama yang ada dalam sejarah
+let ALL = [];
+function rebuildKeys() {
+  const dist = makeDistTargets(settings.customDist).map(g => g.key);
+  const base = [...SPEED_TARGETS.map(g => g.key), ...ROLLING_TARGETS.map(g => g.key), ...dist, ...BRAKE_TARGETS.map(g => g.key)];
+  const extra = new Set();
+  for (const h of history) for (const k of Object.keys(h.results)) if (!base.includes(k)) extra.add(k);
+  ALL = [...base, ...extra];
+}
+const customKeys = () => (settings.customDist || []).map(customKey);
 const HKEY = 'pgear.history.v1', SKEY = 'pgear.settings.v1';
 
 const store = {
@@ -17,7 +26,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
 };
 
-let conn = null, history = store.get(HKEY, []), settings = { rollout: false, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), ...store.get(SKEY, {}) };
+let conn = null, history = store.get(HKEY, []), settings = { rollout: false, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
 setLang(settings.lang);
 // beri nombor run kepada rekod lama (yang belum bernombor)
 { let n = 0; for (let i = history.length - 1; i >= 0; i--) { if (history[i].no) n = Math.max(n, history[i].no); else history[i].no = ++n; } }
@@ -41,6 +50,33 @@ for (const id of ['lang', 'langTop']) $(id).addEventListener('change', e => chan
 $('lang').value = getLang(); $('langTop').value = getLang();
 applyStatic();
 
+// ---------- Jarak tersuai ----------
+function renderCustom() {
+  $('cdList').innerHTML = settings.customDist.map((c, i) =>
+    `<span>${esc(metric(customKey(c)))}<button data-cd="${i}" aria-label="${t('aria.del')}">×</button></span>`).join('');
+}
+$('cdAdd').addEventListener('click', () => {
+  const v = parseFloat(String($('cdVal').value).replace(',', '.')), u = $('cdUnit').value;
+  const m = v * UNIT_M[u];
+  if (!(m >= 1 && m <= 10000)) return toast(t('cd.invalid'));
+  if (settings.customDist.length >= 10) return toast(t('cd.max'));
+  const c = { v: +v.toFixed(3), u };
+  if (makeDistTargets().some(g => Math.abs(g.m - m) < 0.01) || settings.customDist.some(o => Math.abs(o.v * UNIT_M[o.u] - m) < 0.01))
+    return toast(t('cd.exists'));
+  settings.customDist.push(c); $('cdVal').value = '';
+  customChanged();
+});
+$('cdVal').addEventListener('keydown', e => { if (e.key === 'Enter') $('cdAdd').click(); });
+$('cdList').addEventListener('click', e => {
+  const i = e.target.dataset.cd; if (i === undefined) return;
+  settings.customDist.splice(+i, 1); customChanged();
+});
+function customChanged() {
+  store.set(SKEY, settings); timer.setCustomDist(settings.customDist);
+  rebuildKeys(); renderCustom(); renderResults(); renderHistory();
+}
+document.addEventListener('pgear:lang', renderCustom);
+
 // ---------- Tetapan ----------
 for (const k of ['driver', 'car']) {
   $(k).value = settings[k] || '';
@@ -57,7 +93,7 @@ if (!bleSupported()) $('bleWarn').hidden = false;
 
 // ---------- Enjin masa ----------
 const timer = new PerfTimer({
-  rollout: settings.rollout,
+  rollout: settings.rollout, customDist: settings.customDist,
   onState: s => { const el = $('runState'); el.className = 'state ' + s; el.textContent = t('state.' + s);
     if (s === 'run') { current = {}; chartPts = []; renderResults(); } },
   onResult: r => {
@@ -71,7 +107,7 @@ const timer = new PerfTimer({
     } else if (r.kind === 'final') {
       Object.assign(current, r.results); renderResults();
       const run = saveRun({ at: r.at, device: conn?.name || '-', rollout: r.rollout, maxKmh: r.maxKmh, results: r.results,
-        raw: packSamples(r.samples), driver: settings.driver, car: settings.car });
+        raw: packSamples(r.samples), driver: settings.driver, car: settings.car, customDist: [...settings.customDist] });
       lastRunNo = run.no; $('lastDetail').hidden = false;
       fetchWeather(run);
       announce(r.results);
@@ -178,13 +214,17 @@ function drawChart() {
 function fmt(key, r) {
   if (!r) return '<b>--.--</b>';
   let extra = '';
-  if (r.trap !== undefined) extra = `@ ${r.trap.toFixed(1)} ${t('kmh')}`;
+  if (r.trap !== undefined) {
+    extra = `@ ${r.trap.toFixed(1)} ${t('kmh')}`;
+    if (r.vmax != null && r.vmax - r.trap >= 0.5) extra += ` · ${t('res.max', { v: r.vmax.toFixed(1) })}`;
+  }
   else if (r.dist !== undefined) extra = `${r.dist.toFixed(1)} m`;
   return `<b>${r.time.toFixed(2)}</b> s<em>${extra}</em>`;
 }
 function renderResults() {
+  const ck = customKeys();
   $('results').innerHTML = ALL.map(k =>
-    `<div class="res ${current[k] ? 'hit' : ''}"><small>${metric(k)}${/batu|ft/.test(k) ? '' : ' ' + t('kmh')}</small>${fmt(k, current[k])}</div>`).join('');
+    `<div class="res ${current[k] ? 'hit' : ''} ${ck.includes(k) ? 'custom' : ''}"><small>${metric(k)}${isDistKey(k) ? '' : ' ' + t('kmh')}</small>${fmt(k, current[k])}</div>`).join('');
 }
 
 // ---------- Sejarah ----------
@@ -224,7 +264,7 @@ async function fetchWeather(run) {
 function showDetail(no) {
   const run = byNo(no); if (!run) return;
   openDetail(run, $('detail'), {
-    runs: history,
+    runs: history, customDist: settings.customDist,
     onChange: () => { persist(); renderHistory(); },
     onDelete: () => { history = history.filter(h => h.no !== run.no); persist(); renderHistory(); }
   });
@@ -232,7 +272,7 @@ function showDetail(no) {
 // siri kelajuan [t, km/j] untuk graf banding
 function curve(run, xk = 't') {
   if (run.raw) {
-    const a = analyze(run, run.rollout);
+    const a = analyze(run, run.rollout, settings.customDist);
     // fasa pecutan sahaja (hingga kelajuan maksimum), tanpa brek
     const s = a.series.filter(p => p.t >= 0);
     let iMax = 0; s.forEach((p, i) => { if (p.v > s[iMax].v) iMax = i; });
@@ -249,6 +289,7 @@ const byNo = no => history.find(h => h.no === no);
 const label = h => { const d = new Date(h.at); return `Run ${h.no} · ${d.getDate()}/${d.getMonth() + 1} ${d.toTimeString().slice(0, 5)}`; };
 
 function renderHistory() {
+  rebuildKeys();
   const best = {};
   for (const h of history) for (const [k, r] of Object.entries(h.results))
     if (!best[k] || r.time < best[k].time) best[k] = r;
@@ -389,4 +430,4 @@ document.addEventListener('click', wakeLock, { once: true });
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 
-renderResults(); renderHistory();
+rebuildKeys(); renderCustom(); renderResults(); renderHistory();

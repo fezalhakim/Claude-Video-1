@@ -8,8 +8,8 @@ const COL = { other: '#e8ecf1', shift: '#c58bff', g: '#ffb340', alt: '#30d158', 
 
 let state = null;
 
-export function openDetail(run, el, { onChange, onDelete, runs = [] }) {
-  state = { run, el, onChange, onDelete, runs, rollout: !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
+export function openDetail(run, el, { onChange, onDelete, runs = [], customDist = [] }) {
+  state = { run, el, onChange, onDelete, runs, customDist, rollout: !!run.rollout, tab: 'dist', focus: null, xAxis: 'd', cmpNo: null };
   el.hidden = false; document.body.style.overflow = 'hidden';
   render();
 }
@@ -18,7 +18,7 @@ function close() { state.el.hidden = true; state.el.innerHTML = ''; document.bod
 
 function render() {
   const { run, el } = state;
-  const a = analyze(run, state.rollout);
+  const a = analyze(run, state.rollout, state.customDist);
   const keys = Object.keys(a.results);
   // metrik utama: pilihan pengguna, atau jarak terjauh / 0-100
   const pref = ['1/4 batu', '1/8 batu', '0-100', ...keys];
@@ -29,7 +29,7 @@ function render() {
   // larian pembanding (dikira dengan tetapan rollout yang sama supaya adil)
   const others = state.runs.filter(h => h.no !== run.no);
   const oRun = others.find(h => h.no === state.cmpNo) || null;
-  const b = oRun ? analyze(oRun, state.rollout) : null;
+  const b = oRun ? analyze(oRun, state.rollout, state.customDist) : null;
   const delta = (x, y) => {
     if (x == null || y == null) return '<span class="dm">–</span>';
     const dd = x - y;
@@ -88,11 +88,11 @@ function render() {
       <button data-tab="roll" class="${state.tab === 'roll' ? 'on' : ''}">${t('d.tabRoll')}</button>
     </div>
     ${tabRows.length ? `<table class="splits ${b ? 'withCmp' : ''}"><thead><tr>
-      <th>${state.tab === 'dist' ? t('d.colDist') : t('d.colRange')}</th><th>G</th><th>${state.tab === 'dist' ? t('d.speedKmh') : t('d.distM')}</th><th>${t('d.split')}</th><th>${t('d.timeS')}</th>${b ? `<th>${t('d.vs', { no: oRun.no })}</th>` : ''}</tr></thead>
+      <th>${state.tab === 'dist' ? t('d.colDist') : t('d.colRange')}</th><th>G</th><th>${state.tab === 'dist' ? t('d.speedMax') : t('d.distM')}</th><th>${t('d.split')}</th><th>${t('d.timeS')}</th>${b ? `<th>${t('d.vs', { no: oRun.no })}</th>` : ''}</tr></thead>
       <tbody>${tabRows.map(r => `<tr>
-        <td>${esc(metric(r.key))}</td>
+        <td>${esc(metric(r.key))}${r.custom ? ' <span class="cdStar">★</span>' : ''}</td>
         <td class="g">${r.g == null ? '–' : r.g.toFixed(2) + 'g'}</td>
-        <td>${state.tab === 'dist' ? f2(r.speed) : r.dist == null ? '–' : r.dist.toFixed(1)}</td>
+        <td>${state.tab === 'dist' ? f2(r.speed) + (r.vmax != null ? `<span class="vm">${t('res.max', { v: r.vmax.toFixed(1) })}</span>` : '') : r.dist == null ? '–' : r.dist.toFixed(1)}</td>
         <td class="sp">${r.split == null ? '' : '+' + r.split.toFixed(2)}</td>
         <td class="tm">${f2(r.time)}</td>${b ? `<td class="dl">${delta(r.time, b.results[r.key]?.time)}</td>` : ''}</tr>`).join('')}</tbody></table>
       ${b ? `<p class="note">${t('d.vsNote', { no: oRun.no })}</p>` : ''}`

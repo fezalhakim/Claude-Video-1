@@ -48,6 +48,9 @@ const D = {
     'd.rollout': 'Rollout 1 kaki', 'd.old': 'Larian lama ini tiada data mentah — graf G/ketinggian dan togol rollout tidak tersedia.',
     'd.note': 'G = pecutan membujur pada titik itu. Split = masa dari baris sebelumnya. Tukar gear dikesan bila G jatuh mendadak lalu pulih; "G hilang" = berapa banyak G jatuh dan berapa lama. Cerun & beza tinggi diukur sepanjang fasa pecutan.',
     'd.confirmDel': 'Padam Run {no}?',
+    'set.custom': 'Jarak tersuai (ujian masa & laju maks)', 'set.customHint': 'Tambah jarak sendiri, cth. 500 m, 1000 m, 800 ft atau 0.5 batu. Larian lama yang ada data penuh juga dikira semula.',
+    'btn.add': 'Tambah', 'unit.mi': 'batu', 'cd.invalid': 'Masukkan jarak antara 1 m dan 10 km.', 'cd.max': 'Maksimum 10 jarak tersuai.', 'cd.exists': 'Jarak ini sudah ada.',
+    'res.max': 'maks {v}', 'd.speedMax': 'Laju / maks km/j', 'd.custom': 'tersuai',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -94,6 +97,9 @@ const D = {
     'd.rollout': '1-ft rollout', 'd.old': 'This older run has no raw data — G/altitude graph and rollout toggle are unavailable.',
     'd.note': 'G = longitudinal acceleration at that point. Split = time since the previous row. Gear shifts are detected when G drops sharply then recovers; "G lost" = how much G dropped and for how long. Slope & elevation are measured over the acceleration phase.',
     'd.confirmDel': 'Delete Run {no}?',
+    'set.custom': 'Custom distances (time & top speed test)', 'set.customHint': 'Add your own distances, e.g. 500 m, 1000 m, 800 ft or 0.5 mile. Older runs with full data are recalculated too.',
+    'btn.add': 'Add', 'unit.mi': 'mile', 'cd.invalid': 'Enter a distance between 1 m and 10 km.', 'cd.max': 'Maximum of 10 custom distances.', 'cd.exists': 'This distance already exists.',
+    'res.max': 'max {v}', 'd.speedMax': 'Speed / max km/h', 'd.custom': 'custom',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -140,6 +146,9 @@ const D = {
     'd.rollout': 'Rollout 1 kaki', 'd.old': 'Run lama ini tidak punya data mentah — grafik G/ketinggian dan tombol rollout tidak tersedia.',
     'd.note': 'G = akselerasi longitudinal di titik itu. Split = waktu dari baris sebelumnya. Pindah gigi terdeteksi saat G turun tajam lalu pulih; "G hilang" = seberapa besar G turun dan berapa lama. Kemiringan & beda tinggi diukur selama fase akselerasi.',
     'd.confirmDel': 'Hapus Run {no}?',
+    'set.custom': 'Jarak kustom (uji waktu & kecepatan maks)', 'set.customHint': 'Tambahkan jarak sendiri, mis. 500 m, 1000 m, 800 ft atau 0,5 mil. Run lama yang punya data lengkap juga dihitung ulang.',
+    'btn.add': 'Tambah', 'unit.mi': 'mil', 'cd.invalid': 'Masukkan jarak antara 1 m dan 10 km.', 'cd.max': 'Maksimal 10 jarak kustom.', 'cd.exists': 'Jarak ini sudah ada.',
+    'res.max': 'maks {v}', 'd.speedMax': 'Kecepatan / maks km/j', 'd.custom': 'kustom',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -186,6 +195,9 @@ const D = {
     'd.rollout': '1 英尺 Rollout', 'd.old': '此旧记录没有原始数据 — 无法显示 G 值/海拔曲线和 Rollout 开关。',
     'd.note': 'G = 该点的纵向加速度。分段 = 与上一行的时间差。当 G 值骤降后回升时判定为换挡；"G 值损失" = G 值下降的幅度和持续时间。坡度和高差按加速阶段计算。',
     'd.confirmDel': '删除 Run {no}？',
+    'set.custom': '自定义距离（计时和最高速度）', 'set.customHint': '添加自定义距离，例如 500 m、1000 m、800 ft 或 0.5 英里。有完整数据的旧记录也会重新计算。',
+    'btn.add': '添加', 'unit.mi': '英里', 'cd.invalid': '请输入 1 m 至 10 km 之间的距离。', 'cd.max': '最多 10 个自定义距离。', 'cd.exists': '该距离已存在。',
+    'res.max': '最高 {v}', 'd.speedMax': '速度 / 最高 km/h', 'd.custom': '自定义',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
@@ -214,7 +226,7 @@ export function t(key, vars) {
   return s;
 }
 /** Label paparan bagi kunci metrik. */
-export const metric = k => D[lang]['m.' + k] ?? k;
+export const metric = k => D[lang]['m.' + k] ?? (/ batu$/.test(k) ? k.replace(/ batu$/, ' ' + t('unit.mi')) : k);
 
 /** Isi semua elemen statik yang bertanda data-i18n*. */
 export function applyStatic(root = document) {

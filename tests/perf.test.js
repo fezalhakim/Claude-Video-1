@@ -41,3 +41,31 @@ test('rollout 1 kaki memendekkan masa', () => {
     for (const s of constAccel(5)) pt.push(s); return f.results['0-100'].time; };
   assert.ok(get(true) < get(false));
 });
+
+import { makeDistTargets, customKey } from '../js/perf.js';
+
+test('jarak tersuai: masa betul, disusun ikut jarak, kunci unik', () => {
+  const custom = [{ v: 500, u: 'm' }, { v: 800, u: 'ft' }, { v: 0.25, u: 'mi' }]; // 0.25 batu = 1/4 batu -> diabaikan
+  const ts = makeDistTargets(custom);
+  assert.deepEqual(ts.filter(g => g.custom).map(g => g.key), ['800ft', '500 m']);
+  assert.equal(customKey({ v: 0.5, u: 'mi' }), '0.5 batu');
+  const a = 5; let f;
+  const pt = new PerfTimer({ customDist: custom, onResult: r => { if (r.kind === 'live') f = r.run; } });
+  for (const s of constAccel(a, 25, 30)) pt.push(s);
+  const expect = Math.sqrt(2 * 500 / a) - 0.8 / 3.6 / a;
+  assert.ok(Math.abs(f.results['500 m'].time - expect) < 0.02, `500 m ${f.results['500 m'].time}`);
+});
+
+test('laju maks dalam jarak: angkat minyak sebelum garisan', () => {
+  // pecut ke ~150 km/j, kemudian perlahan sebelum 1/4 batu
+  const out = []; const dt = 40;
+  for (let i = 0; i < 25; i++) out.push({ t: i * dt, speed: 0 });
+  let v = 0, t = 25 * dt;
+  while (v < 42) { v += 6 * dt / 1000; out.push({ t, speed: v }); t += dt; }
+  for (let i = 0; i < 400; i++) { v -= 1 * dt / 1000; out.push({ t, speed: v }); t += dt; }
+  let f; const pt = new PerfTimer({ onResult: r => { if (r.kind === 'live') f = r.run; } });
+  for (const s of out) pt.push(s);
+  const q = f.results['1/4 batu'];
+  assert.ok(q.vmax > q.trap + 5, `vmax ${q.vmax} trap ${q.trap}`);
+  assert.ok(Math.abs(q.vmax - 42 * 3.6) < 1);
+});
