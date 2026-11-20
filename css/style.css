@@ -228,6 +228,14 @@ main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 .lkTop { text-align: center; }
 .lkTop small { display: block; color: #ff8a80; font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .lkTop b { font-size: clamp(56px, 18vw, 96px); font-weight: 800; font-variant-numeric: tabular-nums; color: #ffd0cc; }
+.lkSplits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 420px; }
+.lkSplits div { background: #101318; border: 1px solid #1f252d; border-radius: 14px; padding: 10px 6px; text-align: center; }
+.lkSplits div.hit { border-color: rgba(48,209,88,.5); }
+.lkSplits small { display: block; color: var(--mute); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.lkSplits b { display: block; font-size: clamp(26px, 8.5vw, 38px); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); line-height: 1.15; }
+.lkSplits em { font-style: normal; color: var(--mute); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lkSpeed b { font-size: clamp(96px, 32vw, 200px); }
+.lkTop b { font-size: clamp(48px, 15vw, 88px); }
 .lockScr .state { margin: 0; width: 100%; max-width: 360px; }
 .lkRun { display: flex; gap: 24px; color: var(--mute); font-size: 15px; }
 .lkRun b { color: var(--text); font-variant-numeric: tabular-nums; }
