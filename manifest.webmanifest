@@ -1,6 +1,6 @@
 {
-  "name": "MGear Performance Meter",
-  "short_name": "MGear",
+  "name": "MGear GPS by MB Performance",
+  "short_name": "MGear GPS",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
@@ -30,5 +30,6 @@
     }
   ],
   "id": "./",
-  "scope": "./"
+  "scope": "./",
+  "description": "Performance meter untuk RaceBox & Dragy oleh MB Performance"
 }

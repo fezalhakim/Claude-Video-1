@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b0d10">
-  <title>MGear</title>
+  <title>MGear GPS by MB Performance</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -12,12 +12,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="MGear">
+  <meta name="apple-mobile-web-app-title" content="MGear GPS">
+  <meta name="description" content="MGear GPS by MB Performance — performance meter untuk RaceBox & Dragy.">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="top">
-    <div class="brand"><img src="icon.svg" alt=""><span>M<b>GEAR</b></span></div>
+    <div class="brand"><img src="icon.svg" alt=""><span class="bt"><span>M<b>GEAR</b></span><small>GPS · by MB Performance</small></span></div>
     <div class="topR"><select id="langTop" class="langSel" aria-label="Language"></select><div id="conn" class="pill off" data-i18n="conn.off">Tidak bersambung</div></div>
   </header>
 
@@ -168,6 +169,11 @@
     </section>
 
     <button id="showGuide" class="ghost wide" data-i18n="set.guide"></button>
+    <div class="byMB">
+      <img src="icons/mb-logo-wide.jpg" alt="MB Performance">
+      <p><b>MGear GPS</b> by MB Performance</p>
+      <a href="https://www.mbperformance.com.my" target="_blank" rel="noopener">www.mbperformance.com.my</a>
+    </div>
     <p class="foot" data-i18n="foot"></p>
     <p class="foot"><span data-i18n="upd.version">Versi</span> <b id="appVer"></b></p>
    </div>
@@ -189,6 +195,8 @@
 
   <div id="onb" class="onb" hidden role="dialog" aria-modal="true">
     <div class="onbBox">
+      <img class="onbLogo" src="icons/mb-logo-wide.jpg" alt="MB Performance">
+      <div class="onbBy">MGear GPS · by MB Performance</div>
       <div id="onbArt" class="onbArt"></div>
       <h3 id="onbTitle"></h3>
       <p id="onbBody"></p>

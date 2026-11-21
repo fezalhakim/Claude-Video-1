@@ -1,6 +1,6 @@
-const CACHE = 'mgear-v36';
+const CACHE = 'mgear-v37';
 const ASSETS = [
-  './', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg', './media/awake.mp4', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png',
+  './', './index.html', './css/style.css', './manifest.webmanifest', './icon.svg', './icons/mb-logo-wide.jpg', './media/awake.mp4', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png',
   './js/app.js', './js/analysis.js', './js/i18n.js', './js/importer.js', './js/ocrimport.js', './js/chartdigitize.js', './js/detail.js', './js/perf.js', './js/nmea.js', './js/ble.js',
   './js/devices/racebox.js', './js/devices/dragy.js',
   './js/devices/phonegps.js', './js/devices/simulator.js'

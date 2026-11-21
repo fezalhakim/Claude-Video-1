@@ -1,4 +1,6 @@
-# MGear — Performance Meter (RaceBox & Dragy)
+# MGear GPS by MB Performance
+
+Performance meter untuk RaceBox & Dragy — www.mbperformance.com.my
 
 Aplikasi web progresif (PWA) untuk mengukur prestasi kenderaan menggunakan GPS **RaceBox** atau **Dragy** melalui Bluetooth (Web Bluetooth). Boleh dipasang ke skrin utama telefon dan berfungsi luar talian.
 
