@@ -40,7 +40,7 @@ export function simulateRun({ hz = 25, vmax, tau = 9.5, holdS = 1.5, brake = 9.5
  * supaya demo siap dalam ~30 s (cap masa sampel kekal realistik, jadi keputusan tidak berubah).
  */
 export async function connectSimulator({ onSample, onDisconnect }) {
-  const samples = simulateMoto();   // Demo: Y15 65hp, 135 kg, 6 gear
+  const samples = simulateMoto();
   const perTick = Math.max(1, Math.ceil(samples.length / (30 * 25)));
   let i = 0;
   const base = Date.now();
@@ -50,30 +50,23 @@ export async function connectSimulator({ onSample, onDisconnect }) {
       onSample({ ...samples[i], t: base + samples[i].t }); i++;
     }
   }, 40);
-  return { name: 'Demo Y15 65hp', disconnect: () => clearInterval(timer) };
+  return { name: 'Demo', disconnect: () => clearInterval(timer) };
 }
 
 /**
- * Demo motosikal dikira dari fizik (tiada masa "dipaksa"):
- *   kuasa di roda = hp × 745.7 × kecekapan; pecutan = min(cengkaman, P/v) − seretan angin (½ρ·CdA·v²/m) − rintangan tayar
- *   jalur kuasa: selepas tukar gear RPM jatuh, kuasa kira-kira (1−band) dan naik semula ke 100% menjelang titik tukar.
- * Preset lalai: Yamaha Y15 (150cc) ditala 65 hp, berat keseluruhan (motor + penunggang) 135 kg, 6 gear.
+ * Larian Demo (motosikal) dikira dari fizik ringkas:
+ *   pecutan = min(cengkaman, kuasa/v) − seretan·v² − rintangan tayar; tukar gear ikut jarak.
  */
-// Ditala dengan data sebenar Y15 65 hp, 135 kg, penunggang tunduk sepenuhnya:
-//   60ft ~1.51 s & 1/8 batu 6.40 s (1ft rollout).
-// Hasil penalaan: kecekapan rantai/gear ~82% (~53 hp di roda), pelancaran slick ~1.30 g, CdA 0.30, quickshifter 0.06 s.
-export const Y15 = {
-  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 0.814, cda: 0.30, crr: 0.015, traction: 1.295,
-  // tukar gear ikut JARAK (data sebenar): gear 1 → 80ft, gear 2 → 70 m, gear 3 → 120 m,
-  // gear 4 → 201 m (1/8), gear 5 → 300 m, gear 6 → 402 m (1/4)
+export const DEMO = {
+  power: 292.3, drag: 0.001333, crr: 0.015, traction: 1.295,
   shiftsM: [24.384, 70, 120, 201.168, 300],
   shiftMs: 60, band: 0.08, launchMs: 150
 };
 export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8, ...over } = {}) {
-  const P = { ...Y15, ...over }, G = 9.80665;
+  const P = { ...DEMO, ...over }, G = 9.80665;
   if (over.shiftsKmh && !over.shiftsM) delete P.shiftsM;   // pemanggil mahu tukar ikut kelajuan
-  const pw = P.hp * 745.7 * P.eff / P.massKg;            // W/kg di roda
-  const c = 0.5 * 1.2 * P.cda / P.massKg;                 // seretan angin per kg
+  const pw = P.power;                                     // W/kg di roda
+  const c = P.drag;                                       // seretan per kg
   const edges = P.shiftsKmh ? [0, ...P.shiftsKmh, P.shiftsKmh[P.shiftsKmh.length - 1] * 1.2] : [];
   const edgesM = P.shiftsM ? [0, ...P.shiftsM, distM * 1.1] : [];
   const dt = 1000 / hz, out = [];
