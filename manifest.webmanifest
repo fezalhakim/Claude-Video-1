@@ -22,9 +22,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ],
   "id": "./",
   "scope": "./",
-  "description": "Performance meter untuk RaceBox & Dragy oleh MB Performance"
+  "description": "Performance meter untuk RaceBox & Dragy: 0-100, 60ft, 1/8 & 1/4 batu, laju maks, graf G & banding larian. By MB Performance.",
+  "categories": [
+    "sports",
+    "utilities",
+    "navigation"
+  ],
+  "lang": "ms"
 }
