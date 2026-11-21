@@ -318,6 +318,9 @@ main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 .lgRuns span { font-size: 12px; color: var(--text); }
 .legend.lgRuns span::before { content: ''; display: inline-block; width: 22px; height: 0; margin-right: 6px; vertical-align: 3px; border-top: 3px solid var(--c); background: none; border-radius: 0; }
 .legend.lgRuns span.dash::before { border-top: 3px dashed var(--c); }
+.csRow { grid-template-columns: 1fr auto 1fr auto; align-items: center; }
+.csDash { color: var(--mute); font-size: 18px; }
+.shownList .cdBox { margin: 8px 0 16px; }
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 4px; }
 .steps span { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: var(--mute);
   background: #1b2027; border-radius: 99px; padding: 6px 4px; border: 1px solid var(--line); }

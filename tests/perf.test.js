@@ -85,3 +85,20 @@ test('simulator ikut sasaran: laju maks dan jarak', () => {
   assert.ok(fin.results['1 batu'].vmax >= fin.results['1/4 batu'].vmax);
   assert.ok(fin.dist >= 1609);
 });
+
+import { setCustomSpeed, speedTargets, validSpeed } from '../js/perf.js';
+
+test('kelajuan tersuai: 0-120 (pegun), 80-160 (bergolek), 120-0 (brek)', () => {
+  setCustomSpeed([{ from: 0, to: 120 }, { from: 80, to: 160 }, { from: 120, to: 0 }]);
+  try {
+    let fin;
+    const pt = new PerfTimer({ onResult: r => { if (r.kind === 'final') fin = r; } });
+    for (const s of simulateRun()) pt.push(s);
+    const r = fin.results;
+    assert.ok(r['0-120'] && r['80-160'] && r['120-0'], JSON.stringify(Object.keys(r)));
+    assert.ok(r['0-100'].time < r['0-120'].time && r['0-120'].time < r['0-200'].time);
+    assert.ok(r['120-0'].time > r['100-0'].time);
+    assert.deepEqual(speedTargets().map(g => g.key), ['0-60', '0-100', '0-120', '0-200']);
+  } finally { setCustomSpeed([]); }
+  assert.ok(!validSpeed({ from: 120, to: 60 }) && !validSpeed({ from: 50, to: 50 }) && validSpeed({ from: 0, to: 300 }));
+});

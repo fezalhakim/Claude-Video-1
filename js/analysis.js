@@ -1,6 +1,6 @@
 // Analisis terperinci satu larian: siri masa (kelajuan, G, ketinggian), split,
 // cerun, ketinggian ketumpatan (DA), dan pengiraan semula dengan/tanpa rollout.
-import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets } from './perf.js';
+import { PerfTimer, speedTargets, rollingTargets, brakeTargets, makeDistTargets } from './perf.js';
 
 const G = 9.80665;
 
@@ -162,8 +162,8 @@ export function analyze(run, rollout, customDist = []) {
     hasRaw: samples.length > 2,
     rows: {
       dist: rowsFor(makeDistTargets(allCustom), 'dist'),
-      speed: rowsFor(SPEED_TARGETS, 'speed'),
-      roll: rowsFor([...ROLLING_TARGETS, ...BRAKE_TARGETS], 'roll')
+      speed: rowsFor(speedTargets(), 'speed'),
+      roll: rowsFor([...rollingTargets(), ...brakeTargets()], 'roll')
     }
   };
 }

@@ -138,7 +138,7 @@
         <label><span data-i18n="set.driver">Nama pemandu</span><input id="driver" maxlength="30" data-i18n-ph="ph.driver"></label>
         <label><span data-i18n="set.car">Kereta</span><input id="car" maxlength="40" data-i18n-ph="ph.car"></label>
       </div>
-      <div class="cdBox">
+      <div class="cdBox" id="cdBox">
         <div class="cdTitle" data-i18n="set.custom"></div>
         <div class="cdRow">
           <input id="cdVal" type="number" inputmode="decimal" min="0" step="any" placeholder="500" aria-label="Distance">
@@ -147,6 +147,17 @@
         </div>
         <div id="cdList" class="cdList"></div>
         <p class="note" data-i18n="set.customHint"></p>
+      </div>
+      <div class="cdBox" id="csBox">
+        <div class="cdTitle" data-i18n="set.customSpeed">Kelajuan tersuai</div>
+        <div class="cdRow csRow">
+          <input id="csFrom" type="number" inputmode="numeric" min="0" max="450" step="1" placeholder="0" aria-label="From km/h">
+          <span class="csDash">–</span>
+          <input id="csTo" type="number" inputmode="numeric" min="0" max="450" step="1" placeholder="120" aria-label="To km/h">
+          <button id="csAdd" class="ghost" data-i18n="btn.add">Tambah</button>
+        </div>
+        <div id="csList" class="cdList"></div>
+        <p class="note" data-i18n="set.customSpeedHint"></p>
       </div>
       <label class="toggle"><input type="checkbox" id="rollout" checked><span data-i18n="set.rollout"></span></label>
       <label class="toggle"><input type="checkbox" id="tempC" checked><span data-i18n="set.tempC"></span></label>

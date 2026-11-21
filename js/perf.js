@@ -3,11 +3,11 @@
 export const FT = 0.3048, MILE = 1609.344;
 const KMH = 3.6;
 
+// Senarai lalai (sama seperti Dragy). Pengguna boleh tambah kelajuan sendiri (lihat setCustomSpeed).
 export const SPEED_TARGETS = [            // dari pegun (km/j)
-  { key: '0-60', to: 60 }, { key: '0-100', to: 100 }, { key: '0-150', to: 150 }, { key: '0-200', to: 200 }
+  { key: '0-60', to: 60 }, { key: '0-100', to: 100 }, { key: '0-200', to: 200 }
 ];
 export const ROLLING_TARGETS = [          // bergolek (km/j)
-  { key: '60-100', from: 60, to: 100 }, { key: '80-120', from: 80, to: 120 },
   { key: '100-200', from: 100, to: 200 }, { key: '200-250', from: 200, to: 250 },
   { key: '200-300', from: 200, to: 300 }
 ];
@@ -34,6 +34,24 @@ export function makeDistTargets(custom = []) {
   return out.sort((a, b) => a.m - b.m);
 }
 export const isDistKey = k => /(ft|batu| m)$/.test(k);
+
+/**
+ * Kelajuan tersuai: { from, to } km/j.
+ *   from = 0          -> dari pegun (cth. 0-120)
+ *   0 < from < to     -> bergolek (cth. 80-160)
+ *   from > to = 0     -> brek (cth. 120-0)
+ */
+let customSpeed = [];
+export const speedKey = c => `${+c.from}-${+c.to}`;
+export function validSpeed(c) {
+  const a = +c.from, b = +c.to;
+  return Number.isFinite(a) && Number.isFinite(b) && a >= 0 && b >= 0 && a <= 450 && b <= 450 && a !== b && (a < b || b === 0);
+}
+export function setCustomSpeed(list = []) { customSpeed = list.filter(validSpeed); }
+const merge = (base, extra) => { const keys = new Set(base.map(g => g.key)); return [...base, ...extra.filter(g => !keys.has(g.key))]; };
+export const speedTargets = () => merge(SPEED_TARGETS, customSpeed.filter(c => +c.from === 0).map(c => ({ key: speedKey(c), to: +c.to, custom: true }))).sort((a, b) => a.to - b.to);
+export const rollingTargets = () => merge(ROLLING_TARGETS, customSpeed.filter(c => +c.from > 0 && +c.to > +c.from).map(c => ({ key: speedKey(c), from: +c.from, to: +c.to, custom: true }))).sort((a, b) => a.from - b.from || a.to - b.to);
+export const brakeTargets = () => merge(BRAKE_TARGETS, customSpeed.filter(c => +c.to === 0 && +c.from > 0).map(c => ({ key: speedKey(c), from: +c.from, custom: true }))).sort((a, b) => a.from - b.from);
 
 export const BRAKE_TARGETS = [{ key: '100-0', from: 100 }];
 
@@ -103,7 +121,7 @@ export class PerfTimer {
     const distOff = this.rollout ? FT : 0;
 
     // Kelajuan (0-60, 0-100…): sentiasa dari pegun, TANPA rollout (r.t0 = saat mula bergerak).
-    for (const g of SPEED_TARGETS) {
+    for (const g of speedTargets()) {
       if (!r.results[g.key] && pk < g.to && kmh >= g.to) {
         const tt = lerp(p.t, s.t, frac(pk, kmh, g.to));
         r.results[g.key] = { time: (tt - r.t0) / 1000, dist: lerp(d0, d1, frac(pk, kmh, g.to)) };
@@ -130,7 +148,7 @@ export class PerfTimer {
   }
 
   trackRolling(p, s, pk, kmh, dd) {
-    for (const g of ROLLING_TARGETS) {
+    for (const g of rollingTargets()) {
       const st = this.rolling[g.key];
       if (pk < g.from && kmh >= g.from) {
         const f = frac(pk, kmh, g.from);
@@ -150,7 +168,7 @@ export class PerfTimer {
   }
 
   trackBrake(p, s, pk, kmh, dd) {
-    for (const g of BRAKE_TARGETS) {
+    for (const g of brakeTargets()) {
       const st = this.brake[g.key];
       if (pk >= g.from && kmh < g.from) {
         const f = frac(pk, kmh, g.from);

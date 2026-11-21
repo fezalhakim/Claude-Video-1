@@ -9,19 +9,19 @@ import { ocrImage, parseReportText } from './ocrimport.js';
 import { digitizeChart } from './chartdigitize.js';
 import { t, metric, setLang, getLang, locale, applyStatic, detectLang, LANGS } from './i18n.js';
 import { packSamples, analyze, unpackSamples, recompute } from './analysis.js';
-import { PerfTimer, SPEED_TARGETS, ROLLING_TARGETS, BRAKE_TARGETS, makeDistTargets, customKey, isDistKey, UNIT_M } from './perf.js';
+import { PerfTimer, speedTargets, rollingTargets, brakeTargets, setCustomSpeed, speedKey, validSpeed, makeDistTargets, customKey, isDistKey, UNIT_M } from './perf.js';
 
 const $ = id => document.getElementById(id);
 // senarai metrik semasa: termasuk jarak tersuai & metrik tersuai lama yang ada dalam sejarah
 let ALL = [];
 function rebuildKeys() {
   const dist = makeDistTargets(settings.customDist).map(g => g.key);
-  const base = [...SPEED_TARGETS.map(g => g.key), ...ROLLING_TARGETS.map(g => g.key), ...dist, ...BRAKE_TARGETS.map(g => g.key)];
+  const base = [...speedTargets().map(g => g.key), ...rollingTargets().map(g => g.key), ...dist, ...brakeTargets().map(g => g.key)];
   const extra = new Set();
   for (const h of history) for (const k of Object.keys(h.results)) if (!base.includes(k)) extra.add(k);
   ALL = [...base, ...extra];
 }
-const customKeys = () => (settings.customDist || []).map(customKey);
+const customKeys = () => [...(settings.customDist || []).map(customKey), ...(settings.customSpeed || []).map(speedKey)];
 const HKEY = 'pgear.history.v1', SKEY = 'pgear.settings.v1';
 
 const store = {
@@ -29,7 +29,8 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
 };
 
-let conn = null, history = store.get(HKEY, []), settings = { rollout: true, keepAwake: true, tempC: true, shown: null, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], ...store.get(SKEY, {}) };
+let conn = null, history = store.get(HKEY, []), settings = { rollout: true, keepAwake: true, tempC: true, shown: null, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], customSpeed: [], ...store.get(SKEY, {}) };
+setCustomSpeed(settings.customSpeed);
 setLang(settings.lang);
 // Rollout 1 kaki ON secara lalai. Hanya ikut nilai tersimpan jika pengguna sendiri pernah menukarnya
 // (tetapan lama mungkin menyimpan rollout:false secara automatik walaupun tidak pernah disentuh).
@@ -62,12 +63,44 @@ const DEFAULT_SHOWN = ['0-60', '0-100', '100-200', '60ft', '1/8 batu', '1/4 batu
 const shownKeys = () => settings.shown || [...DEFAULT_SHOWN, ...customKeys()];
 const ICON_SPEED = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17a8 8 0 1 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 17l4-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></svg>';
 const ICON_DIST = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15h18M4 15v-4M8 15v-2.5M12 15v-4M16 15v-2.5M20 15v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+let cdBoxEl = null, csBoxEl = null;
 function renderShown() {
   const sh = shownKeys(), ck = customKeys();
   const row = k => `<label class="shownRow">${isDistKey(k) ? ICON_DIST : ICON_SPEED}<span>${esc(metric(k))}${isDistKey(k) ? '' : ' ' + t('kmh')}${ck.includes(k) ? ` <em>★</em>` : ''}</span><input type="checkbox" data-shown="${esc(k)}" ${sh.includes(k) ? 'checked' : ''}></label>`;
   const speed = ALL.filter(k => !isDistKey(k)), dist = ALL.filter(k => isDistKey(k));
-  $('shownList').innerHTML = `<h4>${t('set.grpSpeed')}</h4>${speed.map(row).join('')}<h4>${t('set.grpDist')}</h4>${dist.map(row).join('')}`;
+  // Jarak di atas, kelajuan di bawah; kotak "tambah tersuai" terus di bawah setiap kumpulan.
+  // Simpan rujukan kotak dahulu: innerHTML memadam kotak yang sudah berada di dalam senarai.
+  const cd = cdBoxEl || (cdBoxEl = $('cdBox')), cs = csBoxEl || (csBoxEl = $('csBox'));
+  $('shownList').innerHTML = `<h4>${t('set.grpDist')}</h4>${dist.map(row).join('')}<div id="cdSlot"></div>
+    <h4>${t('set.grpSpeed')}</h4>${speed.map(row).join('')}<div id="csSlot"></div>`;
+  $('cdSlot').appendChild(cd); $('csSlot').appendChild(cs);
 }
+
+// ---------- Kelajuan tersuai ----------
+function renderCustomSpeed() {
+  $('csList').innerHTML = settings.customSpeed.map((c, i) =>
+    `<span>${esc(speedKey(c))} ${t('kmh')}<button data-cs-del="${i}" aria-label="${t('aria.del')}">×</button></span>`).join('');
+}
+$('csAdd').addEventListener('click', () => {
+  const c = { from: parseInt($('csFrom').value, 10), to: parseInt($('csTo').value, 10) };
+  if (!validSpeed(c)) return toast(t('cs.invalid'));
+  const k = speedKey(c);
+  if (ALL.includes(k) && !customKeys().includes(k) || settings.customSpeed.some(o => speedKey(o) === k)) return toast(t('cs.exists'));
+  if (settings.customSpeed.length >= 10) return toast(t('cd.max'));
+  settings.customSpeed.push({ from: c.from, to: c.to }); $('csFrom').value = ''; $('csTo').value = '';
+  if (settings.shown && !settings.shown.includes(k)) settings.shown.push(k);
+  customSpeedChanged();
+});
+$('csTo').addEventListener('keydown', e => { if (e.key === 'Enter') $('csAdd').click(); });
+$('csList').addEventListener('click', e => {
+  const i = e.target.dataset.csDel; if (i === undefined) return;
+  settings.customSpeed.splice(+i, 1); customSpeedChanged();
+});
+function customSpeedChanged() {
+  setCustomSpeed(settings.customSpeed); store.set(SKEY, settings);
+  rebuildKeys(); renderCustomSpeed(); renderShown(); renderResults(); renderHistory();
+}
+document.addEventListener('pgear:lang', renderCustomSpeed);
 $('shownList').addEventListener('change', e => {
   const k = e.target.dataset.shown; if (k == null) return;
   const sh = new Set(shownKeys());
@@ -765,7 +798,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 document.addEventListener('pgear:lang', updateAwake);
 
 // ---------- Kemas kini app ----------
-const APP_VERSION = '35';
+const APP_VERSION = '36';
 $('appVer').textContent = 'v' + APP_VERSION;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis
@@ -796,7 +829,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   if (changed) persist();
 }
 
-rebuildKeys(); renderCustom(); renderShown(); renderResults(); renderHistory();
+rebuildKeys(); renderCustom(); renderCustomSpeed(); renderShown(); renderResults(); renderHistory();
 if (!settings.onboarded) openOnb();
 
 // pulihkan laju maks & sambungan selepas refresh

@@ -78,6 +78,8 @@ const D = {
     'ocr.skip': 'Langkau', 'ocr.save': 'Simpan larian', 'ocr.metric': 'Metrik', 'ocr.time': 'Masa (s)', 'ocr.trap': 'Laju km/j', 'ocr.cond': 'Keadaan: {c}', 'ocr.saved': 'Larian disimpan', 'ocr.needOne': 'Masukkan sekurang-kurangnya satu masa.',
     'ocr.graph': '📈 Graf dikesan — graf kelajuan, G & ketinggian akan disimpan (metrik lain dikira dari graf).', 'ocr.noGraph': 'Graf tidak dikesan — hanya keputusan masa disimpan.', 'd.fromShot': 'Graf dibina semula dari screenshot — anggaran; nilai dari jadual screenshot digunakan jika ada.',
     'upd.ready': 'Versi baru MGear tersedia.', 'upd.reload': 'Muat semula', 'upd.version': 'Versi',
+    'set.customSpeed': 'Kelajuan tersuai', 'set.customSpeedHint': 'Masukkan dari – hingga (km/j): 0-120 (dari pegun), 80-160 (bergolek), 120-0 (brek). Larian lama yang ada data penuh dikira semula.', 'cs.invalid': 'Julat tidak sah. Contoh: 0-120, 80-160 atau 120-0 (0–450 km/j).',
+    'cs.exists': 'Julat kelajuan ini sudah ada.',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -154,6 +156,8 @@ const D = {
     'ocr.skip': 'Skip', 'ocr.save': 'Save run', 'ocr.metric': 'Metric', 'ocr.time': 'Time (s)', 'ocr.trap': 'Speed km/h', 'ocr.cond': 'Conditions: {c}', 'ocr.saved': 'Run saved', 'ocr.needOne': 'Enter at least one time.',
     'ocr.graph': '📈 Graph detected — speed, G & altitude graph will be saved (other metrics are computed from it).', 'ocr.noGraph': 'Graph not detected — only times will be saved.', 'd.fromShot': 'Graph rebuilt from a screenshot — approximate; values from the screenshot table are used when available.',
     'upd.ready': 'A new MGear version is available.', 'upd.reload': 'Reload', 'upd.version': 'Version',
+    'set.customSpeed': 'Custom speeds', 'set.customSpeedHint': 'Enter from – to (km/h): 0-120 (from standstill), 80-160 (rolling), 120-0 (braking). Older runs with full data are recalculated.', 'cs.invalid': 'Invalid range. Examples: 0-120, 80-160 or 120-0 (0–450 km/h).',
+    'cs.exists': 'This speed range already exists.',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -230,6 +234,8 @@ const D = {
     'ocr.skip': 'Lewati', 'ocr.save': 'Simpan run', 'ocr.metric': 'Metrik', 'ocr.time': 'Waktu (s)', 'ocr.trap': 'Kecepatan km/j', 'ocr.cond': 'Kondisi: {c}', 'ocr.saved': 'Run disimpan', 'ocr.needOne': 'Masukkan minimal satu waktu.',
     'ocr.graph': '📈 Grafik terdeteksi — grafik kecepatan, G & ketinggian akan disimpan (metrik lain dihitung dari grafik).', 'ocr.noGraph': 'Grafik tidak terdeteksi — hanya waktu yang disimpan.', 'd.fromShot': 'Grafik dibangun ulang dari screenshot — perkiraan; nilai dari tabel screenshot dipakai jika ada.',
     'upd.ready': 'Versi baru MGear tersedia.', 'upd.reload': 'Muat ulang', 'upd.version': 'Versi',
+    'set.customSpeed': 'Kecepatan kustom', 'set.customSpeedHint': 'Masukkan dari – sampai (km/j): 0-120 (dari diam), 80-160 (rolling), 120-0 (rem). Run lama dengan data lengkap dihitung ulang.', 'cs.invalid': 'Rentang tidak valid. Contoh: 0-120, 80-160 atau 120-0 (0–450 km/j).',
+    'cs.exists': 'Rentang kecepatan ini sudah ada.',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -306,6 +312,8 @@ const D = {
     'ocr.skip': '跳过', 'ocr.save': '保存', 'ocr.metric': '项目', 'ocr.time': '时间 (秒)', 'ocr.trap': '速度 km/h', 'ocr.cond': '条件：{c}', 'ocr.saved': '已保存', 'ocr.needOne': '请至少输入一个时间。',
     'ocr.graph': '📈 已识别曲线 — 将保存速度、G 值和海拔曲线（其他成绩由曲线计算）。', 'ocr.noGraph': '未识别到曲线 — 仅保存时间。', 'd.fromShot': '曲线由截图重建 — 为估算值；如截图表格中有数值则以其为准。',
     'upd.ready': 'MGear 有新版本。', 'upd.reload': '重新加载', 'upd.version': '版本',
+    'set.customSpeed': '自定义速度', 'set.customSpeedHint': '输入起止速度（km/h）：0-120（静止起步）、80-160（中段加速）、120-0（刹车）。有完整数据的旧记录会重新计算。', 'cs.invalid': '范围无效。例如：0-120、80-160 或 120-0（0–450 km/h）。',
+    'cs.exists': '该速度区间已存在。',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
