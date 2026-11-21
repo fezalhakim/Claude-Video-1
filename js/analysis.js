@@ -93,9 +93,11 @@ export function detectShifts(acc) {
     for (let j = i - 1; j >= 0 && acc[j].t >= near.t; j--) if (acc[j].g >= p.g + 0.5 * (near.g - p.g)) { st = acc[j]; break; }
     const sh = { t: st.t, d: st.d, v: st.v, g: st.g, tMin: p.t, gMin: p.g, drop, dur: rec.t - pk.t };
     const last = shifts[shifts.length - 1];
-    // Tukar gear yang sama jika: jatuhan dalam 0.35 s, ATAU beza kelajuan terlalu kecil untuk gear berbeza
-    // (< 8 km/j atau < 8%). Motor laju boleh tukar setiap ~0.6 s tetapi kelajuannya tetap jauh berbeza.
-    const sameShift = last && (p.t - last.tMin < 0.35 || sh.v - last.v < Math.max(8, last.v * 0.08));
+    // Tukar gear yang sama jika: jatuhan dalam 0.35 s, ATAU (dalam 0.8 s DAN beza kelajuan terlalu kecil untuk
+    // gear berbeza: < 8 km/j atau < 8%). Gear pendek di kelajuan tinggi (cth. 150 m → 201 m) tetap dikesan kerana
+    // masanya jauh terpisah walaupun beza kelajuan kecil.
+    const dtShift = last ? p.t - last.tMin : Infinity;
+    const sameShift = last && (dtShift < 0.35 || (dtShift < 0.8 && sh.v - last.v < Math.max(8, last.v * 0.08)));
     if (sameShift) { if (sh.drop > last.drop) shifts[shifts.length - 1] = sh; }
     else shifts.push(sh);
   }

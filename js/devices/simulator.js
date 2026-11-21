@@ -63,10 +63,10 @@ export async function connectSimulator({ onSample, onDisconnect }) {
 //   60ft ~1.51 s & 1/8 batu 6.40 s (1ft rollout).
 // Hasil penalaan: kecekapan rantai/gear ~82% (~53 hp di roda), pelancaran slick ~1.30 g, CdA 0.30, quickshifter 0.06 s.
 export const Y15 = {
-  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 0.815, cda: 0.30, crr: 0.015, traction: 1.295,
-  // tukar gear ikut JARAK (data sebenar): gear 1 → 100ft, gear 2 → 50 m, gear 3 → 100 m,
+  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 0.807, cda: 0.30, crr: 0.015, traction: 1.295,
+  // tukar gear ikut JARAK (data sebenar): gear 1 → 80ft, gear 2 → 100 m, gear 3 → 150 m,
   // gear 4 → 201 m (1/8), gear 5 → 300 m, gear 6 → 402 m (1/4)
-  shiftsM: [30.48, 50, 100, 201.168, 300],
+  shiftsM: [24.384, 100, 150, 201.168, 300],
   shiftMs: 60, band: 0.08, launchMs: 150
 };
 export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8, ...over } = {}) {
