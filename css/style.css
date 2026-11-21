@@ -249,6 +249,20 @@ main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
   .lockScr.lkMany .lkTop small, .lockScr.lkMany .lkBadge { font-size: 12px; }
   .lockScr.lkMany .lkRun { font-size: 13px; }
 }
+.dchart canvas { touch-action: pan-y; cursor: crosshair; }
+.zoomBar { display: flex; align-items: center; gap: 6px; margin: 4px 0 6px; }
+.zoomBar button { background: #1b2027; border: 1px solid var(--line); border-radius: 8px; min-width: 38px; height: 34px; font-size: 16px; color: var(--text); padding: 0 8px; }
+.zoomBar button:active { background: #262d36; }
+.zoomLbl { flex: 1; text-align: center; font-size: 12px; color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.readout { margin-top: 8px; }
+.roHint { color: var(--mute); font-size: 13px; text-align: center; margin: 4px 0; }
+.roTab { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+.roTab th { font-size: 12px; color: var(--mute); font-weight: 700; text-align: right; padding: 4px 6px; }
+.roTab td { padding: 5px 6px; text-align: right; border-top: 1px solid var(--line); }
+.roTab td:first-child, .roTab th:first-child { text-align: left; color: var(--mute); }
+.roTab tr.key td { font-weight: 800; font-size: 15px; color: var(--text); }
+.roTab .faster { color: var(--green); } .roTab .slower { color: var(--red); }
+.roNote { color: var(--mute); font-size: 11.5px; margin: 6px 0 0; }
 .lockPick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .lockPick h4 { width: 100%; margin: 8px 0 2px; font-size: 12px; color: var(--mute); text-transform: uppercase; letter-spacing: .1em; }
 .lockPick button { background: #1b2027; border: 1px solid var(--line); border-radius: 99px; padding: 7px 12px; font-size: 13px; color: var(--mute); }
