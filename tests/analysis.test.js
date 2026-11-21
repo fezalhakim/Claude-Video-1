@@ -46,11 +46,12 @@ test('kesan tukar gear dari simulator (4 tukar gear)', () => {
 
 import { simulateMoto } from '../js/devices/simulator.js';
 
-test('Demo Y15 65hp 135 kg: 1/8 batu 6.40 s (data sebenar), 6 gear (5 tukar gear dikesan)', () => {
+test('Demo Y15 65hp 135 kg: 60ft 1.51 & 1/8 batu 6.40 s (data sebenar), 6 gear (5 tukar gear dikesan)', () => {
   let f; const pt = new PerfTimer({ rollout: true, onResult: r => { if (r.kind === 'final') f = r; } });
   for (const s of simulateMoto()) pt.push(s);
   const e = f.results['1/8 batu'], q = f.results['1/4 batu'];
   assert.ok(Math.abs(e.time - 6.40) < 0.02, `1/8 ${e.time}`);
+  assert.ok(Math.abs(f.results['60ft'].time - 1.51) < 0.02, `60ft ${f.results['60ft'].time}`);
   assert.ok(q.time > 9.8 && q.time < 10.6, `1/4 ${q.time}`);
   const a = analyze({ results: f.results, rollout: true, raw: packSamples(f.samples) }, true);
   assert.equal(a.shifts.length, 5, JSON.stringify(a.shifts.map(s => s.v.toFixed(0))));

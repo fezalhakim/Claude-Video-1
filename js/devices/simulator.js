@@ -59,12 +59,13 @@ export async function connectSimulator({ onSample, onDisconnect }) {
  *   jalur kuasa: selepas tukar gear RPM jatuh, kuasa kira-kira (1−band) dan naik semula ke 100% menjelang titik tukar.
  * Preset lalai: Yamaha Y15 (150cc) ditala 65 hp, berat keseluruhan (motor + penunggang) 135 kg, 6 gear.
  */
-// Ditala dengan data sebenar: Y15 65 hp (dyno roda), 135 kg -> 1/8 batu 6.40 s (1ft rollout).
-// Setup drag: tayar slick (cengkaman ~1.23 g), penunggang membongkok (CdA 0.35), quickshifter 0.06 s, jalur kuasa rata.
+// Ditala dengan data sebenar Y15 65 hp, 135 kg, penunggang tunduk sepenuhnya:
+//   60ft ~1.51 s & 1/8 batu 6.40 s (1ft rollout).
+// Hasil penalaan: kecekapan rantai/gear ~85% (~55 hp di roda), pelancaran slick ~1.33 g, CdA 0.30, quickshifter 0.06 s.
 export const Y15 = {
-  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 1.0, cda: 0.35, crr: 0.015, traction: 1.229,
+  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 0.847, cda: 0.30, crr: 0.015, traction: 1.327,
   shiftsKmh: [58, 88, 114, 136, 156],   // 1→2 … 5→6
-  shiftMs: 60, band: 0.08
+  shiftMs: 60, band: 0.08, launchMs: 150
 };
 export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8, ...over } = {}) {
   const P = { ...Y15, ...over }, G = 9.80665;
@@ -81,7 +82,7 @@ export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8,
       if (gear <= P.shiftsKmh.length && kmh >= P.shiftsKmh[gear - 1]) { gear++; shiftUntil = since + P.shiftMs; }
       const lo = edges[gear - 1], hi = edges[gear], frac = Math.min(1, Math.max(0, (kmh - lo) / (hi - lo)));
       const pe = pw * (gear === 1 ? 1 : 1 - P.band + P.band * frac);
-      const aTrac = P.traction * G * Math.min(1, 0.5 + since / 500);          // cengkaman naik semasa pelancaran
+      const aTrac = P.traction * G * Math.min(1, 0.5 + 0.5 * since / P.launchMs); // cengkaman naik semasa lepas clutch
       a = Math.min(aTrac, pe / Math.max(v, 0.5)) - c * v * v - P.crr * G;
       if (since < shiftUntil) a = -c * v * v - P.crr * G;                       // semasa tukar gear: tiada tolakan
       if (dist >= distM) { phase = 'coast'; since = 0; }

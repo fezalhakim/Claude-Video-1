@@ -82,9 +82,13 @@ export function detectShifts(acc) {
     if (!pk || !rec) continue;
     const drop = pk.g - p.g;
     if (drop < Math.max(0.12, 0.3 * pk.g) || rec.g - p.g < 0.08) continue;
-    // titik mula jatuhan: dari minimum ke belakang, titik pertama G >= 80% jalan ke puncak
-    let st = pk;
-    for (let j = i - 1; j >= 0 && acc[j].t >= pk.t; j--) if (acc[j].g >= p.g + 0.8 * drop) { st = acc[j]; break; }
+    // titik mula jatuhan: diukur berbanding puncak TERDEKAT (0.25 s sebelum minimum), kerana G mungkin sudah
+    // menurun perlahan sebelum tukar gear (cth. peralihan dari had cengkaman ke had kuasa)
+    let near = null;
+    for (let j = i - 1; j >= 0 && p.t - acc[j].t <= 0.25; j--) if (!near || acc[j].g > near.g) near = acc[j];
+    near = near || pk;
+    let st = near;
+    for (let j = i - 1; j >= 0 && acc[j].t >= near.t; j--) if (acc[j].g >= p.g + 0.8 * (near.g - p.g)) { st = acc[j]; break; }
     const sh = { t: st.t, d: st.d, v: st.v, g: st.g, tMin: p.t, gMin: p.g, drop, dur: rec.t - pk.t };
     const last = shifts[shifts.length - 1];
     // Tukar gear yang sama jika: jatuhan dalam 0.35 s, ATAU beza kelajuan terlalu kecil untuk gear berbeza
