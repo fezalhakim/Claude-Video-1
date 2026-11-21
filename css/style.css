@@ -39,7 +39,12 @@ h2 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacin
 .dev small { font-weight: 400; color: var(--mute); font-size: 12px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; position: absolute; top: 14px; right: 14px; }
 .dot.pg { background: #c58bff; }
-.pgDev { grid-column: 1 / -1; border-color: rgba(197,139,255,.45); background: linear-gradient(135deg, #221a2e, #1b2027); }
+.rbMain { grid-column: 1 / -1; min-height: 86px; font-size: 19px; border-color: rgba(255,59,48,.45); background: linear-gradient(135deg, #2a1512, #1b2027); }
+.phDev { grid-column: 1 / -1; min-height: 60px; }
+.dev.demoLink { display: block; width: 100%; margin-top: 8px; min-height: 0; padding: 8px; background: none; border: 0; text-align: center;
+  font-size: 13px; font-weight: 600; color: var(--mute); }
+.dev.demoLink small { display: inline; font-size: 12px; font-weight: 400; opacity: .7; }
+.dev.demoLink:active { transform: none; color: var(--text); }
 .dot.rb { background: var(--red); } .dot.dg { background: var(--amber); } .dot.ph { background: var(--blue); } .dot.sm { background: var(--mute); }
 .warn { color: var(--amber); font-size: 13px; margin: 12px 0 0; }
 .ghost { background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font-size: 13px; }

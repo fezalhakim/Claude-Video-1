@@ -83,7 +83,7 @@ const D = {
     'copy.rights': 'Hak cipta terpelihara.',
     'set.lock': 'Skrin kunci', 'set.lockHint': 'Pilih masa yang ditunjuk di skrin kunci (maks 6). Lalai: 60ft, 330ft, 1/8 batu. Untuk 1 km, 2 km dsb., tambah dahulu di Jarak tersuai.', 'lock.max': 'Maksimum 6 masa pada skrin kunci.', 'unit.km': 'km',
     'zoom.full': 'Paparan penuh', 'zoom.hint': '👆 Sentuh / leret graf untuk bacaan tepat · cubit 2 jari atau ＋/− untuk zoom', 'ro.time': 'Masa', 'ro.dist': 'Jarak', 'ro.speed': 'Laju km/j', 'ro.g': 'G', 'ro.alt': 'Tinggi', 'ro.gear': 'Gear', 'ro.noteD': 'Δ masa pada jarak yang sama: − (hijau) = Run {a} sampai lebih awal.', 'ro.noteT': 'Δ jarak pada masa yang sama: + (hijau) = Run {a} lebih ke depan.',
-    'dev.pgear.sub': 'GPS Bluetooth · format dikesan automatik (UBX / NMEA)',
+    'dev.pgear.sub': 'GPS Bluetooth · auto',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -165,7 +165,7 @@ const D = {
     'copy.rights': 'All rights reserved.',
     'set.lock': 'Lock screen', 'set.lockHint': 'Choose the times shown on the lock screen (max 6). Default: 60ft, 330ft, 1/8 mile. For 1 km, 2 km etc., add them first under Custom distances.', 'lock.max': 'Maximum 6 times on the lock screen.', 'unit.km': 'km',
     'zoom.full': 'Full view', 'zoom.hint': '👆 Touch / drag the graph for exact readings · pinch or ＋/− to zoom', 'ro.time': 'Time', 'ro.dist': 'Distance', 'ro.speed': 'Speed km/h', 'ro.g': 'G', 'ro.alt': 'Altitude', 'ro.gear': 'Gear', 'ro.noteD': 'Δ time at the same distance: − (green) = Run {a} got there earlier.', 'ro.noteT': 'Δ distance at the same time: + (green) = Run {a} is further ahead.',
-    'dev.pgear.sub': 'Bluetooth GPS · format auto-detected (UBX / NMEA)',
+    'dev.pgear.sub': 'Bluetooth GPS · auto',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -247,7 +247,7 @@ const D = {
     'copy.rights': 'Hak cipta dilindungi.',
     'set.lock': 'Layar kunci', 'set.lockHint': 'Pilih waktu yang tampil di layar kunci (maks 6). Default: 60ft, 330ft, 1/8 mil. Untuk 1 km, 2 km dll., tambahkan dulu di Jarak kustom.', 'lock.max': 'Maksimal 6 waktu di layar kunci.', 'unit.km': 'km',
     'zoom.full': 'Tampilan penuh', 'zoom.hint': '👆 Sentuh / geser grafik untuk bacaan tepat · cubit 2 jari atau ＋/− untuk zoom', 'ro.time': 'Waktu', 'ro.dist': 'Jarak', 'ro.speed': 'Kec. km/j', 'ro.g': 'G', 'ro.alt': 'Tinggi', 'ro.gear': 'Gigi', 'ro.noteD': 'Δ waktu di jarak yang sama: − (hijau) = Run {a} sampai lebih dulu.', 'ro.noteT': 'Δ jarak di waktu yang sama: + (hijau) = Run {a} lebih di depan.',
-    'dev.pgear.sub': 'GPS Bluetooth · format terdeteksi otomatis (UBX / NMEA)',
+    'dev.pgear.sub': 'GPS Bluetooth · otomatis',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -329,7 +329,7 @@ const D = {
     'copy.rights': '版权所有。',
     'set.lock': '锁屏', 'set.lockHint': '选择锁屏上显示的成绩（最多 6 项）。默认：60ft、330ft、1/8 英里。如需 1 km、2 km 等，请先在自定义距离中添加。', 'lock.max': '锁屏最多显示 6 项。', 'unit.km': 'km',
     'zoom.full': '完整视图', 'zoom.hint': '👆 触摸 / 拖动曲线查看精确数值 · 双指缩放或按 ＋/−', 'ro.time': '时间', 'ro.dist': '距离', 'ro.speed': '速度 km/h', 'ro.g': 'G 值', 'ro.alt': '海拔', 'ro.gear': '挡位', 'ro.noteD': '相同距离的时间差：−（绿色）= Run {a} 更早到达。', 'ro.noteT': '相同时间的距离差：+（绿色）= Run {a} 更靠前。',
-    'dev.pgear.sub': '蓝牙 GPS · 自动识别格式（UBX / NMEA）',
+    'dev.pgear.sub': '蓝牙 GPS · 自动识别',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
