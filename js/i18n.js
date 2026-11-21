@@ -7,7 +7,7 @@ const D = {
   ms: {
     'conn.off': 'Tidak bersambung', 'conn.on': 'Bersambung: {name}',
     'h.connect': 'Sambung peranti', 'dev.dg.sub': 'GPS 10 Hz / Pro', 'dev.phone': 'GPS Telefon',
-    'dev.phone.sub': '~1 Hz, kurang tepat', 'dev.demo': 'Demo', 'dev.demo.sub': 'Motosikal · 1/4 batu 8.8 s · 6 gear',
+    'dev.phone.sub': '~1 Hz, kurang tepat', 'dev.demo': 'Demo', 'dev.demo.sub': 'Y15 65hp · 135 kg · 6 gear',
     'ble.warn': 'Pelayar ini tiada Web Bluetooth. Guna <b>Chrome</b> di Android/PC, atau aplikasi <b>Bluefy</b> di iPhone.',
     'btn.disconnect': 'Putus', 'kmh': 'km/j', 'live.time': 'Masa', 'live.dist': 'Jarak', 'live.max': 'Maks',
     'st.sats': 'Satelit', 'st.fix': 'Fix', 'st.rate': 'Kadar', 'st.bat': 'Bateri', 'fix.none': 'Tiada',
@@ -87,7 +87,7 @@ const D = {
   en: {
     'conn.off': 'Not connected', 'conn.on': 'Connected: {name}',
     'h.connect': 'Connect device', 'dev.dg.sub': 'GPS 10 Hz / Pro', 'dev.phone': 'Phone GPS',
-    'dev.phone.sub': '~1 Hz, less accurate', 'dev.demo': 'Demo', 'dev.demo.sub': 'Motorcycle · 1/4 mile 8.8 s · 6-speed',
+    'dev.phone.sub': '~1 Hz, less accurate', 'dev.demo': 'Demo', 'dev.demo.sub': 'Y15 65hp · 135 kg · 6-speed',
     'ble.warn': 'This browser has no Web Bluetooth. Use <b>Chrome</b> on Android/PC, or the <b>Bluefy</b> app on iPhone.',
     'btn.disconnect': 'Disconnect', 'kmh': 'km/h', 'live.time': 'Time', 'live.dist': 'Distance', 'live.max': 'Max',
     'st.sats': 'Satellites', 'st.fix': 'Fix', 'st.rate': 'Rate', 'st.bat': 'Battery', 'fix.none': 'None',
@@ -167,7 +167,7 @@ const D = {
   id: {
     'conn.off': 'Tidak terhubung', 'conn.on': 'Terhubung: {name}',
     'h.connect': 'Hubungkan perangkat', 'dev.dg.sub': 'GPS 10 Hz / Pro', 'dev.phone': 'GPS Ponsel',
-    'dev.phone.sub': '~1 Hz, kurang akurat', 'dev.demo': 'Demo', 'dev.demo.sub': 'Motor · 1/4 mil 8,8 s · 6 percepatan',
+    'dev.phone.sub': '~1 Hz, kurang akurat', 'dev.demo': 'Demo', 'dev.demo.sub': 'Y15 65hp · 135 kg · 6 percepatan',
     'ble.warn': 'Browser ini tidak mendukung Web Bluetooth. Gunakan <b>Chrome</b> di Android/PC, atau aplikasi <b>Bluefy</b> di iPhone.',
     'btn.disconnect': 'Putuskan', 'kmh': 'km/j', 'live.time': 'Waktu', 'live.dist': 'Jarak', 'live.max': 'Maks',
     'st.sats': 'Satelit', 'st.fix': 'Fix', 'st.rate': 'Laju data', 'st.bat': 'Baterai', 'fix.none': 'Tidak ada',
@@ -247,7 +247,7 @@ const D = {
   zh: {
     'conn.off': '未连接', 'conn.on': '已连接：{name}',
     'h.connect': '连接设备', 'dev.dg.sub': 'GPS 10 Hz / Pro', 'dev.phone': '手机 GPS',
-    'dev.phone.sub': '约 1 Hz，精度较低', 'dev.demo': '演示', 'dev.demo.sub': '摩托车 · 1/4 英里 8.8 秒 · 6 挡',
+    'dev.phone.sub': '约 1 Hz，精度较低', 'dev.demo': '演示', 'dev.demo.sub': 'Y15 65hp · 135 kg · 6 挡',
     'ble.warn': '此浏览器不支持 Web Bluetooth。请在 Android/电脑上使用 <b>Chrome</b>，或在 iPhone 上使用 <b>Bluefy</b>。',
     'btn.disconnect': '断开', 'kmh': 'km/h', 'live.time': '时间', 'live.dist': '距离', 'live.max': '最高',
     'st.sats': '卫星', 'st.fix': '定位', 'st.rate': '频率', 'st.bat': '电量', 'fix.none': '无',

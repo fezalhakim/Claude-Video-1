@@ -40,7 +40,7 @@ export function simulateRun({ hz = 25, vmax, tau = 9.5, holdS = 1.5, brake = 9.5
  * supaya demo siap dalam ~30 s (cap masa sampel kekal realistik, jadi keputusan tidak berubah).
  */
 export async function connectSimulator({ onSample, onDisconnect }) {
-  const samples = simulateMoto();   // Demo: motosikal 6 gear, 1/4 batu ~8.8 s
+  const samples = simulateMoto();   // Demo: Y15 65hp, 135 kg, 6 gear
   const perTick = Math.max(1, Math.ceil(samples.length / (30 * 25)));
   let i = 0;
   const base = Date.now();
@@ -50,36 +50,45 @@ export async function connectSimulator({ onSample, onDisconnect }) {
       onSample({ ...samples[i], t: base + samples[i].t }); i++;
     }
   }, 40);
-  return { name: 'Demo Superbike', disconnect: () => clearInterval(timer) };
+  return { name: 'Demo Y15 65hp', disconnect: () => clearInterval(timer) };
 }
 
 /**
- * Demo motosikal (superbike, 6 gear): 1/4 batu ~8.8 s dengan 1ft rollout.
- * Model: pecutan dihadkan cengkaman/wheelie semasa pelancaran, kemudian kuasa (P/v) tolak seretan angin (c·v²).
- * Tukar gear quickshifter: pecutan hilang ~0.12 s pada titik tukar.
+ * Demo motosikal dikira dari fizik (tiada masa "dipaksa"):
+ *   kuasa di roda = hp × 745.7 × kecekapan; pecutan = min(cengkaman, P/v) − seretan angin (½ρ·CdA·v²/m) − rintangan tayar
+ *   jalur kuasa: selepas tukar gear RPM jatuh, kuasa kira-kira (1−band) dan naik semula ke 100% menjelang titik tukar.
+ * Preset lalai: Yamaha Y15 (150cc) ditala 65 hp, berat keseluruhan (motor + penunggang) 135 kg, 6 gear.
  */
-// ditala: 1/4 batu 8.80 s @ ~273 km/j, 1/8 batu ~5.9 s, 60ft ~1.55 s, 0-100 ~2.5 s
-export const MOTO = { powerPerKg: 625, drag: 0.0008, traction: 1.22, shiftsKmh: [96, 138, 175, 207, 236], shiftMs: 120 };
-export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8.5, ...over } = {}) {
-  const P = { ...MOTO, ...over };
+export const Y15 = {
+  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 0.88, cda: 0.5, crr: 0.015, traction: 0.95,
+  shiftsKmh: [58, 88, 114, 136, 156],   // 1→2 … 5→6
+  shiftMs: 150, band: 0.22
+};
+export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8, ...over } = {}) {
+  const P = { ...Y15, ...over }, G = 9.80665;
+  const pw = P.hp * 745.7 * P.eff / P.massKg;            // W/kg di roda
+  const c = 0.5 * 1.2 * P.cda / P.massKg;                 // seretan angin per kg
+  const edges = [0, ...P.shiftsKmh, P.shiftsKmh[P.shiftsKmh.length - 1] * 1.2];
   const dt = 1000 / hz, out = [];
-  let t = 0, v = 0, dist = 0, shifts = [...P.shiftsKmh], shiftUntil = -1, gear = 1;
-  let lat = 3.139, lon = 101.6869, phase = 'hold', since = 0;
-  for (let step = 0; step < hz * 120; step++) {
+  let t = 0, v = 0, dist = 0, gear = 1, shiftUntil = -1, lat = 3.139, lon = 101.6869, phase = 'hold', since = 0;
+  for (let step = 0; step < hz * 150; step++) {
     let a = 0;
     if (phase === 'hold') { if (since >= holdS * 1000) { phase = 'go'; since = 0; } }
     else if (phase === 'go') {
-      const aTrac = P.traction * 9.80665 * Math.min(1, 0.55 + since / 600);   // cengkaman naik dalam 0.25 s pertama
-      a = Math.min(aTrac, P.powerPerKg / Math.max(v, 1)) - P.drag * v * v;
-      if (shifts.length && v * 3.6 >= shifts[0]) { shifts.shift(); gear++; shiftUntil = since + P.shiftMs; }
-      if (since < shiftUntil) a = 0.12 * 9.80665;                             // quickshift: hampir tiada tolakan
+      const kmh = v * 3.6;
+      if (gear <= P.shiftsKmh.length && kmh >= P.shiftsKmh[gear - 1]) { gear++; shiftUntil = since + P.shiftMs; }
+      const lo = edges[gear - 1], hi = edges[gear], frac = Math.min(1, Math.max(0, (kmh - lo) / (hi - lo)));
+      const pe = pw * (gear === 1 ? 1 : 1 - P.band + P.band * frac);
+      const aTrac = P.traction * G * Math.min(1, 0.5 + since / 500);          // cengkaman naik semasa pelancaran
+      a = Math.min(aTrac, pe / Math.max(v, 0.5)) - c * v * v - P.crr * G;
+      if (since < shiftUntil) a = -c * v * v - P.crr * G;                       // semasa tukar gear: tiada tolakan
       if (dist >= distM) { phase = 'coast'; since = 0; }
-    } else if (phase === 'coast') { a = -0.2; if (since >= 700) { phase = 'brake'; since = 0; } }
+    } else if (phase === 'coast') { a = -c * v * v - P.crr * G; if (since >= 700) { phase = 'brake'; since = 0; } }
     else a = -brake;
     v = Math.max(0, v + a * dt / 1000);
     lat += (v * dt / 1000) / 111320; dist += v * dt / 1000;
     out.push({ t, speed: v, lat, lon, alt: 30 + Math.sin(dist / 120) * 0.6, heading: 0, sats: 23, fix: 3,
-      gx: a / 9.80665, gy: Math.sin(t / 500) * 0.03, gz: 1, battery: 92, source: 'Simulator' });
+      gx: a / G, gy: Math.sin(t / 500) * 0.03, gz: 1, battery: 92, source: 'Simulator' });
     t += dt; since += dt;
     if (phase === 'brake' && v === 0 && since > 2000) break;
   }
