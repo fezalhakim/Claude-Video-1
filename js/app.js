@@ -1,5 +1,6 @@
 import { bleSupported, findKnownDevice } from './ble.js';
 import { connectRaceBox } from './devices/racebox.js';
+import { connectPGear } from './devices/pgear.js';
 import { connectDragy } from './devices/dragy.js';
 import { connectPhoneGps } from './devices/phonegps.js';
 import { connectSimulator } from './devices/simulator.js';
@@ -203,6 +204,7 @@ const timer = new PerfTimer({
 
 // ---------- Sambungan ----------
 const CONNECTORS = {
+  pgear: o => connectPGear({ ...o, anyDevice: settings.anyBle }),
   racebox: connectRaceBox,
   dragy: o => connectDragy({ ...o, anyDevice: settings.anyBle }),
   phone: connectPhoneGps,
@@ -817,7 +819,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 document.addEventListener('pgear:lang', updateAwake);
 
 // ---------- Kemas kini app ----------
-const APP_VERSION = '54';
+const APP_VERSION = '55';
 $('appVer').textContent = 'v' + APP_VERSION;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis
