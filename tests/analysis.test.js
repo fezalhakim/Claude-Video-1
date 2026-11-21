@@ -55,7 +55,8 @@ test('Demo Y15 65hp 135 kg: 60ft 1.51 & 1/8 batu 6.40 s (data sebenar), 6 gear (
   assert.ok(q.time > 9.8 && q.time < 10.6, `1/4 ${q.time}`);
   const a = analyze({ results: f.results, rollout: true, raw: packSamples(f.samples) }, true);
   assert.equal(a.shifts.length, 5, JSON.stringify(a.shifts.map(s => s.v.toFixed(0))));
-  [58, 88, 114, 136, 156].forEach((k, i) => assert.ok(Math.abs(a.shifts[i].v - k) < 6, `gear ${i + 1}->${i + 2} @ ${a.shifts[i].v}`));
+  // tukar gear ikut jarak: 100ft, 50 m, 100 m, 201 m, 300 m
+  [30.48, 50, 100, 201.168, 300].forEach((m, i) => assert.ok(Math.abs(a.shifts[i].d - m) < 4, `gear ${i + 1}->${i + 2} @ ${a.shifts[i].d.toFixed(1)} m`));
   // lebih kuasa = lebih pantas (model fizik konsisten)
   let g; const p2 = new PerfTimer({ rollout: true, onResult: r => { if (r.kind === 'final') g = r; } });
   for (const s of simulateMoto({ hp: 80 })) p2.push(s);

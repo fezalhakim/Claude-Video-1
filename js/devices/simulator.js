@@ -61,17 +61,21 @@ export async function connectSimulator({ onSample, onDisconnect }) {
  */
 // Ditala dengan data sebenar Y15 65 hp, 135 kg, penunggang tunduk sepenuhnya:
 //   60ft ~1.51 s & 1/8 batu 6.40 s (1ft rollout).
-// Hasil penalaan: kecekapan rantai/gear ~85% (~55 hp di roda), pelancaran slick ~1.33 g, CdA 0.30, quickshifter 0.06 s.
+// Hasil penalaan: kecekapan rantai/gear ~82% (~53 hp di roda), pelancaran slick ~1.30 g, CdA 0.30, quickshifter 0.06 s.
 export const Y15 = {
-  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 0.847, cda: 0.30, crr: 0.015, traction: 1.327,
-  shiftsKmh: [58, 88, 114, 136, 156],   // 1→2 … 5→6
+  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 0.815, cda: 0.30, crr: 0.015, traction: 1.295,
+  // tukar gear ikut JARAK (data sebenar): gear 1 → 100ft, gear 2 → 50 m, gear 3 → 100 m,
+  // gear 4 → 201 m (1/8), gear 5 → 300 m, gear 6 → 402 m (1/4)
+  shiftsM: [30.48, 50, 100, 201.168, 300],
   shiftMs: 60, band: 0.08, launchMs: 150
 };
 export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8, ...over } = {}) {
   const P = { ...Y15, ...over }, G = 9.80665;
+  if (over.shiftsKmh && !over.shiftsM) delete P.shiftsM;   // pemanggil mahu tukar ikut kelajuan
   const pw = P.hp * 745.7 * P.eff / P.massKg;            // W/kg di roda
   const c = 0.5 * 1.2 * P.cda / P.massKg;                 // seretan angin per kg
-  const edges = [0, ...P.shiftsKmh, P.shiftsKmh[P.shiftsKmh.length - 1] * 1.2];
+  const edges = P.shiftsKmh ? [0, ...P.shiftsKmh, P.shiftsKmh[P.shiftsKmh.length - 1] * 1.2] : [];
+  const edgesM = P.shiftsM ? [0, ...P.shiftsM, distM * 1.1] : [];
   const dt = 1000 / hz, out = [];
   let t = 0, v = 0, dist = 0, gear = 1, shiftUntil = -1, lat = 3.139, lon = 101.6869, phase = 'hold', since = 0;
   for (let step = 0; step < hz * 150; step++) {
@@ -79,8 +83,11 @@ export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8,
     if (phase === 'hold') { if (since >= holdS * 1000) { phase = 'go'; since = 0; } }
     else if (phase === 'go') {
       const kmh = v * 3.6;
-      if (gear <= P.shiftsKmh.length && kmh >= P.shiftsKmh[gear - 1]) { gear++; shiftUntil = since + P.shiftMs; }
-      const lo = edges[gear - 1], hi = edges[gear], frac = Math.min(1, Math.max(0, (kmh - lo) / (hi - lo)));
+      // titik tukar: ikut jarak (shiftsM) jika diberi, jika tidak ikut kelajuan (shiftsKmh)
+      const byDist = !!P.shiftsM, pts = byDist ? P.shiftsM : P.shiftsKmh, pos = byDist ? dist : kmh;
+      if (gear <= pts.length && pos >= pts[gear - 1]) { gear++; shiftUntil = since + P.shiftMs; }
+      const ed = byDist ? edgesM : edges;
+      const lo = ed[gear - 1], hi = ed[gear], frac = Math.min(1, Math.max(0, (pos - lo) / (hi - lo)));
       const pe = pw * (gear === 1 ? 1 : 1 - P.band + P.band * frac);
       const aTrac = P.traction * G * Math.min(1, 0.5 + 0.5 * since / P.launchMs); // cengkaman naik semasa lepas clutch
       a = Math.min(aTrac, pe / Math.max(v, 0.5)) - c * v * v - P.crr * G;

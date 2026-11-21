@@ -88,7 +88,9 @@ export function detectShifts(acc) {
     for (let j = i - 1; j >= 0 && p.t - acc[j].t <= 0.25; j--) if (!near || acc[j].g > near.g) near = acc[j];
     near = near || pk;
     let st = near;
-    for (let j = i - 1; j >= 0 && acc[j].t >= near.t; j--) if (acc[j].g >= p.g + 0.8 * (near.g - p.g)) { st = acc[j]; break; }
+    // ambang 50%: pada G yang dilicinkan secara simetri, titik tengah penurunan = saat sebenar tukar gear
+    // (ambang lebih tinggi akan kelihatan terlalu awal, cth. ~4 m pada 170 km/j)
+    for (let j = i - 1; j >= 0 && acc[j].t >= near.t; j--) if (acc[j].g >= p.g + 0.5 * (near.g - p.g)) { st = acc[j]; break; }
     const sh = { t: st.t, d: st.d, v: st.v, g: st.g, tMin: p.t, gMin: p.g, drop, dur: rec.t - pk.t };
     const last = shifts[shifts.length - 1];
     // Tukar gear yang sama jika: jatuhan dalam 0.35 s, ATAU beza kelajuan terlalu kecil untuk gear berbeza
