@@ -43,3 +43,15 @@ test('kesan tukar gear dari simulator (4 tukar gear)', () => {
   a.shifts.forEach((s, i) => assert.ok(Math.abs(s.v - exp[i]) < 6, `gear ${i} @ ${s.v}`));
   assert.ok(a.shifts[1].d > a.shifts[0].d);
 });
+
+import { simulateMoto } from '../js/devices/simulator.js';
+
+test('Demo motosikal: 1/4 batu 8.8 s dengan rollout, 6 gear (5 tukar gear dikesan)', () => {
+  let f; const pt = new PerfTimer({ rollout: true, onResult: r => { if (r.kind === 'final') f = r; } });
+  for (const s of simulateMoto()) pt.push(s);
+  assert.ok(Math.abs(f.results['1/4 batu'].time - 8.8) < 0.02, `1/4 ${f.results['1/4 batu'].time}`);
+  assert.ok(f.results['1/4 batu'].trap > 255 && f.results['1/4 batu'].trap < 290);
+  const a = analyze({ results: f.results, rollout: true, raw: packSamples(f.samples) }, true);
+  assert.equal(a.shifts.length, 5, JSON.stringify(a.shifts.map(s => s.v.toFixed(0))));
+  [96, 138, 175, 207, 236].forEach((k, i) => assert.ok(Math.abs(a.shifts[i].v - k) < 8, `gear ${i + 1}->${i + 2} @ ${a.shifts[i].v}`));
+});

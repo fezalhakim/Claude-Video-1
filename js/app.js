@@ -740,7 +740,9 @@ document.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click',
 // ---------- Ringkasan selepas larian ----------
 function showSummary(run) {
   const sh = shownKeys();
-  const pick = ALL.filter(k => sh.includes(k) && run.results[k]).slice(0, 5);
+  // jarak dahulu (gaya drag: 60ft, 1/8, 1/4…), kemudian kelajuan
+  const got = ALL.filter(k => sh.includes(k) && run.results[k]);
+  const pick = [...got.filter(isDistKey), ...got.filter(k => !isDistKey(k))].slice(0, 5);
   const tiles = pick.map(k => `<div><small>${esc(metric(k))}</small><b>${run.results[k].time.toFixed(2)}</b><i>s</i></div>`);
   if (run.maxKmh) tiles.push(`<div><small>${t('d.maxV')}</small><b>${run.maxKmh.toFixed(0)}</b><i>${t('kmh')}</i></div>`);
   $('sheetBody').innerHTML = tiles.join('');
@@ -815,7 +817,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 document.addEventListener('pgear:lang', updateAwake);
 
 // ---------- Kemas kini app ----------
-const APP_VERSION = '42';
+const APP_VERSION = '43';
 $('appVer').textContent = 'v' + APP_VERSION;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis
