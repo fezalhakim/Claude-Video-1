@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b0d10">
   <title>MGear GPS by MB Performance</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/favicon-64.png" type="image/png" sizes="64x64">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -242,7 +242,10 @@
   </div>
 
   <div id="lockScr" class="lockScr" hidden role="dialog" aria-modal="true">
-    <div class="lkBadge">🔒 <span data-i18n="lock.locked">Skrin dikunci</span></div>
+    <div class="lkTopBar">
+      <img class="lkLogo" src="icons/mb-logo-wide.jpg" alt="MB Performance">
+      <div class="lkBadge">🔒 <span data-i18n="lock.locked">Skrin dikunci</span></div>
+    </div>
     <div class="lkSpeed"><b id="lkSpeed">0</b><span data-i18n="kmh">km/j</span></div>
     <div class="lkTop"><small data-i18n="live.top">Laju maks</small><b id="lkTop">0.0</b></div>
     <div id="lkSplits" class="lkSplits"></div>
