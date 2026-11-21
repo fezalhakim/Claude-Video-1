@@ -181,7 +181,7 @@ const timer = new PerfTimer({
   onResult: r => {
     if (r.kind === 'live') {
       Object.assign(current, r.run.results);
-      $('elapsed').textContent = (r.run.elapsed || 0).toFixed(2);
+      $('elapsed').textContent = (r.run.elapsed || 0).toFixed(3);
       $('dist').textContent = r.run.dist.toFixed(0);
       chartPts = r.run.pts;
       renderResults();
@@ -392,7 +392,7 @@ function fmt(key, r) {
     if (r.vmax != null && r.vmax - r.trap >= 0.5) extra += ` · ${t('res.max', { v: r.vmax.toFixed(1) })}`;
   }
   else if (r.dist !== undefined) extra = `${r.dist.toFixed(1)} m`;
-  return `<b>${r.time.toFixed(2)}</b> s<em>${extra}</em>`;
+  return `<b>${r.time.toFixed(3)}</b> s<em>${extra}</em>`;
 }
 function renderResults() {
   const ck = customKeys();
@@ -411,7 +411,7 @@ function renderLockSplits() {
   $('lkSplits').innerHTML = lockKeys().map(k => {
     const label = metric(k);
     const r = current[k];
-    return `<div class="${r ? 'hit' : ''}"><small>${label}</small><b>${r ? r.time.toFixed(2) : '--.--'}</b><em>${r?.trap != null ? r.trap.toFixed(1) + ' ' + t('kmh') : '&nbsp;'}</em></div>`;
+    return `<div class="${r ? 'hit' : ''}"><small>${label}</small><b>${r ? r.time.toFixed(3) : '-.---'}</b><em>${r?.trap != null ? r.trap.toFixed(1) + ' ' + t('kmh') : '&nbsp;'}</em></div>`;
   }).join('');
 }
 
@@ -490,10 +490,10 @@ function renderHistory() {
   for (const h of history) for (const [k, r] of Object.entries(h.results))
     if (!best[k] || r.time < best[k].time) best[k] = r;
   const sh = shownKeys();
-  $('best').innerHTML = ALL.filter(k => best[k] && sh.includes(k)).map(k => `<span>${t('best', { k: metric(k) })}: <b>${best[k].time.toFixed(2)} s</b></span>`).join('');
+  $('best').innerHTML = ALL.filter(k => best[k] && sh.includes(k)).map(k => `<span>${t('best', { k: metric(k) })}: <b>${best[k].time.toFixed(3)} s</b></span>`).join('');
   $('history').innerHTML = history.length ? history.map((h, i) => {
     const hk = ALL.filter(k => h.results[k]), hs = hk.filter(k => sh.includes(k));
-    const vals = (hs.length ? hs : hk).map(k => `${metric(k)} <b>${h.results[k].time.toFixed(2)}</b>`).join(' · ');
+    const vals = (hs.length ? hs : hk).map(k => `${metric(k)} <b>${h.results[k].time.toFixed(3)}</b>`).join(' · ');
     const d = new Date(h.at);
     return `<li><div class="hinfo" data-open="${h.no}"><div class="meta"><span class="runno">Run ${h.no}</span>${h.imported ? `<span class="impTag">${t('imp.tag')}</span> ` : ''}${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale())} · ${esc(h.device)}${h.rollout ? ' · rollout' : ''}${h.maxKmh ? ` · ${t('hist.max')} ${h.maxKmh.toFixed(0)} ${t('kmh')}` : ''}</div>
       <div class="vals">${vals}</div><div class="open">${h.car ? esc(h.car) + ' · ' : ''}${t('hist.open')}</div></div><div class="acts">
@@ -528,7 +528,7 @@ function renderMetricHist() {
     $('metricList').innerHTML = keys.map(k => {
       const runs = history.filter(h => h.results[k]);
       const best = Math.min(...runs.map(h => h.results[k].time));
-      return `<button class="mItem" data-metric="${esc(k)}">${icon(k)}<span class="ml"><b>${esc(metric(k))}${unitLbl(k)}</b><small>${t('hist.bestIs', { v: best.toFixed(2) })}</small></span>
+      return `<button class="mItem" data-metric="${esc(k)}">${icon(k)}<span class="ml"><b>${esc(metric(k))}${unitLbl(k)}</b><small>${t('hist.bestIs', { v: best.toFixed(3) })}</small></span>
         <span class="mc">${t('hist.runs', { n: runs.length })}</span><span class="chev">›</span></button>`;
     }).join('');
     return;
@@ -546,8 +546,8 @@ function renderMetricHist() {
       const r = h.results[k], rank = rankOf.get(h.no), d = new Date(h.at), dd = r.time - best;
       const extra = r.trap != null ? ` · @ ${r.trap.toFixed(1)} ${t('kmh')}` : r.dist != null ? ` · ${r.dist.toFixed(1)} m` : '';
       return `<li class="mRow ${rank === 1 ? 'top' : ''}"><span class="rank">${rank === 1 ? '🏆' : '#' + rank}</span>
-        <div class="mi" data-open="${h.no}"><b>${r.time.toFixed(2)}<i>s</i></b><small>Run ${h.no}${h.imported ? ' · ' + t('imp.tag') + ' ' + esc(h.device) : ''} · ${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })}${extra}${h.car ? ' · ' + esc(h.car) : ''}</small></div>
-        <span class="dlt">${rank === 1 ? t('hist.top') : '+' + dd.toFixed(2)}</span>
+        <div class="mi" data-open="${h.no}"><b>${r.time.toFixed(3)}<i>s</i></b><small>Run ${h.no}${h.imported ? ' · ' + t('imp.tag') + ' ' + esc(h.device) : ''} · ${d.toLocaleDateString(locale())} ${d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })}${extra}${h.car ? ' · ' + esc(h.car) : ''}</small></div>
+        <span class="dlt">${rank === 1 ? t('hist.top') : '+' + dd.toFixed(3)}</span>
         <span class="acts"><button class="a ${cmp.a === h.no ? 'on' : ''}" data-pick="a" data-no="${h.no}" aria-label="${t('aria.pickA')}">A</button><button class="b ${cmp.b === h.no ? 'on' : ''}" data-pick="b" data-no="${h.no}" aria-label="${t('aria.pickB')}">B</button></span></li>`;
     }).join('')}</ol>`;
   if (runs.length > 1) drawTrend(runs, k, best);
@@ -560,7 +560,7 @@ function drawTrend(runs, k, best) {
   const X = i => L + (pts.length === 1 ? (w - L - R) / 2 : (i / (pts.length - 1)) * (w - L - R));
   const Y = v => T + ((v - y0) / (y1 - y0)) * (h - T - B); // lebih pantas = lebih tinggi
   x.clearRect(0, 0, w, h); x.font = '15px system-ui'; x.fillStyle = '#8b95a3'; x.strokeStyle = '#242a32'; x.lineWidth = 1;
-  for (const v of [lo, (lo + hi) / 2, hi]) { const yy = Y(v); x.beginPath(); x.moveTo(L, yy); x.lineTo(w - R, yy); x.stroke(); x.fillText(v.toFixed(2), 2, yy + 5); }
+  for (const v of [lo, (lo + hi) / 2, hi]) { const yy = Y(v); x.beginPath(); x.moveTo(L, yy); x.lineTo(w - R, yy); x.stroke(); x.fillText(v.toFixed(3), 2, yy + 5); }
   x.strokeStyle = '#4aa3ff'; x.lineWidth = 3; x.beginPath();
   pts.forEach(([, v], i) => (i ? x.lineTo(X(i), Y(v)) : x.moveTo(X(i), Y(v)))); x.stroke();
   x.textAlign = 'center';
@@ -606,10 +606,10 @@ function renderCompare() {
     let diff = '–', ca = '', cb = '';
     if (a && b) {
       const d = b.time - a.time;
-      diff = `<span class="${d < 0 ? 'faster' : d > 0 ? 'slower' : ''}">${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d).toFixed(2)}</span>`;
+      diff = `<span class="${d < 0 ? 'faster' : d > 0 ? 'slower' : ''}">${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d).toFixed(3)}</span>`;
       if (d < 0) { cb = 'win'; winB++; } else if (d > 0) { ca = 'win'; winA++; }
     }
-    return `<tr><td>${metric(k)}</td><td class="${ca}">${a ? a.time.toFixed(2) : '–'}</td><td class="${cb}">${b ? b.time.toFixed(2) : '–'}</td><td>${diff}</td></tr>`;
+    return `<tr><td>${metric(k)}</td><td class="${ca}">${a ? a.time.toFixed(3) : '–'}</td><td class="${cb}">${b ? b.time.toFixed(3) : '–'}</td><td>${diff}</td></tr>`;
   }).join('');
   const vmax = (A.maxKmh || B.maxKmh)
     ? `<tr><td>${t('cmp.maxkmh')}</td><td>${A.maxKmh?.toFixed(0) ?? '–'}</td><td>${B.maxKmh?.toFixed(0) ?? '–'}</td><td></td></tr>` : '';
@@ -743,7 +743,7 @@ function showSummary(run) {
   // jarak dahulu (gaya drag: 60ft, 1/8, 1/4…), kemudian kelajuan
   const got = ALL.filter(k => sh.includes(k) && run.results[k]);
   const pick = [...got.filter(isDistKey), ...got.filter(k => !isDistKey(k))].slice(0, 5);
-  const tiles = pick.map(k => `<div><small>${esc(metric(k))}</small><b>${run.results[k].time.toFixed(2)}</b><i>s</i></div>`);
+  const tiles = pick.map(k => `<div><small>${esc(metric(k))}</small><b>${run.results[k].time.toFixed(3)}</b><i>s</i></div>`);
   if (run.maxKmh) tiles.push(`<div><small>${t('d.maxV')}</small><b>${run.maxKmh.toFixed(0)}</b><i>${t('kmh')}</i></div>`);
   $('sheetBody').innerHTML = tiles.join('');
   $('sheet').hidden = false;
@@ -817,7 +817,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 document.addEventListener('pgear:lang', updateAwake);
 
 // ---------- Kemas kini app ----------
-const APP_VERSION = '52';
+const APP_VERSION = '53';
 $('appVer').textContent = 'v' + APP_VERSION;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis

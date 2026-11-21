@@ -4,6 +4,7 @@ import { t, metric, locale } from './i18n.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const f2 = x => (x == null || !isFinite(x) ? '–' : x.toFixed(2));
+const f3 = x => (x == null || !isFinite(x) ? '–' : x.toFixed(3));   // masa: 3 perpuluhan (seperti sistem masa dragstrip)
 const COL = { other: '#e8ecf1', shift: '#c58bff', g: '#ffb340', alt: '#30d158', v: '#4aa3ff', grid: '#2a313a', text: '#8b95a3' };
 
 let state = null;
@@ -35,7 +36,7 @@ function render() {
   const delta = (x, y) => {
     if (x == null || y == null) return '<span class="dm">–</span>';
     const dd = x - y;
-    return `<span class="${dd < 0 ? 'faster' : dd > 0 ? 'slower' : ''}">${dd > 0 ? '+' : dd < 0 ? '−' : '±'}${Math.abs(dd).toFixed(2)}</span>`;
+    return `<span class="${dd < 0 ? 'faster' : dd > 0 ? 'slower' : ''}">${dd > 0 ? '+' : dd < 0 ? '−' : '±'}${Math.abs(dd).toFixed(3)}</span>`;
   };
   const mainB = b?.results[state.focus];
 
@@ -44,7 +45,7 @@ function render() {
       <h3>Run ${run.no}</h3><button class="ghost danger" data-act="del">${t('d.del')}</button></div>
 
     <div class="hero">
-      <div class="main"><small>${t('d.result', { k: esc(metric(state.focus || '')) })}</small><b>${f2(main?.time)}</b><i>s</i>${b ? `<span class="hdelta">${delta(main?.time, mainB?.time)} ${t('d.vs', { no: oRun.no })}</span>` : ''}</div>
+      <div class="main"><small>${t('d.result', { k: esc(metric(state.focus || '')) })}</small><b>${f3(main?.time)}</b><i>s</i>${b ? `<span class="hdelta">${delta(main?.time, mainB?.time)} ${t('d.vs', { no: oRun.no })}</span>` : ''}</div>
       <div><small>${t('d.maxG')}</small><b>${a.maxG == null ? '–' : a.maxG.toFixed(2)}</b><i>g</i></div>
       <div><small>${t('d.maxV')}</small><b>${a.maxKmh == null ? '–' : a.maxKmh.toFixed(1)}</b><i>${t('kmh')}</i></div>
     </div>
@@ -66,7 +67,7 @@ function render() {
       <label for="dCmp">${t('d.cmpWith')}</label>
       <select id="dCmp"><option value="">${t('d.none')}</option>${others.map(h => {
         const dt = new Date(h.at);
-        return `<option value="${h.no}" ${h.no === state.cmpNo ? 'selected' : ''}>Run ${h.no} · ${dt.getDate()}/${dt.getMonth() + 1} ${dt.toTimeString().slice(0, 5)}${h.car ? ' · ' + esc(h.car) : ''}${h.results[state.focus] ? ' · ' + h.results[state.focus].time.toFixed(2) + 's' : ''}</option>`;
+        return `<option value="${h.no}" ${h.no === state.cmpNo ? 'selected' : ''}>Run ${h.no} · ${dt.getDate()}/${dt.getMonth() + 1} ${dt.toTimeString().slice(0, 5)}${h.car ? ' · ' + esc(h.car) : ''}${h.results[state.focus] ? ' · ' + h.results[state.focus].time.toFixed(3) + 's' : ''}</option>`;
       }).join('')}</select>
     </div>
 
@@ -91,7 +92,7 @@ function render() {
     ${a.shifts.length ? `<h4 class="sub">${t('d.shifts')}</h4><table class="splits gears"><thead><tr>
       <th>${t('d.gear')}</th><th>${t('d.distM')}</th><th>${t('d.speedKmh')}</th><th>${t('d.timeS')}</th>${b ? `<th>Run ${oRun.no}</th>` : `<th>${t('d.gLost')}</th>`}</tr></thead>
       <tbody>${a.shifts.map((g, i) => { const o = b?.shifts[i]; return `<tr><td><span class="gearTag">${i + 1}→${i + 2}</span></td><td>${g.d.toFixed(1)}</td>
-        <td>${g.v.toFixed(1)}</td><td>${g.t.toFixed(2)}</td>${b
+        <td>${g.v.toFixed(1)}</td><td>${g.t.toFixed(3)}</td>${b
           ? `<td class="oth">${o ? `<span class="nw">${o.d.toFixed(0)} m · ${o.v.toFixed(0)}</span><br><span class="dm">(${g.d < o.d ? '−' : '+'}${Math.abs(g.d - o.d).toFixed(0)} m)</span>` : '–'}</td>`
           : `<td class="g">−${g.drop.toFixed(2)}g · ${g.dur.toFixed(2)}s</td>`}</tr>`; }).join('')}</tbody></table>`
       : a.hasRaw ? `<p class="note">${t('d.noShift')}</p>` : ''}
@@ -107,8 +108,8 @@ function render() {
         <td>${esc(metric(r.key))}${r.custom ? ' <span class="cdStar">★</span>' : ''}</td>
         <td class="g">${r.g == null ? '–' : r.g.toFixed(2) + 'g'}</td>
         <td>${state.tab === 'dist' ? f2(r.speed) + (r.vmax != null ? `<span class="vm">${t('res.max', { v: r.vmax.toFixed(1) })}</span>` : '') : r.dist == null ? '–' : r.dist.toFixed(1)}</td>
-        <td class="sp">${r.split == null ? '' : '+' + r.split.toFixed(2)}</td>
-        <td class="tm">${f2(r.time)}</td>${b ? `<td class="dl">${delta(r.time, b.results[r.key]?.time)}</td>` : ''}</tr>`).join('')}</tbody></table>
+        <td class="sp">${r.split == null ? '' : '+' + r.split.toFixed(3)}</td>
+        <td class="tm">${f3(r.time)}</td>${b ? `<td class="dl">${delta(r.time, b.results[r.key]?.time)}</td>` : ''}</tr>`).join('')}</tbody></table>
       ${b ? `<p class="note">${t('d.vsNote', { no: oRun.no })}</p>` : ''}`
       : `<p class="empty">${t('d.empty')}</p>`}
 
