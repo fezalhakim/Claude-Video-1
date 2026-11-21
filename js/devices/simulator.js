@@ -59,10 +59,12 @@ export async function connectSimulator({ onSample, onDisconnect }) {
  *   jalur kuasa: selepas tukar gear RPM jatuh, kuasa kira-kira (1−band) dan naik semula ke 100% menjelang titik tukar.
  * Preset lalai: Yamaha Y15 (150cc) ditala 65 hp, berat keseluruhan (motor + penunggang) 135 kg, 6 gear.
  */
+// Ditala dengan data sebenar: Y15 65 hp (dyno roda), 135 kg -> 1/8 batu 6.40 s (1ft rollout).
+// Setup drag: tayar slick (cengkaman ~1.23 g), penunggang membongkok (CdA 0.35), quickshifter 0.06 s, jalur kuasa rata.
 export const Y15 = {
-  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 0.88, cda: 0.5, crr: 0.015, traction: 0.95,
+  name: 'Y15 65hp', hp: 65, massKg: 135, eff: 1.0, cda: 0.35, crr: 0.015, traction: 1.229,
   shiftsKmh: [58, 88, 114, 136, 156],   // 1→2 … 5→6
-  shiftMs: 150, band: 0.22
+  shiftMs: 60, band: 0.08
 };
 export function simulateMoto({ hz = 25, holdS = 1.5, distM = 402.336, brake = 8, ...over } = {}) {
   const P = { ...Y15, ...over }, G = 9.80665;
