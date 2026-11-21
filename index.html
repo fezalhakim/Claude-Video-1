@@ -148,6 +148,12 @@
     </section>
 
     <section class="card">
+      <h2 data-i18n="set.lock">Skrin kunci</h2>
+      <p class="note" data-i18n="set.lockHint"></p>
+      <div id="lockPick" class="lockPick"></div>
+    </section>
+
+    <section class="card">
       <h2 data-i18n="h.settings">Tetapan</h2>
       <div class="fields">
         <label><span data-i18n="set.lang">Bahasa</span><select id="lang"></select></label>
@@ -158,7 +164,7 @@
         <div class="cdTitle" data-i18n="set.custom"></div>
         <div class="cdRow">
           <input id="cdVal" type="number" inputmode="decimal" min="0" step="any" placeholder="500" aria-label="Distance">
-          <select id="cdUnit" aria-label="Unit"><option value="m">m</option><option value="ft">ft</option><option value="mi" data-i18n="unit.mi">batu</option></select>
+          <select id="cdUnit" aria-label="Unit"><option value="m">m</option><option value="km">km</option><option value="ft">ft</option><option value="mi" data-i18n="unit.mi">batu</option></select>
           <button id="cdAdd" class="ghost" data-i18n="btn.add">Tambah</button>
         </div>
         <div id="cdList" class="cdList"></div>

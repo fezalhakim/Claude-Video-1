@@ -19,10 +19,10 @@ export const DIST_TARGETS = [             // jarak (m)
 ];
 
 /** Jarak tersuai: { v: nilai, u: 'm' | 'ft' | 'mi' } -> sasaran { key, m, custom: true } */
-export const UNIT_M = { m: 1, ft: FT, mi: MILE };
+export const UNIT_M = { m: 1, km: 1000, ft: FT, mi: MILE };
 export function customKey(c) {
   const n = +(+c.v).toFixed(3);
-  return c.u === 'ft' ? `${n}ft` : c.u === 'mi' ? `${n} batu` : `${n} m`;
+  return c.u === 'ft' ? `${n}ft` : c.u === 'mi' ? `${n} batu` : c.u === 'km' ? `${n} km` : `${n} m`;
 }
 export function makeDistTargets(custom = []) {
   const out = [...DIST_TARGETS];
@@ -33,7 +33,7 @@ export function makeDistTargets(custom = []) {
   }
   return out.sort((a, b) => a.m - b.m);
 }
-export const isDistKey = k => /(ft|batu| m)$/.test(k);
+export const isDistKey = k => /(ft|batu| m| km)$/.test(k);
 
 /**
  * Kelajuan tersuai: { from, to } km/j.

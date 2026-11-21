@@ -228,12 +228,32 @@ main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 .lkTop { text-align: center; }
 .lkTop small { display: block; color: #ff8a80; font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .lkTop b { font-size: clamp(56px, 18vw, 96px); font-weight: 800; font-variant-numeric: tabular-nums; color: #ffd0cc; }
-.lkSplits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 420px; }
-.lkSplits div { background: #101318; border: 1px solid #1f252d; border-radius: 14px; padding: 10px 6px; text-align: center; }
+.lkSplits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 400px; }
+.lkSplits div { background: #101318; border: 1px solid #1f252d; border-radius: 12px; padding: 6px 4px; text-align: center; }
 .lkSplits div.hit { border-color: rgba(48,209,88,.5); }
-.lkSplits small { display: block; color: var(--mute); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
-.lkSplits b { display: block; font-size: clamp(26px, 8.5vw, 38px); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); line-height: 1.15; }
-.lkSplits em { font-style: normal; color: var(--mute); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lkSplits small { display: block; color: var(--mute); font-size: 11.5px; font-weight: 700; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lkSplits b { display: block; font-size: clamp(20px, 6.4vw, 28px); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); line-height: 1.15; }
+.lkSplits em { font-style: normal; color: var(--mute); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+.lockScr.lkMany .lkSpeed b { font-size: clamp(76px, 25vw, 170px); }
+.lockScr.lkMany .lkTop b { font-size: clamp(40px, 12vw, 74px); }
+@media (max-height: 700px) {
+  .lockScr { padding-top: 14px; padding-bottom: 14px; }
+  .lkSpeed b { font-size: clamp(72px, 22vw, 150px); }
+  .lkTop b { font-size: clamp(38px, 11vw, 64px); }
+  .lkMg img { width: 36px; } .lkMg b { font-size: 21px; }
+  .unlockBtn { width: 66px; height: 66px; } .unlockBtn span { font-size: 24px; }
+  .lkUnlock p { margin-top: 4px; font-size: 12px; }
+  .lkFoot { margin-top: 6px; } .lkLogo { width: 64px; }
+  .lockScr.lkMany .lkSpeed b { font-size: clamp(60px, 19vw, 120px); }
+  .lockScr.lkMany .lkTop b { font-size: clamp(32px, 9.5vw, 54px); }
+  .lockScr.lkMany .lkTop small, .lockScr.lkMany .lkBadge { font-size: 12px; }
+  .lockScr.lkMany .lkRun { font-size: 13px; }
+}
+.lockPick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.lockPick h4 { width: 100%; margin: 8px 0 2px; font-size: 12px; color: var(--mute); text-transform: uppercase; letter-spacing: .1em; }
+.lockPick button { background: #1b2027; border: 1px solid var(--line); border-radius: 99px; padding: 7px 12px; font-size: 13px; color: var(--mute); }
+.lockPick button.on { background: rgba(255,59,48,.15); border-color: var(--red); color: var(--text); font-weight: 700; }
+.lockPick button.on::before { content: '✓ '; color: var(--red); }
 .lkSpeed b { font-size: clamp(96px, 32vw, 200px); }
 .lkTop b { font-size: clamp(48px, 15vw, 88px); }
 .lockScr .state { margin: 0; width: 100%; max-width: 360px; }

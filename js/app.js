@@ -29,7 +29,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storan tidak tersedia */ } }
 };
 
-let conn = null, history = store.get(HKEY, []), settings = { rollout: true, keepAwake: true, tempC: true, shown: null, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], customSpeed: [], ...store.get(SKEY, {}) };
+let conn = null, history = store.get(HKEY, []), settings = { rollout: true, keepAwake: true, tempC: true, shown: null, anyBle: false, speak: true, weather: true, driver: '', car: '', lang: detectLang(), customDist: [], customSpeed: [], lockSplits: ['60ft', '330ft', '1/8 batu'], ...store.get(SKEY, {}) };
 setCustomSpeed(settings.customSpeed);
 setLang(settings.lang);
 // Rollout 1 kaki ON secara lalai. Hanya ikut nilai tersimpan jika pengguna sendiri pernah menukarnya
@@ -57,6 +57,20 @@ function changeLang(l) {
 for (const id of ['lang', 'langTop']) $(id).addEventListener('change', e => changeLang(e.target.value));
 $('lang').value = getLang(); $('langTop').value = getLang();
 applyStatic();
+
+// ---------- Pilih masa untuk skrin kunci ----------
+function renderLockPick() {
+  const sel = lockKeys(), chip = k => `<button data-lock="${esc(k)}" class="${sel.includes(k) ? 'on' : ''}">${esc(metric(k))}</button>`;
+  $('lockPick').innerHTML = `<h4>${t('set.grpDist')}</h4>${ALL.filter(isDistKey).map(chip).join('')}<h4>${t('set.grpSpeed')}</h4>${ALL.filter(k => !isDistKey(k)).map(chip).join('')}`;
+}
+$('lockPick').addEventListener('click', e => {
+  const k = e.target.closest('[data-lock]')?.dataset.lock; if (!k) return;
+  const sel = lockKeys();
+  if (sel.includes(k)) settings.lockSplits = sel.filter(x => x !== k);
+  else { if (sel.length >= LOCK_MAX) return toast(t('lock.max')); settings.lockSplits = ALL.filter(x => sel.includes(x) || x === k); } // ikut susunan jarak
+  store.set(SKEY, settings); renderLockPick(); renderLockSplits();
+});
+document.addEventListener('pgear:lang', renderLockPick);
 
 // ---------- Pilih keputusan yang dipaparkan ----------
 const DEFAULT_SHOWN = ['0-60', '0-100', '100-200', '60ft', '1/8 batu', '1/4 batu'];
@@ -98,7 +112,7 @@ $('csList').addEventListener('click', e => {
 });
 function customSpeedChanged() {
   setCustomSpeed(settings.customSpeed); store.set(SKEY, settings);
-  rebuildKeys(); renderCustomSpeed(); renderShown(); renderResults(); renderHistory();
+  rebuildKeys(); renderCustomSpeed(); renderShown(); renderLockPick(); renderResults(); renderHistory();
 }
 document.addEventListener('pgear:lang', renderCustomSpeed);
 $('shownList').addEventListener('change', e => {
@@ -134,7 +148,7 @@ $('cdList').addEventListener('click', e => {
 });
 function customChanged() {
   store.set(SKEY, settings); timer.setCustomDist(settings.customDist);
-  rebuildKeys(); renderCustom(); renderShown(); renderResults(); renderHistory();
+  rebuildKeys(); renderCustom(); renderShown(); renderLockPick(); renderResults(); renderHistory();
 }
 document.addEventListener('pgear:lang', renderCustom);
 
@@ -389,9 +403,12 @@ function renderResults() {
   renderLockSplits();
 }
 // Skrin kunci: masa 60ft, 330ft & 1/8 batu (660ft, 201.168 m)
-const LOCK_SPLITS = ['60ft', '330ft', '1/8 batu'];
+// Skrin kunci: lalai 60ft, 330ft & 1/8 batu; pengguna boleh pilih sehingga 6 (Tetapan → Skrin kunci)
+const LOCK_MAX = 6;
+const lockKeys = () => (settings.lockSplits || []).filter(k => ALL.includes(k)).slice(0, LOCK_MAX);
 function renderLockSplits() {
-  $('lkSplits').innerHTML = LOCK_SPLITS.map(k => {
+  $('lockScr').classList.toggle('lkMany', lockKeys().length > 3);   // 2 baris kotak: kecilkan elemen lain
+  $('lkSplits').innerHTML = lockKeys().map(k => {
     const label = metric(k);
     const r = current[k];
     return `<div class="${r ? 'hit' : ''}"><small>${label}</small><b>${r ? r.time.toFixed(2) : '--.--'}</b><em>${r?.trap != null ? r.trap.toFixed(1) + ' ' + t('kmh') : '&nbsp;'}</em></div>`;
@@ -798,7 +815,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 document.addEventListener('pgear:lang', updateAwake);
 
 // ---------- Kemas kini app ----------
-const APP_VERSION = '41';
+const APP_VERSION = '42';
 $('appVer').textContent = 'v' + APP_VERSION;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis
@@ -829,7 +846,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   if (changed) persist();
 }
 
-rebuildKeys(); renderCustom(); renderCustomSpeed(); renderShown(); renderResults(); renderHistory();
+rebuildKeys(); renderCustom(); renderCustomSpeed(); renderShown(); renderLockPick(); renderResults(); renderHistory();
 if (!settings.onboarded) openOnb();
 
 // pulihkan laju maks & sambungan selepas refresh

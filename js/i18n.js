@@ -81,6 +81,7 @@ const D = {
     'set.customSpeed': 'Kelajuan tersuai', 'set.customSpeedHint': 'Masukkan dari – hingga (km/j): 0-120 (dari pegun), 80-160 (bergolek), 120-0 (brek). Larian lama yang ada data penuh dikira semula.', 'cs.invalid': 'Julat tidak sah. Contoh: 0-120, 80-160 atau 120-0 (0–450 km/j).',
     'cs.exists': 'Julat kelajuan ini sudah ada.',
     'copy.rights': 'Hak cipta terpelihara.',
+    'set.lock': 'Skrin kunci', 'set.lockHint': 'Pilih masa yang ditunjuk di skrin kunci (maks 6). Lalai: 60ft, 330ft, 1/8 batu. Untuk 1 km, 2 km dsb., tambah dahulu di Jarak tersuai.', 'lock.max': 'Maksimum 6 masa pada skrin kunci.', 'unit.km': 'km',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -160,6 +161,7 @@ const D = {
     'set.customSpeed': 'Custom speeds', 'set.customSpeedHint': 'Enter from – to (km/h): 0-120 (from standstill), 80-160 (rolling), 120-0 (braking). Older runs with full data are recalculated.', 'cs.invalid': 'Invalid range. Examples: 0-120, 80-160 or 120-0 (0–450 km/h).',
     'cs.exists': 'This speed range already exists.',
     'copy.rights': 'All rights reserved.',
+    'set.lock': 'Lock screen', 'set.lockHint': 'Choose the times shown on the lock screen (max 6). Default: 60ft, 330ft, 1/8 mile. For 1 km, 2 km etc., add them first under Custom distances.', 'lock.max': 'Maximum 6 times on the lock screen.', 'unit.km': 'km',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -239,6 +241,7 @@ const D = {
     'set.customSpeed': 'Kecepatan kustom', 'set.customSpeedHint': 'Masukkan dari – sampai (km/j): 0-120 (dari diam), 80-160 (rolling), 120-0 (rem). Run lama dengan data lengkap dihitung ulang.', 'cs.invalid': 'Rentang tidak valid. Contoh: 0-120, 80-160 atau 120-0 (0–450 km/j).',
     'cs.exists': 'Rentang kecepatan ini sudah ada.',
     'copy.rights': 'Hak cipta dilindungi.',
+    'set.lock': 'Layar kunci', 'set.lockHint': 'Pilih waktu yang tampil di layar kunci (maks 6). Default: 60ft, 330ft, 1/8 mil. Untuk 1 km, 2 km dll., tambahkan dulu di Jarak kustom.', 'lock.max': 'Maksimal 6 waktu di layar kunci.', 'unit.km': 'km',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -318,6 +321,7 @@ const D = {
     'set.customSpeed': '自定义速度', 'set.customSpeedHint': '输入起止速度（km/h）：0-120（静止起步）、80-160（中段加速）、120-0（刹车）。有完整数据的旧记录会重新计算。', 'cs.invalid': '范围无效。例如：0-120、80-160 或 120-0（0–450 km/h）。',
     'cs.exists': '该速度区间已存在。',
     'copy.rights': '版权所有。',
+    'set.lock': '锁屏', 'set.lockHint': '选择锁屏上显示的成绩（最多 6 项）。默认：60ft、330ft、1/8 英里。如需 1 km、2 km 等，请先在自定义距离中添加。', 'lock.max': '锁屏最多显示 6 项。', 'unit.km': 'km',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
