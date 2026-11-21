@@ -385,7 +385,7 @@ function drawChart() {
 
 // ---------- Keputusan ----------
 function fmt(key, r) {
-  if (!r) return '<b>--.--</b>';
+  if (!r) return '<b>-.---</b>';
   let extra = '';
   if (r.trap !== undefined) {
     extra = `@ ${r.trap.toFixed(1)} ${t('kmh')}`;
@@ -817,7 +817,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 document.addEventListener('pgear:lang', updateAwake);
 
 // ---------- Kemas kini app ----------
-const APP_VERSION = '53';
+const APP_VERSION = '54';
 $('appVer').textContent = 'v' + APP_VERSION;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   const hadController = !!navigator.serviceWorker.controller;   // lawatan pertama: tiada notis
