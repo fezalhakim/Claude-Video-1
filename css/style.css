@@ -337,8 +337,10 @@ main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 .lkMg b { font-size: clamp(22px, 6.5vw, 28px); font-weight: 900; letter-spacing: .02em; color: #fff; }
 .lkMg b i { font-style: normal; color: var(--red); }
 .lkMg small { font-size: 11px; font-weight: 700; letter-spacing: .35em; color: var(--mute); margin-top: 3px; }
-.lkSep { width: 1px; height: 40px; background: #2a313a; }
-.lkLogo { width: clamp(84px, 24vw, 112px); height: auto; display: block; }
+.lkLogo { width: clamp(72px, 20vw, 96px); height: auto; display: block; margin: 0 auto; }
+.lkFoot { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.copy { display: block; color: var(--mute); font-size: 11px; letter-spacing: .03em; }
+.byMB .copy { margin-top: 10px; }
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 4px; }
 .steps span { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: var(--mute);
   background: #1b2027; border-radius: 99px; padding: 6px 4px; border: 1px solid var(--line); }

@@ -80,6 +80,7 @@ const D = {
     'upd.ready': 'Versi baru MGear tersedia.', 'upd.reload': 'Muat semula', 'upd.version': 'Versi',
     'set.customSpeed': 'Kelajuan tersuai', 'set.customSpeedHint': 'Masukkan dari – hingga (km/j): 0-120 (dari pegun), 80-160 (bergolek), 120-0 (brek). Larian lama yang ada data penuh dikira semula.', 'cs.invalid': 'Julat tidak sah. Contoh: 0-120, 80-160 atau 120-0 (0–450 km/j).',
     'cs.exists': 'Julat kelajuan ini sudah ada.',
+    'copy.rights': 'Hak cipta terpelihara.',
     'm.1/8 batu': '1/8 batu', 'm.1/4 batu': '1/4 batu'
   },
   en: {
@@ -158,6 +159,7 @@ const D = {
     'upd.ready': 'A new MGear version is available.', 'upd.reload': 'Reload', 'upd.version': 'Version',
     'set.customSpeed': 'Custom speeds', 'set.customSpeedHint': 'Enter from – to (km/h): 0-120 (from standstill), 80-160 (rolling), 120-0 (braking). Older runs with full data are recalculated.', 'cs.invalid': 'Invalid range. Examples: 0-120, 80-160 or 120-0 (0–450 km/h).',
     'cs.exists': 'This speed range already exists.',
+    'copy.rights': 'All rights reserved.',
     'm.1/8 batu': '1/8 mile', 'm.1/4 batu': '1/4 mile'
   },
   id: {
@@ -236,6 +238,7 @@ const D = {
     'upd.ready': 'Versi baru MGear tersedia.', 'upd.reload': 'Muat ulang', 'upd.version': 'Versi',
     'set.customSpeed': 'Kecepatan kustom', 'set.customSpeedHint': 'Masukkan dari – sampai (km/j): 0-120 (dari diam), 80-160 (rolling), 120-0 (rem). Run lama dengan data lengkap dihitung ulang.', 'cs.invalid': 'Rentang tidak valid. Contoh: 0-120, 80-160 atau 120-0 (0–450 km/j).',
     'cs.exists': 'Rentang kecepatan ini sudah ada.',
+    'copy.rights': 'Hak cipta dilindungi.',
     'm.1/8 batu': '1/8 mil', 'm.1/4 batu': '1/4 mil'
   },
   zh: {
@@ -314,6 +317,7 @@ const D = {
     'upd.ready': 'MGear 有新版本。', 'upd.reload': '重新加载', 'upd.version': '版本',
     'set.customSpeed': '自定义速度', 'set.customSpeedHint': '输入起止速度（km/h）：0-120（静止起步）、80-160（中段加速）、120-0（刹车）。有完整数据的旧记录会重新计算。', 'cs.invalid': '范围无效。例如：0-120、80-160 或 120-0（0–450 km/h）。',
     'cs.exists': '该速度区间已存在。',
+    'copy.rights': '版权所有。',
     'm.1/8 batu': '1/8 英里', 'm.1/4 batu': '1/4 英里'
   }
 };
